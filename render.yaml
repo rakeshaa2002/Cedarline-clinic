@@ -1,0 +1,40 @@
+# Render Blueprint for the API. The database is hosted separately (Neon recommended, see README),
+# and the frontend on Vercel/Netlify, so each tier can be deployed and scaled independently.
+services:
+  - type: web
+    name: cedarline-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false # paste the Neon connection string (postgresql://...?sslmode=require)
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false # e.g. https://cedarline-clinic.vercel.app
+      - key: ADMIN_EMAIL
+        value: admin@cedarline.example
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: STAFF_PASSWORD
+        sync: false
+      - key: EMBEDDING_PROVIDER
+        value: gemini
+      - key: EMBEDDING_MODEL
+        value: gemini-embedding-001
+      - key: EMBEDDING_DIM
+        value: "768"
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: LLM_MODEL
+        value: gemini-2.5-flash
+      - key: LLM_FALLBACK_MODELS
+        value: gemini-flash-lite-latest
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SEED_ON_START
+        value: "true"

@@ -1,0 +1,108 @@
+@import 'tailwindcss';
+
+/* Design tokens: deep teal primary, navy ink, a restrained orange accent for key actions. */
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink-950: #08172a;
+  --color-ink-900: #0d2139;
+  --color-ink-800: #15304f;
+  --color-ink-700: #23436a;
+  --color-ink-600: #3b5a80;
+  --color-ink-500: #5a7598;
+  --color-ink-400: #8399b4;
+  --color-ink-300: #b2c0d1;
+  --color-ink-200: #d6dee8;
+  --color-ink-100: #ebf0f5;
+  --color-ink-50: #f5f8fb;
+
+  --color-brand-50: #eef8f8;
+  --color-brand-100: #d4eeee;
+  --color-brand-200: #a9dbdc;
+  --color-brand-300: #74c0c2;
+  --color-brand-400: #3f9fa3;
+  --color-brand-500: #208589;
+  --color-brand-600: #176d72;
+  --color-brand-700: #135a5f;
+  --color-brand-800: #10494d;
+  --color-brand-900: #0d3b3e;
+
+  --color-accent-50: #fff4ec;
+  --color-accent-100: #ffe4d1;
+  --color-accent-200: #ffc7a1;
+  --color-accent-400: #f5894b;
+  --color-accent-500: #ee6c2a;
+  --color-accent-600: #d6561b;
+  --color-accent-700: #b04312;
+
+  --radius-card: 1.25rem;
+  --shadow-card: 0 1px 2px rgb(13 33 57 / 0.04), 0 8px 24px -12px rgb(13 33 57 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(13 33 57 / 0.05), 0 18px 40px -18px rgb(13 33 57 / 0.25);
+
+  --animate-fade-up: fade-up 0.5s ease-out both;
+  --animate-pop: pop 0.18s ease-out both;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.96) translateY(6px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-white font-sans text-ink-800 antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display text-ink-900;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+  ::selection {
+    @apply bg-brand-100 text-ink-900;
+  }
+}
+
+@layer components {
+  /* Fluid page width: content uses the whole screen, with gutters that grow with the viewport.
+     Only ultra-wide monitors (>1920px) get a cap, so text lines stay readable. */
+  .container-page {
+    @apply mx-auto w-full max-w-[120rem] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 2xl:px-20;
+  }
+  .section {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold tracking-[0.14em] text-brand-600 uppercase;
+  }
+  /* Typography for long-form article and markdown-lite content */
+  .prose-clinic h2 {
+    @apply mt-10 mb-3 text-2xl font-bold;
+  }
+  .prose-clinic p {
+    @apply mb-5 text-[1.0625rem] leading-8 text-ink-700;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
