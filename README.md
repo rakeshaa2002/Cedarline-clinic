@@ -1,282 +1,302 @@
-# Cedarline Multispeciality Clinic — Website & AI Healthcare Chatbot
+# Cedarline Clinic — Website & AI Healthcare Chatbot
 
-Technical assessment for **Arquette Digital — Full Stack Developer (Web Applications & AI Automation)**.
+A website for a fictional multi-speciality clinic (dental, skin, hair, general medicine, paediatrics) with an **AI assistant** that answers visitors' questions from the clinic's own approved information. It never diagnoses or recommends treatment.
 
-A 10-page healthcare clinic website for a fictional multi-speciality clinic (Task 1), with **Task 2 – Option A: an AI healthcare chatbot** built on genuine Retrieval-Augmented Generation:
+The assistant uses **Retrieval-Augmented Generation (RAG)**:
+1. Clinic information is split into chunks and turned into vectors with Google Gemini.
+2. The vectors are stored in PostgreSQL with the **pgvector** extension.
+3. For each question, the most relevant chunks are found and Gemini writes an answer using only those chunks.
 
-- **Google Gemini** embeddings and generation.
-- **PostgreSQL + pgvector** similarity search.
-- Medical-safety guardrails that never let the AI diagnose or recommend treatment.
+Built for the Arquette Digital Full Stack Developer assessment (Task 1: website, Task 2 Option A: AI chatbot).
 
-Everything runs end to end against a real FastAPI + PostgreSQL backend, with an authenticated admin dashboard for the chatbot's knowledge base and usage.
-
-> All clinic details, doctors, qualifications, prices, testimonials and patients are **fictional**. Phone numbers use an invalid prefix and emails use the reserved `.example` domain. Photos are royalty-free Unsplash stock images and do not depict the named people.
+> All clinic details, doctors, prices and patients are **fictional**. Phone numbers use an invalid prefix, and emails use the reserved `.example` domain.
 
 | | |
 |---|---|
 | Live website | _add your deployed URL_ |
 | API docs (Swagger) | _add `https://<api-host>/docs`_ |
-| Repository | _add GitHub URL_ |
 | Screen recording | _add link_ |
 
 ---
 
 ## Contents
-1. [Features](#features)
-2. [Technology stack](#technology-stack)
-3. [Project structure](#project-structure)
-4. [Quick start (Docker)](#quick-start-docker)
-5. [Local development without Docker](#local-development-without-docker)
-6. [Environment variables](#environment-variables)
-7. [Database, migrations and seed data](#database-migrations-and-seed-data)
-8. [Testing](#testing)
-9. [How to try the chatbot](#how-to-try-the-chatbot)
-10. [API overview](#api-overview)
+
+1. [Tech stack](#tech-stack)
+2. [Architecture](#architecture)
+3. [How the chatbot answers a question](#how-the-chatbot-answers-a-question)
+4. [Getting started](#getting-started)
+5. [Codebase tour](#codebase-tour)
+6. [Common tasks](#common-tasks)
+7. [Testing](#testing)
+8. [Configuration](#configuration)
+9. [Conventions](#conventions)
+10. [API reference](#api-reference)
 11. [Deployment](#deployment)
 12. [Troubleshooting](#troubleshooting)
-13. [AI tools used](#ai-tools-used)
-14. [Known limitations](#known-limitations)
+13. [Known limitations](#known-limitations)
+14. [AI tools used](#ai-tools-used)
 
-Deeper documentation: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (RAG pipeline, safety design, database schema) · [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
-
----
-
-## Features
-
-### AI healthcare chatbot (Task 2 – Option A)
-
-How each requirement in the brief is met:
-
-| Requirement | How it is met |
-|---|---|
-| Answer general questions about clinic services | RAG over the clinic's own approved information: services with durations and indicative prices, FAQs, policies and patient-education articles |
-| Provide clinic timings, location and doctor information | Hours, address, contact details and every doctor's specialty and consultation days are generated from the database, so the chatbot always matches the website |
-| Guide visitors to the appointment booking page | Booking questions are answered with the phone, email and front-desk options, plus a **How to book** button that links to `/appointments` |
-| Handle questions it cannot answer without inventing information | A similarity threshold, a `[[NO_ANSWER]]` token and a grounding check (every number and doctor name must appear in the retrieved text). Otherwise it says it doesn't know and gives the real contact details |
-| Use an AI API | Google Gemini: `gemini-embedding-001` (768-d) for retrieval, `gemini-2.5-flash` for answers, with an automatic fallback model when the main one is overloaded |
-| No diagnoses or personalised treatment | Diagnosis, treatment, medicine and dosage questions get a fixed, safe redirect to a doctor. Possible emergencies get an urgent-care message (112). **These never reach the LLM.** |
-
-**Pipeline:** safety screen → query embedding → **pgvector cosine search with a similarity threshold** → grounded prompt → LLM → answer validation → sources and suggested links.
-
-**Widget, on every public page:**
-- Welcome message and suggested questions.
-- Typing indicator.
-- Source chips and action buttons ("How to book", department pages, "Contact us").
-- Retry on error and clear chat.
-- A full-screen sheet on mobile.
-- History kept only in the browser tab; the server never stores what visitors type.
-
-**Other pages open it directly.** For example, the "Try asking" questions on the How to book page open the widget and ask that question.
-
-**Knowledge base management (admin):**
-- Upload PDF/TXT/MD documents (type and size validated). They are extracted, chunked, embedded and searchable immediately.
-- Delete documents and re-index.
-- Doctor, service, hours and article data become knowledge documents automatically and are refreshed after every admin edit.
-
-**Resilience:**
-- If Gemini is overloaded (HTTP 429/5xx), the next model in `LLM_FALLBACK_MODELS` is tried.
-- If generation fails entirely, the assistant quotes the relevant clinic text instead of erroring.
-- Indexing waits out per-minute API quotas.
-- An **offline mode** (lexical hashing embeddings + extractive answers) still performs real pgvector retrieval, so the demo works without an API key.
-
-### Admin dashboard
-JWT authentication, Argon2 password hashing, and two roles: admin and staff.
-- **Dashboard:**
-  - Chatbot questions per day.
-  - Outcome breakdown: answered, couldn't answer, medical advice declined, emergency guidance.
-  - Share answered from clinic information, and average reply time.
-  - Knowledge-base health and unread messages.
-  - Only the *outcome* of each reply is recorded, never the visitor's text.
-- **Chatbot knowledge** (admin): upload, delete and re-index documents.
-- **Doctors and Services** (admin): edits flow straight into the chatbot's knowledge.
-- **Messages:** submissions from the contact form.
-
-### Website (Task 1)
-| # | Page | Route |
-|---|------|-------|
-| 01 | Home | `/` |
-| 02 | About the Clinic | `/about` |
-| 03 | Our Doctors (filters, search, profile modal) | `/doctors` |
-| 04 | All Services | `/services` |
-| 05 | Dental Treatments | `/services/dental` |
-| 06 | Skin Treatments | `/services/skin` |
-| 07 | Hair Treatments | `/services/hair` |
-| 08 | Appointments: how to book (phone, email, front desk), each doctor's consultation days, AI assistant shortcuts | `/appointments` |
-| 09 | Blog / Patient Education (+ article pages) | `/blog`, `/blog/:slug` |
-| 10 | Contact Us (working form + map) | `/contact` |
-
-- **Responsive:** fluid layout from 320 px phones to 2560 px monitors. An automated sweep of every route at 12 widths finds no horizontal overflow and no console errors.
-- **Design system:** Button, Field/Input/Select/Textarea, Card, Badge, SectionHeading, Breadcrumbs, Modal (focus trap), Toasts, Pagination, Skeleton/Spinner loading states, Alert/Error/Empty states, page hero and CTA banner.
-- **Single source of truth:** doctors, services, hours, articles and contact details all come from the API, shared by the website and the chatbot.
-- **Forms:** validated with React Hook Form + Zod and re-validated by Pydantic. Server field errors are mapped back onto the inputs.
-- **SEO:**
-  - A unique `<title>`, meta description, canonical and Open Graph tags per page (React 19 native head tags).
-  - Semantic headings and `MedicalClinic` JSON-LD.
-  - `sitemap.xml` and `robots.txt` generated at build time.
-- **Accessibility:**
-  - Skip link, landmark regions, and labelled inputs with `aria-invalid`/`aria-describedby`.
-  - Keyboard-operable menus and dialogs, with visible focus rings.
-  - `prefers-reduced-motion` support.
-  - Information is never conveyed by colour alone.
-- **Performance:** route-level code splitting, self-hosted variable fonts, WebP images with explicit dimensions and lazy loading, a preloaded hero image, and Recharts isolated in the admin-only chunk.
+More detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (design decisions, safety layers, schema) · [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (step-by-step hosting) · [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) (walkthrough).
 
 ---
 
-## Technology stack
+## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite 8, TypeScript 6, Tailwind CSS 4, React Router 7, Axios, Lucide React, Recharts, React Hook Form + Zod |
-| Backend | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 ORM, Alembic, Psycopg 3, PyJWT, Argon2 (argon2-cffi), httpx, pypdf |
-| Database & vectors | PostgreSQL 17 + **pgvector** (`vector(768)` column, HNSW index, cosine distance `<=>`) |
-| AI | Google Gemini API (embeddings + generation) via REST; OpenAI-compatible alternative; offline fallback |
-| Testing | pytest against real PostgreSQL + pgvector (89 tests; AI APIs mocked); oxlint and `tsc` for the frontend |
-| Delivery | Docker, Docker Compose, nginx; Render (API) + Neon (Postgres + pgvector) + Vercel/Netlify (frontend) |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS 4, React Router 7, Axios, React Hook Form + Zod, Recharts, Lucide icons |
+| Backend | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2, Alembic, Psycopg 3, PyJWT, Argon2, httpx, pypdf |
+| Database | PostgreSQL 17 + pgvector: one database holds both the app data and the vectors; there is no separate vector database |
+| AI | Google Gemini: `gemini-embedding-001` (768 dimensions) for search, `gemini-2.5-flash` for answers. An OpenAI-compatible API also works, and an offline mode needs no API key |
+| Tests | pytest against a real PostgreSQL + pgvector database (AI calls mocked); `tsc` + oxlint for the frontend |
+| Delivery | Docker, Docker Compose, nginx; Render (API), Neon (Postgres), Vercel or Netlify (frontend) |
 
 ---
 
-## Project structure
+## Architecture
 
 ```
-healthcare-platform/
-├── backend/
-│   ├── app/
-│   │   ├── api/v1/routers/      # health, auth, clinic, chat, admin, knowledge
-│   │   ├── core/                # config, security (JWT/Argon2), rate limiting, error handlers
-│   │   ├── db/                  # SQLAlchemy base + session
-│   │   ├── models/              # ORM models (clinic, knowledge, chat events, user)
-│   │   ├── schemas/             # Pydantic request/response models
-│   │   ├── services/
-│   │   │   ├── knowledge_base/  # extraction, chunking, embeddings, ingestion, DB->documents
-│   │   │   └── chatbot/         # safety, retrieval, prompt, LLM providers, grounding, orchestration
-│   │   ├── seed/                # fictional data + approved FAQ markdown + seed runner
-│   │   └── main.py
-│   ├── alembic/                 # migrations (creates the pgvector extension)
-│   ├── tests/                   # pytest suite
-│   ├── scripts/start.sh         # container entrypoint: migrate → seed → serve
-│   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   │   ├── components/          # ui/ (design system), site/, chat/
-│   │   ├── pages/               # 10 public pages, blog article, admin/
-│   │   ├── layouts/ hooks/ services/ types/ utils/ router/ content/
-│   ├── public/images/           # optimised WebP imagery
-│   ├── nginx.conf  vercel.json  Dockerfile
-├── docs/                        # architecture, deployment, demo script
-├── docker-compose.yml
-├── render.yaml
-└── .env.example
+┌──────────────────────┐   /api/v1 (JSON)   ┌───────────────────────────┐  SQL   ┌─────────────────────────┐
+│  React SPA (browser) │ ─────────────────► │  FastAPI backend          │ ─────► │ PostgreSQL + pgvector   │
+│  - 10 public pages   │                    │  routers → services →     │        │  clinic data, users,    │
+│  - chat widget       │ ◄───────────────── │  models                   │ ◄───── │  knowledge chunks with  │
+│  - admin dashboard   │                    │                           │        │  vector(768) embeddings │
+└──────────────────────┘                    └─────────────┬─────────────┘        └─────────────────────────┘
+   no API keys here                                       │ httpx (server-side only)
+                                                          ▼
+                                            ┌───────────────────────────┐
+                                            │ Gemini API                │
+                                            │ embeddings + generation   │
+                                            └───────────────────────────┘
 ```
+
+Four ideas explain most of the design:
+
+1. **The database is the single source of truth.** Doctors, services, opening hours and articles live in PostgreSQL. The website reads them through the API, and the chatbot's knowledge is *generated from the same tables*. When an admin edits a doctor, the chatbot's knowledge for that doctor is rebuilt automatically, so the two can never disagree.
+2. **Secrets stay on the server.** The browser only talks to our API. Gemini is called from the backend, and nothing secret is ever given a `VITE_` prefix.
+3. **The AI is fenced in.**
+   - Safety rules catch medical-advice and emergency questions *before* the AI is called.
+   - The prompt only allows answers from retrieved clinic text.
+   - A grounding check rejects answers that contain numbers or doctor names not found in that text.
+4. **Every AI failure has a fallback.**
+   - An overloaded model → the next model is tried.
+   - The model is still down → the bot quotes the matching clinic text.
+   - Nothing relevant was found → the bot says so and gives the clinic's phone and email.
 
 ---
 
-## Quick start (Docker)
+## How the chatbot answers a question
+
+Entry point: `POST /api/v1/chat` → [`routers/chat.py`](backend/app/api/v1/routers/chat.py) → `ChatService.answer()` in [`services/chatbot/service.py`](backend/app/services/chatbot/service.py).
+
+| Step | What happens | Code |
+|---|---|---|
+| 1. Validate | 1–500 characters, whitespace collapsed | `schemas/chat.py` |
+| 2. Safety screen | Emergency or medical-advice wording → fixed safe reply. **The AI is never called.** | `chatbot/safety.py` |
+| 3. Small talk | "hi", "thanks" → fixed reply | `chatbot/service.py` |
+| 4. Embed question | Gemini turns the question into a 768-number vector | `knowledge_base/embeddings.py` |
+| 5. Retrieve | pgvector finds the closest chunks (`embedding <=> :question`). Chunks below the similarity threshold are dropped. Nothing left → "I couldn't find that…" plus contact details | `chatbot/retrieval.py` |
+| 6. Build prompt | Strict rules + retrieved chunks + the last few chat turns | `chatbot/prompt.py` |
+| 7. Generate | Gemini writes the answer. HTTP 429/5xx → next model in `LLM_FALLBACK_MODELS`. Still failing → quote the chunks | `chatbot/llm.py` |
+| 8. Check | `[[NO_ANSWER]]` → "couldn't find". A number or "Dr. X" not in the chunks → discard and quote the chunks instead | `chatbot/grounding.py` |
+| 9. Respond | Answer + sources + suggested page links (e.g. "How to book") | `chatbot/service.py` |
+| 10. Record | One `chat_events` row: outcome, provider, latency. **Never the text** | `routers/chat.py` |
+
+Where the knowledge comes from ([`services/knowledge_base/`](backend/app/services/knowledge_base/)):
+
+- **System documents:** generated from the database tables (hours, location, each doctor, each department's services, each article). See `system_documents.py`.
+- **Seed documents:** approved Markdown in [`app/seed/knowledge/`](backend/app/seed/knowledge/) (FAQ, policies, how to book).
+- **Uploads:** PDF/TXT/MD files added by an admin in the dashboard.
+
+Each document is cleaned (`extraction.py`), split into chunks of about 800 characters with a 150-character overlap (`chunking.py`), embedded (`embeddings.py`), and stored (`ingestion.py`). Every chunk records which embedding model produced it, so vectors from different models are never mixed.
+
+---
+
+## Getting started
+
+### Option 1 — Docker (everything in one command)
 
 Requirements: Docker Desktop.
 
 ```bash
-cp .env.example .env        # set POSTGRES_PASSWORD, JWT_SECRET, ADMIN_PASSWORD and GEMINI_API_KEY
+cp .env.example .env
+# edit .env: set POSTGRES_PASSWORD, JWT_SECRET, ADMIN_PASSWORD
+# optional: EMBEDDING_PROVIDER=gemini, LLM_PROVIDER=gemini, GEMINI_API_KEY=<your key>
 docker compose up --build
 ```
 
-| | |
+| What | URL |
 |---|---|
 | Website | http://localhost:8080 |
-| API / Swagger UI | http://localhost:8000/docs |
-| Admin | http://localhost:8080/admin — sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` |
+| API + Swagger UI | http://localhost:8000/docs |
+| Admin | http://localhost:8080/admin (log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`) |
 
-On start, the backend:
-1. Runs `alembic upgrade head`.
-2. Seeds the fictional data (safe to repeat).
-3. Builds the knowledge base.
-4. Serves on port 8000.
+On start, the backend container runs `alembic upgrade head`, seeds the fictional data, builds the chatbot knowledge, and starts the API ([`scripts/start.sh`](backend/scripts/start.sh)). Without a Gemini key it runs in **offline mode** (see [Configuration](#configuration)), so the chatbot still works.
 
-nginx serves the single-page app and proxies `/api` to the backend.
+### Option 2 — Local development (hot reload)
 
-To use Gemini, set `EMBEDDING_PROVIDER=gemini`, `LLM_PROVIDER=gemini` and `GEMINI_API_KEY` in `.env`, then restart. The seed re-embeds automatically, because each vector records the model that produced it. Without a key, the Compose defaults run the offline mode.
+Requirements: Python 3.12+, Node 20+, Docker (for the database only).
 
----
-
-## Local development without Docker
-
-You need Python 3.12+, Node 20+, and a PostgreSQL database with pgvector. The easiest way to get the database is still Docker:
+**1. Database** (PostgreSQL 17 with pgvector, on port 5434):
 
 ```bash
 docker run -d --name clinic-pg -e POSTGRES_USER=clinic -e POSTGRES_PASSWORD=clinic_dev_password \
   -e POSTGRES_DB=clinic -p 5434:5432 pgvector/pgvector:pg17
 ```
 
-**Backend**
+**2. Backend** (http://localhost:8000):
 
 ```bash
 cd backend
 python -m venv .venv
-.venv/Scripts/activate            # Windows  (macOS/Linux: source .venv/bin/activate)
+.venv/Scripts/activate            # Windows   (macOS/Linux: source .venv/bin/activate)
 pip install -r requirements-dev.txt
-cp .env.example .env              # edit DATABASE_URL, JWT_SECRET, ADMIN_PASSWORD, GEMINI_API_KEY
-alembic upgrade head              # creates the vector extension + all tables
-python -m app.seed.run            # fictional data + knowledge base
+cp .env.example .env              # then set JWT_SECRET, ADMIN_PASSWORD, and GEMINI_API_KEY or offline mode
+alembic upgrade head              # creates the pgvector extension and all tables
+python -m app.seed.run            # fictional data + chatbot knowledge (safe to re-run)
 uvicorn app.main:app --reload --port 8000
 ```
 
-**Frontend**
+**3. Frontend** (http://localhost:5173):
 
 ```bash
 cd frontend
 npm install
-npm run dev                       # http://localhost:5173 (proxies /api → 127.0.0.1:8000)
+npm run dev                       # proxies /api to http://127.0.0.1:8000
 ```
 
-Other scripts: `npm run build`, `npm run lint`, `npm run preview`.
+**First-run checklist:**
+- `GET http://localhost:8000/api/v1/health` returns `{"status":"ok","database":"ok"}`.
+- `GET http://localhost:8000/api/v1/chat/health` shows `indexed_chunks` above 0.
+- Open the site, click **Ask Cedarline** (bottom right), and ask "What are the clinic timings?".
 
----
+**Logins.** The seed creates two accounts from `.env`. There is no sign-up page.
 
-## Environment variables
-
-Full annotated lists: [`backend/.env.example`](backend/.env.example), [`frontend/.env.example`](frontend/.env.example), [`.env.example`](.env.example) (Compose).
-
-| Variable | Purpose |
+| Role | Can do |
 |---|---|
-| `DATABASE_URL` | PostgreSQL URL. `postgres://` and `postgresql://` are normalised to the psycopg driver automatically. |
-| `JWT_SECRET` | Token signing secret. The API refuses to start in production with the dev default or anything shorter than 32 characters. |
-| `CORS_ORIGINS` | Comma-separated frontend origins allowed by the API |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD`, `STAFF_EMAIL` / `STAFF_PASSWORD` | Accounts created by the seed script |
-| `EMBEDDING_PROVIDER` | `gemini` \| `openai` \| `hashing` (offline) |
-| `EMBEDDING_MODEL`, `EMBEDDING_DIM` | Model name and vector size. **`EMBEDDING_DIM` must match the pgvector column (768).** |
-| `LLM_PROVIDER`, `LLM_MODEL` | `gemini` \| `openai` \| `extractive`, and the chat model name (default `gemini-2.5-flash`) |
-| `LLM_FALLBACK_MODELS` | Comma-separated models tried in order when the main one is overloaded (default `gemini-flash-lite-latest`) |
-| `GEMINI_API_KEY`, `OPENAI_API_KEY`, `OPENAI_BASE_URL` | Provider credentials (server-side only) |
-| `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP`, `RAG_TOP_K`, `RAG_SIMILARITY_THRESHOLD` | Retrieval tuning |
-| `RATE_LIMIT_*_PER_MINUTE` | Per-IP limits for chat, login and the contact form |
-| `VITE_API_URL` | Frontend → API base URL in production (empty in development) |
-| `VITE_SITE_URL` | Public site URL for canonical tags and the sitemap |
+| `admin` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`) | Everything: dashboard, messages, edit doctors and services, upload/delete chatbot documents, re-index |
+| `staff` (`STAFF_EMAIL` / `STAFF_PASSWORD`) | Dashboard, messages, view doctors and services |
 
-API keys exist only on the backend. Nothing secret is prefixed `VITE_`, so the browser never sees a key.
+The login page is at `/admin/login`; it isn't linked from the public site.
 
 ---
 
-## Database, migrations and seed data
+## Codebase tour
 
-```bash
-alembic upgrade head                        # apply migrations (enables pgvector)
-alembic downgrade base                      # drop everything
-python -m app.seed.run                      # idempotent seed (safe to re-run)
-python -m app.seed.run --reindex            # re-chunk + re-embed all documents (after changing model/chunking)
-python -m app.seed.run --skip-knowledge     # data only, no embedding calls
+### Backend — `backend/app/`
+
+```
+main.py                  App factory: CORS, gzip, error handlers, routers
+api/
+  deps.py                Shared dependencies: DbSession, current user, StaffUser / AdminUser role guards
+  v1/router.py           Registers every router under /api/v1
+  v1/routers/
+    health.py            Liveness + database check
+    clinic.py            Public content: clinic info, services, doctors, blog, contact form
+    chat.py              The chatbot endpoint + chat_events recording + /chat/health
+    auth.py              Login (JWT) and /auth/me
+    admin.py             Dashboard overview, doctors, services, contact messages
+    knowledge.py         Upload / list / delete documents, re-index (admin only)
+core/
+  config.py              All settings, read from environment variables (pydantic-settings)
+  security.py            Argon2 password hashing, JWT create/verify
+  rate_limit.py          In-memory per-IP sliding-window limiter
+  exceptions.py          AppError family → uniform JSON errors
+  logging.py             Log format
+db/                      SQLAlchemy Base (with constraint naming rules) and session
+models/                  ORM tables: clinic.py, knowledge.py, chat.py, user.py
+schemas/                 Pydantic request/response models (the API contract)
+services/
+  knowledge_base/        extraction → chunking → embeddings → ingestion; system_documents (DB → knowledge)
+  chatbot/               safety, retrieval, prompt, llm, grounding, service (orchestrates the steps)
+seed/
+  data.py                Fictional clinic, doctors, services, articles
+  knowledge/*.md         Approved FAQ / policy / how-to-book documents
+  run.py                 Idempotent seeder (python -m app.seed.run)
 ```
 
-Tables:
-- `users`, `clinic_info`, `doctors`, `services`, `blog_posts`, `contact_messages`.
-- `knowledge_documents` and `knowledge_chunks`, with `embedding vector(768)` and an HNSW `vector_cosine_ops` index.
-- `chat_events`: one row per chatbot reply. It records only the outcome, provider, latency and best similarity, never the question or answer text.
+Other backend folders: `alembic/versions/` (migrations: `0001` initial schema + pgvector, `0002` chat_events), `tests/` (pytest), `scripts/start.sh` (container entrypoint).
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#database-schema) for columns, constraints and indexes.
+**Layering rule.** Routers deal with HTTP only (parsing, status codes, auth). Logic lives in `services/`. Routers return Pydantic schemas, never ORM objects.
 
-The seed creates:
-- Clinic details and weekly hours.
-- 9 doctors with consultation days, 20 services with indicative prices, and 8 patient-education articles.
-- 3 approved FAQ/policy documents, including the "How to book" guide.
-- Admin and staff accounts from the environment variables. In development, a missing password is generated and printed once.
+### Frontend — `frontend/src/`
+
+```
+main.tsx                 Entry: router + providers (auth, toasts)
+router/index.tsx         All routes; every page except Home is lazy-loaded
+layouts/
+  SiteLayout.tsx         Public shell: navbar, footer, chat widget, scroll handling
+  AdminLayout.tsx        Admin shell: sidebar, auth guard, admin-only route guard
+pages/                   One file per public page (+ departments/ template, admin/ pages)
+components/
+  ui/                    Design system: Button, Form fields, Card, Modal, Toast, loading/error/empty states
+  site/                  Navbar, Footer, PageHero, Seo, Doctor/Service/Blog cards, CTA banner
+  chat/                  ChatWidget, RichText (safe Markdown), openChat() helper
+services/
+  api.ts                 Axios instance: base URL, JWT header, error normalisation
+  endpoints.ts           Every API call, typed (clinicApi, chatApi, authApi, adminApi)
+hooks/
+  useApi.ts              Fetch + in-memory cache + request de-duplication; invalidate(prefix)
+  useClinic.ts           useClinicInfo / useDoctors / useServices + hours helpers
+  useAuth.tsx            Admin session (JWT in sessionStorage)
+types/index.ts           TypeScript types mirroring the backend schemas
+content/site.ts          Static marketing copy (departments, testimonials, values)
+utils/format.ts          Dates, times, prices, labels, cn() class helper
+index.css                Tailwind theme tokens (ink / brand / accent colours, fonts)
+```
+
+**Pages:** `/`, `/about`, `/doctors`, `/services`, `/services/dental`, `/services/skin`, `/services/hair` (the three share [`DepartmentPage.tsx`](frontend/src/pages/departments/DepartmentPage.tsx) driven by a config object), `/appointments` (how to book), `/blog` + `/blog/:slug`, `/contact`, and `/admin/*`.
+
+---
+
+## Common tasks
+
+### Change clinic content (doctors, services, hours)
+- **In a running app:** log in as admin → **Doctors** or **Services**. Saving triggers a background task that regenerates and re-embeds only the affected chatbot documents.
+- **In the seed:** edit [`backend/app/seed/data.py`](backend/app/seed/data.py), then run `python -m app.seed.run`. The seeder upserts by slug and re-embeds only documents whose text changed.
+
+### Teach the chatbot something new
+- **Quick:** admin → **Chatbot knowledge** → upload a PDF, TXT or MD file. It is searchable immediately.
+- **Permanent:** add a Markdown file to [`backend/app/seed/knowledge/`](backend/app/seed/knowledge/) and run `python -m app.seed.run`. Start the file with `# Title`. Use `## Question-style headings` and make each fact name its subject (e.g. "The price **for Teeth Whitening** starts at…"); this noticeably improves retrieval.
+
+### Change what the chatbot refuses or how it behaves
+- **Refusal and emergency rules:** regex patterns in [`chatbot/safety.py`](backend/app/services/chatbot/safety.py). Add a test case both ways in `tests/test_chatbot.py`: it must catch the unsafe question *and* still answer a normal one.
+- **Answering rules and tone:** the system prompt in [`chatbot/prompt.py`](backend/app/services/chatbot/prompt.py).
+- **How strict retrieval is:** `RAG_SIMILARITY_THRESHOLD` (default 0.55 for Gemini). Raise it if the bot answers off-topic; lower it if it says "couldn't find" too often. Each response's `sources[].similarity` shows the scores.
+
+### Switch AI provider or model
+Set these in `backend/.env`, restart the API, then re-embed:
+- `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`
+- `LLM_PROVIDER`, `LLM_MODEL`, `LLM_FALLBACK_MODELS`
+
+To re-embed, run `python -m app.seed.run`, which updates only out-of-date documents, or use admin → **Re-index**. Chunks from the old model are ignored automatically. The vector column is 768 dimensions; a model with a different size needs a migration (see below).
+
+### Add an API endpoint
+1. Define the request/response models in `backend/app/schemas/`.
+2. Add the route to a router in `backend/app/api/v1/routers/`. For a new router file, register it in `api/v1/router.py`. Protect it with `StaffUser` or `AdminUser` from `api/deps.py` if needed.
+3. Put real logic in `backend/app/services/`. Raise `NotFoundError`, `ConflictError` and similar from `core/exceptions.py` for errors.
+4. Add a test in `backend/tests/`.
+5. In the frontend, add the type to `types/index.ts` and the call to `services/endpoints.ts`. Then use it with `useApi('some:key', () => api.call())`. After a write, call `invalidate('some:')` so cached lists refresh.
+
+### Change the database schema
+1. Edit the model in `backend/app/models/`. New model files must be imported in `models/__init__.py`.
+2. Generate a migration: `alembic revision --autogenerate --rev-id 0003 -m "describe change"`.
+3. **Read the generated file.** Autogenerate misses some things (e.g. partial indexes, extensions).
+4. Apply it with `alembic upgrade head`. Test the rollback with `alembic downgrade -1 && alembic upgrade head`.
+5. Run `alembic check`. It should report *No new upgrade operations detected*.
+
+### Add a public page
+1. Create `frontend/src/pages/MyPage.tsx`. Start it with `<Seo title=… description=… path="/my-page" />` and usually a `<PageHero>`.
+2. Add a lazy route in `router/index.tsx`.
+3. Link it from `components/site/Navbar.tsx` and/or `Footer.tsx`.
+4. Add the path to `PUBLIC_ROUTES` in `vite.config.ts` so it appears in `sitemap.xml`.
+
+### Open the chatbot from any component
+
+```tsx
+import { openChat } from '@/components/chat/openChat'
+<button onClick={() => openChat('Which doctor does braces?')}>Ask</button>   // question is optional
+```
 
 ---
 
@@ -284,91 +304,119 @@ The seed creates:
 
 ```bash
 cd backend
-pytest                    # needs the pgvector Postgres running; uses/creates database `clinic_test`
+pytest                     # ~70 s; needs the pgvector container from "Getting started"
+pytest tests/test_chatbot.py -k safety     # run a subset
 ```
 
-`TEST_DATABASE_URL` overrides the test database. The suite runs the real Alembic migrations, then exercises:
+- **Database:** tests use a separate `clinic_test` database (created automatically) and run the real Alembic migrations, so they exercise actual pgvector queries. Set `TEST_DATABASE_URL` to use another server.
+- **No AI calls:** `conftest.py` forces the offline embedder, and `FakeLLM` stands in for Gemini. Gemini's HTTP request/response handling is tested with `httpx.MockTransport`. The test run needs no network access, costs nothing and gives the same results every time.
+- **Coverage:** grounded answers, "couldn't find" without calling the LLM, rejecting made-up hours and doctors, safety redirects (and no false positives), model fallback and retries, file upload limits, chunking, pgvector storage, auth and roles, and the dashboard counts.
 
-| Area | What is covered |
-|---|---|
-| Health & clinic API | Services/doctors listing and filters, blog pagination and 404s, contact form validation |
-| Chatbot | Grounded answers with sources, booking guidance, prompt contains retrieved context, history passed through, **no-context reply without calling the LLM**, `[[NO_ANSWER]]` handling, **hallucinated hours/doctor rejected**, LLM outage fallback, embedding outage → 503, **diagnosis/medication/dosage requests redirected without calling the LLM**, emergencies, no false positives on normal questions, rate limit, Gemini request/response parsing, **fallback model on HTTP 503**, embedding retry on 429 (all with mocked HTTP) |
-| Knowledge base | TXT/MD/PDF extraction, rejected file types, size limit (413), chunk size/overlap/heading behaviour, embedding dimension and normalisation, upload → pgvector `vector_dims = 768` → retrievable, model isolation, cascade delete, re-index |
-| Auth & admin | Login, rate limiting, 401 on every admin route, staff vs admin (403), **dashboard outcome counts**, `chat_events` holds no message text, doctor edit validation |
+Frontend checks (run all three before pushing):
 
-Latest run: **89 passed**. The frontend passes `tsc -b`, has zero `oxlint` findings, and `vite build` succeeds. The chatbot, the How to book page and the admin dashboard were also checked in a real browser with Playwright, and against the live Gemini API.
-
----
-
-## How to try the chatbot
-
-Click **Ask Cedarline** (bottom right) on any page, or a "Try asking" question on `/appointments`:
-
-| Ask | What you should see |
-|---|---|
-| "What are the clinic timings?" / "Is the clinic open on Sunday?" | The opening hours, with sources |
-| "Where is the clinic located?" | The address, plus a Contact link |
-| "Which doctors are available?" / "When does Dr. Sara Thomas consult?" | Doctor information and consultation days |
-| "What dental treatments do you offer?" / "How much does teeth whitening cost?" | Services and the indicative price |
-| "Which doctor does braces and clear aligners?" | Dr. Arjun Nair, the orthodontist |
-| "How do I book an appointment?" / "Can I book online?" | Phone, email and front-desk options, plus a **How to book** button |
-| "What is the capital of France?" | "I couldn't find that in the clinic's approved information…" plus contact details |
-| "I have a rash, which cream should I use?" | A safety redirect to a dermatologist; no advice is given |
-| "I have chest pain" | An urgent-care message (112) |
-
-Then sign in at `/admin` and open the **Dashboard** to see those questions counted by outcome.
+```bash
+cd frontend
+npx tsc -b && npm run lint && npm run build
+```
 
 ---
 
-## API overview
+## Configuration
 
-Interactive docs live at `/docs` (Swagger UI) and `/redoc`. Every error has the shape `{"error": {"code", "message", "details"}}`.
+Settings are read from environment variables (or `backend/.env`) by [`core/config.py`](backend/app/core/config.py). Annotated templates: [`backend/.env.example`](backend/.env.example), [`frontend/.env.example`](frontend/.env.example), [`.env.example`](.env.example) (Docker Compose).
 
-| Method & path | Auth | Description |
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string. `postgres://` / `postgresql://` are normalised automatically |
+| `JWT_SECRET` | Signs login tokens. In production the API refuses to start unless it is at least 32 characters and not the dev default |
+| `CORS_ORIGINS` | Comma-separated frontend origins allowed to call the API |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `STAFF_EMAIL`, `STAFF_PASSWORD` | Accounts created by the seeder |
+| `EMBEDDING_PROVIDER` | `gemini` · `openai` · `hashing` (offline) |
+| `EMBEDDING_MODEL`, `EMBEDDING_DIM` | Embedding model and vector size. **`EMBEDDING_DIM` must be 768** to match the database column |
+| `LLM_PROVIDER` | `gemini` · `openai` · `extractive` (offline: quotes the matching text instead of writing prose) |
+| `LLM_MODEL`, `LLM_FALLBACK_MODELS` | Main answer model, then comma-separated backups tried when it is overloaded |
+| `GEMINI_API_KEY`, `OPENAI_API_KEY`, `OPENAI_BASE_URL` | Provider credentials. **Backend only** |
+| `RAG_CHUNK_SIZE`, `RAG_CHUNK_OVERLAP`, `RAG_TOP_K`, `RAG_SIMILARITY_THRESHOLD` | Retrieval tuning |
+| `RATE_LIMIT_CHAT_PER_MINUTE`, `RATE_LIMIT_LOGIN_PER_MINUTE`, `RATE_LIMIT_CONTACT_PER_MINUTE` | Per-IP request limits |
+| `VITE_API_URL` | Frontend → API URL in production (leave empty in development; Vite proxies `/api`) |
+| `VITE_SITE_URL` | Public site URL for canonical tags and the sitemap |
+
+**Offline mode** (`EMBEDDING_PROVIDER=hashing`, `LLM_PROVIDER=extractive`) runs the same pipeline and the same pgvector search with no API key. It is useful for development and is what the tests use. Answers quote clinic text rather than being written by an AI.
+
+---
+
+## Conventions
+
+- **Errors.** Every API error has the shape `{"error": {"code", "message", "details"}}`. The frontend's `api.ts` turns it into an `ApiError`, and form pages map `details[].field` onto the matching inputs.
+- **Validation in both places.** Forms validate with Zod for instant feedback; Pydantic re-validates on the server. The server is the authority.
+- **Secrets.** Never commit `.env` files (they are git-ignored). Never prefix a secret with `VITE_`, because anything prefixed `VITE_` is bundled into public JavaScript.
+- **Privacy.** The server does not store chat text. Chat history lives in the visitor's browser tab (`sessionStorage`), and `chat_events` records only outcomes; a test enforces this.
+- **Styling.** Use Tailwind with the theme tokens in `index.css` (`ink-*` neutrals, `brand-*` teal, `accent-*` orange) rather than raw hex values. Page sections use the `container-page` and `section` utility classes.
+- **Accessibility.** Use the `components/ui` primitives: they handle labels, `aria-invalid`, focus traps and focus rings. Never convey information by colour alone.
+- **Data fetching.** Always go through `useApi` + `endpoints.ts`, not raw Axios calls in components. Cache keys are namespaced strings (`'admin:overview'`, `'blog:skin:1'`).
+- **Fictional data only.** Keep names, numbers and emails fake (`.example` domains, invalid phone prefixes).
+
+---
+
+## API reference
+
+Interactive docs: `/docs` (Swagger UI) and `/redoc` on the API host.
+
+| Method & path | Auth | Purpose |
 |---|---|---|
-| `GET /api/v1/health` | – | Liveness + DB check |
-| `GET /api/v1/clinic-info` | – | Clinic details and hours |
+| `GET /api/v1/health` | – | Liveness + database check |
+| `GET /api/v1/clinic-info` | – | Clinic details and opening hours |
 | `GET /api/v1/services[?department=]`, `GET /api/v1/services/{id}` | – | Services |
 | `GET /api/v1/doctors[?department=&service_id=]`, `GET /api/v1/doctors/{id}` | – | Doctors |
-| `GET /api/v1/blog[?page=&page_size=&category=]`, `GET /api/v1/blog/categories`, `GET /api/v1/blog/{slug}` | – | Articles |
+| `GET /api/v1/blog[?page=&page_size=&category=]`, `/blog/categories`, `/blog/{slug}` | – | Articles |
 | `POST /api/v1/contact` | – (rate-limited) | Contact form |
-| `POST /api/v1/chat`, `GET /api/v1/chat/health` | – (rate-limited) | RAG chatbot; provider and index status |
-| `POST /api/v1/auth/login`, `GET /api/v1/auth/me` | – / Bearer | JWT login (rate-limited), current user |
-| `GET /api/v1/admin/overview` | staff | Dashboard: chatbot usage by day and outcome, knowledge-base health, unread messages |
+| `POST /api/v1/chat` | – (rate-limited) | Ask the chatbot (`{message, history}`) |
+| `GET /api/v1/chat/health` | – | Provider, model and number of indexed chunks |
+| `POST /api/v1/auth/login`, `GET /api/v1/auth/me` | – / Bearer | Log in (rate-limited), current user |
+| `GET /api/v1/admin/overview` | staff | Dashboard: chatbot usage per day and by outcome, knowledge health, unread messages |
 | `GET /api/v1/admin/messages`, `PATCH /api/v1/admin/messages/{id}/read` | staff | Contact messages |
 | `GET\|POST /api/v1/admin/doctors`, `PUT /api/v1/admin/doctors/{id}` | admin (GET: staff) | Manage doctors |
 | `GET\|POST /api/v1/admin/services`, `PUT /api/v1/admin/services/{id}` | admin (GET: staff) | Manage services |
-| `GET\|POST /api/v1/admin/knowledge/documents`, `DELETE /api/v1/admin/knowledge/documents/{id}`, `POST /api/v1/admin/knowledge/reindex` | admin | Knowledge base |
+| `GET\|POST /api/v1/admin/knowledge/documents`, `DELETE …/documents/{id}`, `POST /api/v1/admin/knowledge/reindex` | admin | Chatbot knowledge base |
 
 ---
 
 ## Deployment
 
-The three tiers deploy independently. The recommended free-tier setup is below; step-by-step instructions are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
-
-| Tier | Recommended | Why |
+| Part | Recommended host | Notes |
 |---|---|---|
-| Database | **Neon** Postgres | pgvector is available on every plan (`CREATE EXTENSION vector`) and storage is persistent |
-| API | **Render** web service (Docker, `render.yaml` included) | Runs the same container as local, with health checks on `/api/v1/health`. Set `GEMINI_API_KEY` in the Render dashboard. |
-| Frontend | **Vercel** or **Netlify** (`vercel.json` / `_redirects` included) | Static hosting with SPA rewrites; set `VITE_API_URL` and `VITE_SITE_URL` |
+| Database | **Neon** (free tier) | pgvector is available; the first migration runs `CREATE EXTENSION vector` |
+| API | **Render** (Docker) | [`render.yaml`](render.yaml) included. Set `DATABASE_URL`, `CORS_ORIGINS`, `ADMIN_PASSWORD`, `STAFF_PASSWORD` and `GEMINI_API_KEY` in the Render dashboard |
+| Frontend | **Vercel** or **Netlify** | Root `frontend`, build `npm run build`, output `dist`. Set `VITE_API_URL` and `VITE_SITE_URL` |
 
-Render Postgres also supports pgvector. Neon is recommended because Render's free database expires. pgvector support was checked against the [Neon](https://neon.com/docs/extensions/pgvector) and [Render](https://render.com/docs/postgresql-extensions) documentation.
+Full step-by-step guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ---
 
 ## Troubleshooting
 
-| Symptom | Fix |
+| Problem | Fix |
 |---|---|
-| `type "vector" does not exist` | The database lacks pgvector. Use the `pgvector/pgvector` image, or a host that supports it, and re-run `alembic upgrade head` (the migration runs `CREATE EXTENSION IF NOT EXISTS vector`). |
-| `Embedding has 3072 dimensions but the database expects 768` | Set `EMBEDDING_DIM=768` (Gemini supports reduced dimensions), or create a migration that changes the column and then re-index. |
-| `Embedding API returned HTTP 429` while seeding | The Gemini free tier limits requests per minute. Indexing already waits and retries; run `python -m app.seed.run` again and it continues with the documents that are still missing. |
-| Chatbot always says it can't find information | Check `GET /api/v1/chat/health`. `indexed_chunks: 0` means you should run `python -m app.seed.run`, or use **Admin → Chatbot knowledge → Re-index**. After switching embedding provider, re-index; vectors from other models are ignored by design. |
-| Chatbot answers are quotes, not prose | `LLM_PROVIDER=extractive`, or every LLM model failed (`provider` shows `extractive-fallback`). Set `LLM_PROVIDER=gemini` and `GEMINI_API_KEY`, and check the API logs. |
-| Browser shows CORS errors in production | Add the exact frontend origin (scheme + host, no trailing slash) to `CORS_ORIGINS`. |
-| `401` on admin pages after a while | The JWT expired (`JWT_EXPIRE_MINUTES`); sign in again. |
-| Port already in use | Change `FRONTEND_PORT` / `BACKEND_PORT` / `DB_PORT` in `.env`, or run Vite with `--port`. |
-| Tests can't connect | Start the pgvector container, or set `TEST_DATABASE_URL`. The `clinic_test` database is created automatically. |
+| `type "vector" does not exist` | The database has no pgvector. Use the `pgvector/pgvector` image (or a host that supports it), then `alembic upgrade head` |
+| Chatbot always says it "couldn't find" the answer | Check `GET /api/v1/chat/health`. If `indexed_chunks` is 0, run `python -m app.seed.run` or use admin → Re-index. After changing embedding provider, re-index |
+| `Embedding API returned HTTP 429` while seeding | Gemini's free tier limits requests per minute. Indexing already waits and retries; run the seed again and it continues where it stopped |
+| Chat answers are quotes instead of prose | `LLM_PROVIDER` is `extractive`, or every model failed (the response's `provider` shows `extractive-fallback`). Check `GEMINI_API_KEY` and the API logs |
+| `Embedding has 3072 dimensions but the database expects 768` | Set `EMBEDDING_DIM=768` |
+| CORS error in the browser | Add the exact frontend origin (no trailing slash) to `CORS_ORIGINS` |
+| `401` in the admin after a while | The login token expired (`JWT_EXPIRE_MINUTES`). Sign in again |
+| Port already in use | Change `DB_PORT` / `BACKEND_PORT` / `FRONTEND_PORT` in `.env`, or run Vite with `--port` |
+| Tests can't connect | Start the pgvector container, or set `TEST_DATABASE_URL` |
+
+---
+
+## Known limitations
+
+- **No online booking.** By design (Task 2 Option A), `/appointments` explains how to book by phone, email or at reception, and the chatbot guides visitors there.
+- **Rate limits** are kept in memory per process. Use Redis or a gateway limit when running several API instances.
+- **On the Gemini free tier**, heavy simultaneous use can hit per-minute limits; the bot then quotes clinic text.
+- **Offline mode** matches words, not meaning. Use Gemini (or OpenAI) embeddings in production.
+- **Admin sessions** use a JWT in `sessionStorage`. A production clinic system should use httpOnly cookies with CSRF protection, audit logging and MFA.
+- **Embedding size** is fixed at 768 by the migration. Changing it needs a new migration and a re-index.
 
 ---
 
@@ -376,30 +424,12 @@ Render Postgres also supports pgvector. Neon is recommended because Render's fre
 
 > **Draft:** edit this section so it accurately describes your own process before submitting.
 
-- **Claude Code (Anthropic Claude)** was the main AI pair-programmer.
-  - It inspected the empty workspace, proposed the architecture, and generated most of the code, tests, seed content and documentation from a detailed specification I wrote.
-  - I asked it to work in phases and to run the tests, builds, Docker stack and browser checks rather than only describe them.
-- **How the output was checked:**
-  - 89 backend tests run against real PostgreSQL + pgvector.
-  - The frontend passes type-check, lint and build.
-  - The chatbot was tested against the live Gemini API.
-  - Main journeys were automated in a browser at desktop and mobile sizes.
-- **Problems found and fixed during development:**
-  - **A wrong price in a chat answer.** Chunk overlap separated a service's price from its name, so the extractive answer showed the root-canal price for teeth whitening. Fixed with self-describing facts, paragraph-level extraction and overlap kept as its own paragraph.
-  - **A retrieval miss.** A hash collision cancelled out a key term ("orthodontist"). Fixed by hashing each feature into two buckets.
-  - **Safety-filter false positives.** Questions like "Do I have to bring reports?" were being refused.
-  - **Gemini overload and rate limits.** The default model returned HTTP 503 under load, and bulk indexing hit the free-tier 429 limit. Fixed with a fallback model list and quota-aware retries.
-  - **A mobile layout bug.** A CSS conflict caused horizontal overflow.
-- All design decisions are documented in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) so they can be explained and modified.
+**Claude Code (Anthropic)** was used as an AI pair-programmer for architecture, code, tests and documentation, working from a specification I wrote.
 
----
+How the output was checked:
+- The 89 backend tests run against real PostgreSQL + pgvector.
+- The frontend passes type-check, lint and build.
+- The chatbot was tested against the live Gemini API.
+- The main pages were checked in a real browser at phone and desktop sizes.
 
-## Known limitations
-
-- **The website does not take bookings itself.** Option A was chosen for Task 2, so `/appointments` explains how to book by phone, email or at the front desk, and the chatbot guides visitors there.
-- **Rate limiting** is in memory and per process. With several API instances, use Redis or a gateway limit.
-- **The offline `hashing` embedder** is lexical, not semantic. It exists so the demo and tests work without an API key; use Gemini or OpenAI embeddings in production.
-- **On the Gemini free tier**, heavy simultaneous use can hit per-minute limits. The assistant then falls back to quoting clinic information.
-- **Opening hours** are shown in the clinic's local schedule; the visitor's "open today" badge uses the browser's weekday.
-- **Admin sessions:** JWTs are stored in `sessionStorage`, which suits a demo. A production clinic system would use httpOnly cookies with CSRF protection, audit logging, and MFA for staff.
-- **Embedding size:** the pgvector dimension is fixed by the migration (768). Changing it needs a new migration plus a re-index.
+Design decisions are explained in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
