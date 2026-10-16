@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.sqlite3
+
+# Secrets
+.env
+.env.*
+*.env
+!.env.example
+!*.env.example
+
+# Logs
+*.log

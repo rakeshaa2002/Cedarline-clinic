@@ -1,16 +1,53 @@
-import { CalendarCheck, ChevronDown, Clock, Menu, Phone, X } from 'lucide-react'
+import {
+  CalendarCheck,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Menu,
+  Phone,
+  ScanFace,
+  Scissors,
+  Smile,
+  Sparkles,
+  X,
+} from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ButtonLink } from '@/components/ui/Button'
 import { Logo } from '@/components/site/Logo'
-import { todayHours, useClinicInfo } from '@/hooks/useClinic'
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
+import { todayHours, useClinicInfo, useServices } from '@/hooks/useClinic'
 import { cn } from '@/utils/format'
 
-const SERVICE_LINKS = [
-  { to: '/services', label: 'All Services', description: 'Every treatment we offer' },
-  { to: '/services/dental', label: 'Dental Treatments', description: 'Check-ups, aligners, implants' },
-  { to: '/services/skin', label: 'Skin Treatments', description: 'Dermatology & aesthetic care' },
-  { to: '/services/hair', label: 'Hair Treatments', description: 'Trichology & restoration' },
+const BASE_SERVICE_LINKS = [
+  {
+    to: '/services',
+    label: 'All Services',
+    description: 'Complete directory of specialised medical procedures',
+    icon: Sparkles,
+    badge: 'Directory',
+  },
+  {
+    to: '/services/dental',
+    label: 'Dental Treatments',
+    description: 'Implants, clear aligners, root canals & cosmetic dentistry',
+    icon: Smile,
+    badge: 'Department',
+  },
+  {
+    to: '/services/skin',
+    label: 'Skin Treatments',
+    description: 'Dermatology, acne therapies, chemical peels & anti-aging',
+    icon: ScanFace,
+    badge: 'Department',
+  },
+  {
+    to: '/services/hair',
+    label: 'Hair Treatments',
+    description: 'Trichology, PRP therapy, hair restoration & scalp care',
+    icon: Scissors,
+    badge: 'Department',
+  },
 ]
 
 const NAV = [
@@ -22,8 +59,10 @@ const NAV = [
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
-    'rounded-lg px-3 py-2 text-[0.9375rem] font-medium whitespace-nowrap transition-colors',
-    isActive ? 'text-brand-700' : 'text-ink-700 hover:text-brand-700',
+    'relative rounded-xl px-3.5 py-2 text-[0.9375rem] font-semibold whitespace-nowrap transition-all duration-200 ease-out',
+    isActive
+      ? 'bg-brand-50/90 text-brand-700 shadow-xs ring-1 ring-brand-100/90'
+      : 'text-ink-700 hover:text-brand-700 hover:bg-ink-50/80',
   )
 
 export function Navbar() {
@@ -32,9 +71,35 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const { data: clinic } = useClinicInfo()
+  const { data: servicesList } = useServices()
   const menuRef = useRef<HTMLLIElement>(null)
   const today = clinic ? todayHours(clinic.opening_hours) : undefined
   const servicesActive = location.pathname.startsWith('/services')
+  const count = servicesList?.length
+  const SERVICE_LINKS = BASE_SERVICE_LINKS.map((s) =>
+    s.to === '/services' && count
+      ? { ...s, description: `Complete directory of ${count} specialised medical procedures` }
+      : s,
+  )
+
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setServicesOpen(true)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setServicesOpen(false)
+    }, 180)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
 
   // Close menus on navigation (state adjusted during render instead of in an effect).
   const [lastPath, setLastPath] = useState(location.pathname)
@@ -73,30 +138,63 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50">
       {/* Utility bar */}
-      <div className="hidden bg-ink-900 text-ink-200 md:block">
-        <div className="container-page flex h-9 items-center justify-between text-xs">
-          <p className="flex items-center gap-2">
-            <Clock className="size-3.5 text-brand-300" aria-hidden="true" />
-            {today ? (today.closed ? 'Closed today' : `Open today ${today.open} – ${today.close}`) : 'Mon–Sat appointments'}
-            <span className="text-ink-500">·</span>
-            <span>{clinic ? `${clinic.address_line.split(',').slice(-1)[0].trim()}, ${clinic.city}` : 'Indiranagar, Bengaluru'}</span>
-          </p>
+      <div className="bg-ink-900 text-ink-200 border-b border-white/10 shadow-xs">
+        <div className="container-page flex min-h-[3rem] py-2.5 sm:h-13 items-center justify-between text-sm sm:text-[0.9375rem]">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 flex-wrap">
+            <span className="relative flex size-2.5">
+              <span className={cn('absolute inline-flex size-full animate-ping rounded-full opacity-75', today?.closed ? 'bg-amber-400' : 'bg-emerald-400')} />
+              <span className={cn('relative inline-flex size-2.5 rounded-full', today?.closed ? 'bg-amber-500' : 'bg-emerald-500')} />
+            </span>
+            <span className="flex items-center gap-2 font-medium text-ink-100">
+              <Clock className="size-4.5 text-brand-300 shrink-0" aria-hidden="true" />
+              <span className="font-semibold text-white">
+                {today ? (today.closed ? 'Closed today' : `Open today ${today.open} – ${today.close}`) : 'Mon–Sat appointments'}
+              </span>
+            </span>
+            <span className="hidden sm:inline text-ink-500">·</span>
+            <span className="hidden sm:inline text-ink-300 font-medium">
+              {clinic ? `${clinic.address_line.split(',').slice(-1)[0].trim()}, ${clinic.city}` : 'Indiranagar, Bengaluru'}
+            </span>
+          </div>
           {clinic && (
-            <a href={`tel:${clinic.phone.replace(/\s/g, '')}`} className="flex items-center gap-1.5 hover:text-white">
-              <Phone className="size-3.5 text-brand-300" aria-hidden="true" /> {clinic.phone}
-            </a>
+            <div className="flex items-center gap-4 sm:gap-6 text-sm sm:text-[0.9375rem]">
+              <a
+                href={`https://wa.me/${(clinic.whatsapp || clinic.phone).replace(/\D/g, '')}?text=${encodeURIComponent('Hello Cedarline Clinic, I have an enquiry.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 font-semibold text-white transition-colors hover:text-emerald-400"
+              >
+                <WhatsAppIcon className="size-5 text-[#25D366] transition-transform group-hover:scale-110" aria-hidden="true" />
+                <span className="hidden sm:inline">WhatsApp</span>
+              </a>
+              <span className="text-ink-600">·</span>
+              <a
+                href={`tel:${clinic.phone.replace(/\s/g, '')}`}
+                className="group flex items-center gap-2 font-bold text-white transition-colors hover:text-brand-300"
+              >
+                <Phone className="size-4.5 text-brand-300 transition-transform group-hover:scale-110" aria-hidden="true" />
+                <span>{clinic.phone}</span>
+              </a>
+              <span className="hidden md:inline text-ink-600">·</span>
+              <Link
+                to="/doctor/login"
+                className="hidden md:inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white transition-all hover:bg-white/20 border border-white/15 hover:border-white/30"
+              >
+                <span>🩺 Doctor Portal</span>
+              </Link>
+            </div>
           )}
         </div>
       </div>
 
-      <div className={cn('border-b bg-white/95 backdrop-blur transition-shadow', scrolled ? 'border-ink-100 shadow-sm' : 'border-transparent')}>
-        <nav className="container-page flex h-[4.5rem] items-center justify-between gap-6" aria-label="Main">
+      <div className={cn('border-b bg-white/90 backdrop-blur-xl transition-all duration-300', scrolled ? 'border-ink-100 shadow-[0_4px_24px_-4px_rgba(13,33,57,0.08)]' : 'border-transparent')}>
+        <nav className="container-page flex h-20 items-center justify-between gap-6" aria-label="Main">
           <Link to="/" aria-label="Cedarline Multispeciality Clinic – home">
             <Logo />
           </Link>
 
           {/* Desktop navigation */}
-          <ul className="hidden items-center gap-0.5 xl:flex 2xl:gap-2">
+          <ul className="hidden items-center gap-1 xl:flex 2xl:gap-2">
             <li>
               <NavLink to="/" end className={linkClass}>
                 Home
@@ -107,33 +205,96 @@ export function Navbar() {
                 About
               </NavLink>
             </li>
-            <li className="relative" ref={menuRef}>
+            <li
+              className="relative group py-2"
+              ref={menuRef}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
               <button
                 type="button"
                 aria-expanded={servicesOpen}
                 aria-controls="services-menu"
                 onClick={() => setServicesOpen((v) => !v)}
-                className={cn(linkClass({ isActive: servicesActive }), 'inline-flex items-center gap-1')}
+                className={cn(
+                  linkClass({ isActive: servicesActive }),
+                  'inline-flex items-center gap-1 cursor-pointer transition-colors',
+                  servicesOpen && 'bg-brand-50/90 text-brand-700 ring-1 ring-brand-100/90',
+                )}
               >
-                Services <ChevronDown className={cn('size-4 transition-transform', servicesOpen && 'rotate-180')} aria-hidden="true" />
+                Services{' '}
+                <ChevronDown
+                  className={cn(
+                    'size-4 transition-transform duration-200 group-hover:rotate-180',
+                    servicesOpen && 'rotate-180',
+                  )}
+                  aria-hidden="true"
+                />
               </button>
-              {servicesOpen && (
-                <div id="services-menu" className="absolute top-full left-1/2 mt-3 w-80 -translate-x-1/2 animate-pop rounded-2xl border border-ink-100 bg-white p-2 shadow-lift">
-                  {SERVICE_LINKS.map((s) => (
-                    <NavLink
-                      key={s.to}
-                      to={s.to}
-                      end
-                      className={({ isActive }) =>
-                        cn('block rounded-xl px-4 py-3 transition-colors hover:bg-brand-50', isActive && 'bg-brand-50')
-                      }
+
+              {/* Dropdown Menu: Hybrid Pure-CSS Hover (instant) + React state */}
+              <div
+                id="services-menu"
+                className={cn(
+                  'absolute top-full left-1/2 -translate-x-1/2 pt-2 w-[23rem] z-50 transition-all duration-200 ease-out',
+                  servicesOpen
+                    ? 'opacity-100 visible pointer-events-auto translate-y-0'
+                    : 'opacity-0 invisible pointer-events-none -translate-y-1.5 group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0',
+                )}
+              >
+                <div className="overflow-hidden rounded-2xl border border-ink-100/90 bg-white/98 p-2 shadow-2xl backdrop-blur-xl ring-1 ring-ink-900/5">
+                  <div className="space-y-0.5">
+                    {SERVICE_LINKS.map((s) => {
+                      const Icon = s.icon
+                      return (
+                        <NavLink
+                          key={s.to}
+                          to={s.to}
+                          end
+                          onClick={() => setServicesOpen(false)}
+                          className={({ isActive }) =>
+                            cn(
+                              'group/item flex items-center gap-3 rounded-xl p-2.5 transition-all duration-150 hover:bg-brand-50/90 hover:shadow-xs',
+                              isActive && 'bg-brand-50/90 ring-1 ring-brand-100',
+                            )
+                          }
+                        >
+                          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700 ring-1 ring-brand-100/80 transition-all duration-150 group-hover/item:bg-brand-600 group-hover/item:text-white group-hover/item:shadow-sm">
+                            <Icon className="size-4" aria-hidden="true" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="block text-sm font-bold text-ink-900 transition-colors group-hover/item:text-brand-700">
+                                {s.label}
+                              </span>
+                              <span className="rounded-full bg-ink-100/80 px-1.5 py-0.5 text-[0.625rem] font-semibold uppercase tracking-wider text-ink-600">
+                                {s.badge}
+                              </span>
+                            </div>
+                            <span className="block text-xs text-ink-500 truncate">
+                              {s.description}
+                            </span>
+                          </div>
+                          <ChevronRight
+                            className="size-4 shrink-0 text-ink-400 opacity-0 -translate-x-1 transition-all duration-150 group-hover/item:opacity-100 group-hover/item:translate-x-0 group-hover/item:text-brand-600"
+                            aria-hidden="true"
+                          />
+                        </NavLink>
+                      )
+                    })}
+                  </div>
+                  <div className="mt-1 flex items-center justify-between rounded-xl bg-brand-50/60 px-3 py-2 text-xs text-ink-600">
+                    <span className="font-medium text-brand-900">Need treatment guidance?</span>
+                    <Link
+                      to="/contact"
+                      onClick={() => setServicesOpen(false)}
+                      className="font-semibold text-brand-700 transition-colors hover:text-brand-800 hover:underline"
                     >
-                      <span className="block text-sm font-semibold text-ink-900">{s.label}</span>
-                      <span className="block text-xs text-ink-500">{s.description}</span>
-                    </NavLink>
-                  ))}
+                      Ask clinic team &rarr;
+                    </Link>
+                  </div>
                 </div>
-              )}
+              </div>
             </li>
             {NAV.slice(1).map((item) => (
               <li key={item.to}>
@@ -190,8 +351,16 @@ export function Navbar() {
                 </ButtonLink>
               </li>
               {clinic && (
-                <li>
-                  <a href={`tel:${clinic.phone.replace(/\s/g, '')}`} className="mt-2 flex items-center justify-center gap-2 py-3 text-sm font-medium text-ink-600">
+                <li className="space-y-1 pt-1">
+                  <a
+                    href={`https://wa.me/${(clinic.whatsapp || clinic.phone).replace(/\D/g, '')}?text=${encodeURIComponent('Hello Cedarline Clinic, I have an enquiry.')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-emerald-50 py-3 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-100"
+                  >
+                    <WhatsAppIcon className="size-4 text-[#25D366]" aria-hidden="true" /> Chat on WhatsApp
+                  </a>
+                  <a href={`tel:${clinic.phone.replace(/\s/g, '')}`} className="flex items-center justify-center gap-2 py-2 text-sm font-medium text-ink-600">
                     <Phone className="size-4" aria-hidden="true" /> Call {clinic.phone}
                   </a>
                 </li>

@@ -90,7 +90,7 @@ export interface User {
   id: number
   email: string
   full_name: string
-  role: 'admin' | 'staff'
+  role: 'admin' | 'staff' | 'doctor'
 }
 
 export interface TokenResponse {
@@ -164,3 +164,23 @@ export interface Overview {
   active_doctors: number
   active_services: number
 }
+
+export interface Testimonial {
+  id: number
+  quote: string
+  name: string
+  detail: string
+}
+
+export interface HighlightItem {
+  icon: string
+  title: string
+  text: string
+}
+
+export interface ClinicHighlights {
+  values: HighlightItem[]
+  facilities: string[]
+  why_choose: HighlightItem[]
+}
+

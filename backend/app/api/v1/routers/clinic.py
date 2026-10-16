@@ -13,13 +13,16 @@ from app.models import BlogPost, ClinicInfo, ContactMessage, Doctor, Service
 from app.schemas.clinic import (
     BlogPostOut,
     BlogPostSummary,
+    ClinicHighlightsOut,
     ClinicInfoOut,
     ContactCreate,
     Department,
     DoctorOut,
     ServiceOut,
+    TestimonialOut,
 )
 from app.schemas.common import Message, Page
+from app.seed import data
 
 router = APIRouter(tags=["clinic"])
 
@@ -122,3 +125,14 @@ def submit_contact(data: ContactCreate, db: DbSession):
     db.add(ContactMessage(**data.model_dump(mode="json")))
     db.commit()
     return Message(message="Thank you! Our front desk will get back to you within one working day.")
+
+
+@router.get("/testimonials", response_model=list[TestimonialOut])
+def get_testimonials():
+    return data.TESTIMONIALS
+
+
+@router.get("/clinic-highlights", response_model=ClinicHighlightsOut)
+def get_clinic_highlights():
+    return data.CLINIC_HIGHLIGHTS
+

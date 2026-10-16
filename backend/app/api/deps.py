@@ -49,5 +49,6 @@ def require_roles(*roles: str):
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
-StaffUser = Annotated[User, Depends(require_roles("admin", "staff"))]
+StaffUser = Annotated[User, Depends(require_roles("admin", "staff", "doctor"))]
 AdminUser = Annotated[User, Depends(require_roles("admin"))]
+

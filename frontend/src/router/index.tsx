@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { SiteLayout } from '@/layouts/SiteLayout'
 import HomePage from '@/pages/HomePage'
@@ -45,6 +45,8 @@ export const router = createBrowserRouter([
     ],
   },
   { path: '/admin/login', element: <AdminLoginPage />, errorElement: <RouteErrorPage /> },
+  { path: '/doctor/login', element: <AdminLoginPage />, errorElement: <RouteErrorPage /> },
+  { path: '/doctor', element: <Navigate to="/admin" replace /> },
   {
     path: '/admin',
     element: <AdminLayout />,

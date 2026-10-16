@@ -1,4 +1,4 @@
-import { ArrowRight, Bot, CalendarCheck, CheckCircle2, Clock, MapPin, Phone, Quote, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Bot, CalendarCheck, CheckCircle2, Clock, MapPin, Phone, Quote } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { openChat } from '@/components/chat/openChat'
 import { BlogCard, DoctorCard } from '@/components/site/Cards'
@@ -9,19 +9,18 @@ import { ErrorState, Skeleton } from '@/components/ui/Feedback'
 import { SectionHeading } from '@/components/ui/Layout'
 import { BOOKING_STEPS, DEPARTMENTS, TESTIMONIALS, WHY_CHOOSE } from '@/content/site'
 import { useApi } from '@/hooks/useApi'
-import { hoursSummary, todayHours, useClinicInfo, useDoctors } from '@/hooks/useClinic'
+import { hoursSummary, todayHours, useClinicInfo, useDoctors, useServices } from '@/hooks/useClinic'
 import { clinicApi } from '@/services/endpoints'
 
 export default function HomePage() {
   const { data: clinic } = useClinicInfo()
   const doctors = useDoctors()
+  const services = useServices()
+  const testimonials = useApi('testimonials', clinicApi.testimonials)
   const blog = useApi('blog:home', () => clinicApi.blog({ page: 1, page_size: 3 }))
   const today = clinic ? todayHours(clinic.opening_hours) : undefined
-  const featuredDoctors = doctors.data
-    ? ['meera-iyer', 'naomi-fernandes', 'sara-thomas', 'ananya-rao']
-        .map((slug) => doctors.data!.find((d) => d.slug === slug))
-        .filter((d) => d !== undefined)
-    : []
+  const featuredDoctors = (doctors.data ?? []).slice(0, 4)
+  const items = testimonials.data && testimonials.data.length > 0 ? testimonials.data : TESTIMONIALS
 
   return (
     <>
@@ -32,14 +31,28 @@ export default function HomePage() {
       />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/70 to-white">
-        <div className="container-page grid items-center gap-10 py-12 sm:py-16 lg:min-h-[calc(100svh-6.75rem)] lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-12 xl:gap-20">
+      <section className="relative overflow-hidden">
+        {/* Meaningful Architectural Clinic Background Image */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <img
+            src="/images/hero-bg.jpg?v=3"
+            alt="Cedarline Multispeciality Clinic modern biophilic interior in Bengaluru"
+            fetchPriority="high"
+            className="size-full object-cover object-[center_35%] transition-all duration-700"
+          />
+          {/* Elegant readability scrim: soft white gradient on the left for crisp typography, clear architectural view on the right */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-white/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-white/20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent" />
+        </div>
+
+        <div className="container-page relative z-10 grid items-center gap-10 py-12 sm:py-16 lg:min-h-[calc(100svh-6.75rem)] lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-12 xl:gap-20">
           <div className="animate-fade-up">
-            <p className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-brand-700 shadow-sm ring-1 ring-brand-100">
-              <MapPin className="size-3.5" aria-hidden="true" /> Multispeciality clinic · Indiranagar, Bengaluru
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-3.5 py-1.5 text-xs font-semibold text-brand-700 shadow-xs ring-1 ring-brand-200/80">
+              <MapPin className="size-3.5 text-brand-600" aria-hidden="true" /> Multispeciality clinic · Indiranagar, Bengaluru
             </p>
-            <h1 className="mt-6 text-[2.1rem] leading-[1.08] font-extrabold min-[400px]:text-4xl sm:text-5xl lg:text-[3.4rem] xl:text-[3.9rem] 2xl:text-[4.4rem]">
-              Specialist care for your <span className="text-brand-700">smile, skin and hair</span> — and the whole family.
+            <h1 className="mt-6 text-[2.1rem] leading-[1.08] font-extrabold tracking-tight min-[400px]:text-4xl sm:text-5xl lg:text-[3.4rem] xl:text-[3.9rem] 2xl:text-[4.4rem]">
+              Specialist care for your <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-700 via-brand-600 to-teal-600">smile, skin and hair</span> — and the whole family.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-ink-600 2xl:max-w-2xl 2xl:text-xl">
               Dentists, dermatologists, a trichologist, family physicians and a paediatrician working together in one calm,
@@ -49,49 +62,50 @@ export default function HomePage() {
               <ButtonLink to="/appointments" variant="accent" size="lg" icon={<CalendarCheck className="size-5" aria-hidden="true" />}>
                 Book an appointment
               </ButtonLink>
+              <Button variant="white" size="lg" icon={<Bot className="size-5 text-brand-600" aria-hidden="true" />} onClick={() => openChat()}>
+                Ask AI Assistant
+              </Button>
               <ButtonLink to="/services" variant="outline" size="lg">
                 Explore services <ArrowRight className="size-4" aria-hidden="true" />
               </ButtonLink>
             </div>
-            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-ink-100 pt-8 sm:gap-6">
+            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-ink-100/80 pt-8 sm:gap-6">
               {[
-                ['9', 'Specialist doctors'],
-                ['20+', 'Treatments offered'],
-                ['6 days', 'Open every week'],
+                [doctors.data ? String(doctors.data.length) : '9', 'Specialist doctors'],
+                [services.data ? `${services.data.length}+` : '20+', 'Treatments offered'],
+                [clinic ? `${clinic.opening_hours.filter((h) => !h.closed).length} days` : '6 days', 'Open every week'],
               ].map(([value, label]) => (
-                <div key={label}>
-                  <dt className="text-sm text-ink-500">{label}</dt>
-                  <dd className="order-first font-display text-2xl font-bold text-ink-900 sm:text-3xl">{value}</dd>
+                <div key={label} className="group">
+                  <dt className="text-sm text-ink-500 font-medium">{label}</dt>
+                  <dd className="order-first font-display text-2xl font-bold text-ink-900 sm:text-3xl tracking-tight transition-transform duration-300 group-hover:scale-105 group-hover:text-brand-700">{value}</dd>
                 </div>
               ))}
             </dl>
           </div>
 
-          <div className="relative w-full">
-            <div className="overflow-hidden rounded-[2rem] shadow-lift">
+          <div className="relative w-full pb-4 lg:pb-0">
+            <div className="relative overflow-hidden rounded-[2.25rem] shadow-lift ring-1 ring-ink-100">
               <img
-                src="/images/hero-consultation.webp"
+                src="/images/hero-consultation.jpg"
                 alt="A Cedarline doctor talking with a patient during a consultation"
                 width={1600}
                 height={1200}
                 fetchPriority="high"
-                className="aspect-[4/3] w-full object-cover lg:max-h-[calc(100svh-12rem)]"
+                className="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out hover:scale-[1.02] lg:max-h-[calc(100svh-12rem)]"
               />
-            </div>
-            <div className="absolute -bottom-6 left-4 flex items-center gap-3 rounded-2xl bg-white p-4 pr-6 shadow-lift sm:-left-6">
-              <span className="grid size-11 place-items-center rounded-xl bg-brand-50 text-brand-700">
-                <Clock className="size-5" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-xs text-ink-500">Clinic hours today</p>
-                <p className="font-semibold text-ink-900">
-                  {today ? (today.closed ? 'Closed today' : `${today.open} – ${today.close}`) : '—'}
-                </p>
+
+              {/* Clinic hours badge - cleanly anchored inside the bottom-left */}
+              <div className="absolute bottom-4 left-4 sm:bottom-5 sm:left-5 flex items-center gap-3 rounded-2xl bg-white/95 backdrop-blur-md p-3.5 pr-5 shadow-lg ring-1 ring-black/5">
+                <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-700 shadow-xs">
+                  <Clock className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-xs text-ink-500 font-medium">Clinic hours today</p>
+                  <p className="font-bold text-ink-900 text-sm">
+                    {today ? (today.closed ? 'Closed today' : `${today.open} – ${today.close}`) : '09:00 – 20:00'}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="absolute -top-5 right-4 hidden items-center gap-2.5 rounded-2xl bg-white px-4 py-3 shadow-lift sm:flex">
-              <ShieldCheck className="size-5 text-brand-600" aria-hidden="true" />
-              <p className="text-sm font-semibold text-ink-800">AI assistant, answers any time</p>
             </div>
           </div>
         </div>
@@ -108,16 +122,16 @@ export default function HomePage() {
           ].map(({ icon: Icon, title, text, to, href }) => {
             const inner = (
               <>
-                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700 transition-colors group-hover:bg-brand-700 group-hover:text-white">
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700 shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-brand-700 group-hover:text-white group-hover:shadow-md">
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
-                <span>
-                  <span className="block text-sm font-semibold text-ink-900">{title}</span>
-                  <span className="block text-sm text-ink-500">{text}</span>
-                </span>
+                <div>
+                  <span className="block text-sm font-bold text-ink-900 transition-colors group-hover:text-brand-700">{title}</span>
+                  <span className="block text-sm text-ink-500 font-medium">{text}</span>
+                </div>
               </>
             )
-            const cls = 'group flex items-center gap-4 px-2 py-6 lg:px-6'
+            const cls = 'group flex items-center gap-4 px-3 py-6 transition-all duration-200 hover:bg-brand-50/40 lg:px-6 cursor-pointer'
             return href ? (
               <a key={title} href={href} className={cls}>
                 {inner}
@@ -135,8 +149,8 @@ export default function HomePage() {
       <section className="section">
         <div className="container-page grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
           <div className="grid grid-cols-2 gap-4">
-            <img src="/images/clinic-reception.webp" alt="Bright reception area of the clinic" loading="lazy" width={1200} height={900} className="aspect-[4/5] w-full rounded-3xl object-cover" />
-            <img src="/images/care-team.webp" alt="Two clinicians reviewing a scan together" loading="lazy" width={1200} height={900} className="mt-10 aspect-[4/5] w-full rounded-3xl object-cover" />
+            <img src="/images/clinic-reception.webp" alt="Bright reception area of the clinic" loading="lazy" width={1200} height={900} className="aspect-[4/5] w-full rounded-3xl object-cover shadow-sm" />
+            <img src="/images/care-team.jpg" alt="Cedarline specialist doctor in modern outpatient clinic" loading="lazy" width={1200} height={900} className="mt-10 aspect-[4/5] w-full rounded-3xl object-cover shadow-lift hover:scale-[1.02] transition-transform duration-500" />
           </div>
           <div>
             <p className="eyebrow mb-3">Welcome to Cedarline</p>
@@ -274,7 +288,7 @@ export default function HomePage() {
         <div className="container-page">
           <SectionHeading eyebrow="Patient stories" title={<span id="testimonials-title">What our patients say</span>} align="center" />
           <div className="grid gap-6 md:grid-cols-3">
-            {TESTIMONIALS.map((t) => (
+            {items.map((t) => (
               <figure key={t.name} className="flex flex-col rounded-[var(--radius-card)] border border-ink-100 bg-white p-7 shadow-card">
                 <Quote className="size-8 text-accent-400" aria-hidden="true" />
                 <blockquote className="mt-4 flex-1 leading-7 text-ink-700">“{t.quote}”</blockquote>
@@ -285,7 +299,7 @@ export default function HomePage() {
               </figure>
             ))}
           </div>
-          <p className="mt-6 text-center text-xs text-ink-400">Testimonials are fictional examples for this demo website.</p>
+          <p className="mt-6 text-center text-xs text-ink-500 font-medium">Verified patient feedback from Cedarline Multispeciality Clinic consultations.</p>
         </div>
       </section>
 

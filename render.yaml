@@ -1,6 +1,11 @@
-# Render Blueprint for the API. The database is hosted separately (Neon recommended, see README),
-# and the frontend on Vercel/Netlify, so each tier can be deployed and scaled independently.
+# Render Blueprint for full-stack deployment:
+# 1. cedarline-api: Docker Web Service hosting the FastAPI Backend with pgvector RAG
+# 2. cedarline-frontend: Static Site hosting the React Frontend Single Page App
+
 services:
+  # =========================================================================
+  # 1. Backend Web Service (FastAPI + pgvector + RAG + Uvicorn)
+  # =========================================================================
   - type: web
     name: cedarline-api
     runtime: docker
@@ -11,16 +16,22 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: DATABASE_URL
-        sync: false # paste the Neon connection string (postgresql://...?sslmode=require)
+        sync: false # PostgreSQL connection string (Neon or Render Postgres, e.g. postgresql://user:pass@ep-xyz.neon.tech/clinic?sslmode=require)
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGINS
-        sync: false # e.g. https://cedarline-clinic.vercel.app
+        sync: false # Comma-separated allowed frontend origins (e.g. https://cedarline-frontend.onrender.com)
       - key: ADMIN_EMAIL
         value: admin@cedarline.example
       - key: ADMIN_PASSWORD
         sync: false
+      - key: STAFF_EMAIL
+        value: staff@cedarline.example
       - key: STAFF_PASSWORD
+        sync: false
+      - key: DOCTOR_EMAIL
+        value: doctor@cedarline.example
+      - key: DOCTOR_PASSWORD
         sync: false
       - key: EMBEDDING_PROVIDER
         value: gemini
@@ -38,3 +49,23 @@ services:
         sync: false
       - key: SEED_ON_START
         value: "true"
+
+  # =========================================================================
+  # 2. Frontend Web Service (Vite + React Static SPA)
+  # =========================================================================
+  - type: web
+    name: cedarline-frontend
+    runtime: static
+    rootDir: frontend
+    plan: free
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false # Point to backend API: https://cedarline-api.onrender.com
+      - key: VITE_SITE_URL
+        sync: false # Frontend URL: https://cedarline-frontend.onrender.com

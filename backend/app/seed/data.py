@@ -18,8 +18,8 @@ CLINIC = {
         "dental suites, a dedicated dermatology procedure room, an in-house sample collection point and "
         "a step-free entrance with lift access."
     ),
-    "phone": "+91 80 0123 4567",
-    "whatsapp": None,
+    "phone": "+91 94835 41927",
+    "whatsapp": "+91 94835 41927",
     "email": "hello@cedarline.example",
     "address_line": "2nd Floor, Cedar Court, 48 Lakeside Avenue, Indiranagar",
     "city": "Bengaluru",
@@ -424,3 +424,90 @@ BLOG_POSTS = [
         "missed, speak to your paediatrician, who can advise how to catch up.",
     },
 ]
+
+TESTIMONIALS = [
+    {
+        "id": 1,
+        "quote": "Dr. Iyer explained every option for my root canal and the cost before we started. No surprises, and very gentle.",
+        "name": "Ritika S.",
+        "detail": "Dental patient",
+    },
+    {
+        "id": 2,
+        "quote": "Being able to get an evening appointment made it easy to get my father’s diabetes reviews done after work.",
+        "name": "Mohammed A.",
+        "detail": "Family medicine",
+    },
+    {
+        "id": 3,
+        "quote": "The trichoscopy showed exactly what was going on with my scalp. I finally have a plan I understand.",
+        "name": "Deepak N.",
+        "detail": "Hair & scalp care",
+    },
+]
+
+CLINIC_HIGHLIGHTS = {
+    "facilities": [
+        "Three dental suites with digital X-ray",
+        "Dermatology procedure room with medical-grade lasers",
+        "Trichoscopy and scalp imaging",
+        "In-house sample collection point",
+        "Child-friendly waiting area",
+        "Step-free access, lift and accessible restroom",
+    ],
+    "values": [
+        {
+            "icon": "HeartHandshake",
+            "title": "Unhurried consultations",
+            "text": "Appointment lengths are set by specialty so doctors have time to listen and explain.",
+        },
+        {
+            "icon": "ShieldCheck",
+            "title": "Evidence-based care",
+            "text": "We recommend treatments only when there is good reason to, and we say so when there isn’t.",
+        },
+        {
+            "icon": "Stethoscope",
+            "title": "Joined-up specialists",
+            "text": "Our physicians, dentists and dermatologists share notes so care stays coordinated.",
+        },
+        {
+            "icon": "BadgeIndianRupee",
+            "title": "Transparent costs",
+            "text": "Itemised bills and published starting prices, with costs discussed before treatment.",
+        },
+    ],
+    "why_choose": [
+        {
+            "icon": "UsersRound",
+            "title": "Specialists under one roof",
+            "text": "Nine consultants across five departments who refer to each other, so you are not passed between hospitals.",
+        },
+        {
+            "icon": "BadgeIndianRupee",
+            "title": "Clear, upfront pricing",
+            "text": "Indicative starting prices are published, and every cost is explained before any procedure begins.",
+        },
+        {
+            "icon": "CalendarClock",
+            "title": "Evening & Saturday clinics",
+            "text": "Consultations until 8 PM on weekdays and on Saturdays, built around working families.",
+        },
+        {
+            "icon": "Microscope",
+            "title": "Modern diagnostics",
+            "text": "Digital dental imaging, trichoscopy and an in-house sample collection point.",
+        },
+        {
+            "icon": "Baby",
+            "title": "Child-friendly care",
+            "text": "A dedicated paediatrician and gentle children’s dentistry in a calm setting.",
+        },
+        {
+            "icon": "Accessibility",
+            "title": "Accessible for everyone",
+            "text": "Step-free entrance, lift access and an accessible restroom on our floor.",
+        },
+    ],
+}
+

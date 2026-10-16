@@ -42,7 +42,7 @@ export default function DoctorsPage() {
         title="Meet the specialists"
         description="Experienced consultants across five departments. See when each doctor consults and book directly with the one you prefer."
         crumbs={[{ label: 'Our Doctors' }]}
-        image="/images/care-team.webp"
+        image="/images/care-team.jpg"
       />
 
       <section className="section">

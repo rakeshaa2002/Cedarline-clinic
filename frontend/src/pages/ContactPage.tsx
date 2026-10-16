@@ -10,6 +10,7 @@ import { Alert, Skeleton } from '@/components/ui/Feedback'
 import { Field, Input, Select, Textarea } from '@/components/ui/Form'
 import { Card } from '@/components/ui/Layout'
 import { useToast } from '@/components/ui/Toast'
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
 import { useClinicInfo } from '@/hooks/useClinic'
 import type { ApiError } from '@/services/api'
 import { clinicApi } from '@/services/endpoints'
@@ -87,6 +88,20 @@ export default function ContactPage() {
                     {clinic.phone}
                   </a>
                   <p className="text-sm text-ink-500">Front desk during opening hours</p>
+                </ContactItem>
+                <ContactItem icon={<WhatsAppIcon className="size-5 text-[#25D366]" />} title="WhatsApp">
+                  <a
+                    href={`https://wa.me/${(clinic.whatsapp || clinic.phone).replace(/\D/g, '')}?text=${encodeURIComponent('Hello Cedarline Clinic, I would like to enquire about an appointment.')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-semibold text-emerald-700 hover:text-emerald-800"
+                  >
+                    <span>{clinic.whatsapp || clinic.phone}</span>
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                      Chat now
+                    </span>
+                  </a>
+                  <p className="text-sm text-ink-500">Fast replies via WhatsApp</p>
                 </ContactItem>
                 <ContactItem icon={<Mail className="size-5" />} title="Email">
                   <a href={`mailto:${clinic.email}`} className="font-semibold text-ink-900 hover:text-brand-700">

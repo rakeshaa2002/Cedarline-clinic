@@ -36,11 +36,13 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 120
 
-    # Used only by the seed script to create the first admin/staff accounts.
+    # Used only by the seed script to create the first admin/staff/doctor accounts.
     admin_email: str = "admin@cedarline.example"
     admin_password: str | None = None
     staff_email: str = "staff@cedarline.example"
     staff_password: str | None = None
+    doctor_email: str = "doctor@cedarline.example"
+    doctor_password: str | None = None
 
     # --- Rate limits (requests per minute, per client IP) ---------------------
     rate_limit_chat_per_minute: int = 20

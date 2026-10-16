@@ -1,4 +1,4 @@
-import { Pencil, Plus } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { ServiceIcon } from '@/components/site/ServiceIcon'
 import { Button } from '@/components/ui/Button'
@@ -11,7 +11,7 @@ import { invalidate, useApi } from '@/hooks/useApi'
 import { AdminPageHeader } from '@/layouts/AdminLayout'
 import type { ApiError } from '@/services/api'
 import { adminApi, type ServiceInput } from '@/services/endpoints'
-import type { Department } from '@/types'
+import type { Department, Service } from '@/types'
 import { DEPARTMENT_LABELS, formatPrice } from '@/utils/format'
 
 const EMPTY: ServiceInput = {
@@ -28,7 +28,10 @@ const EMPTY: ServiceInput = {
 
 export default function AdminServicesPage() {
   const services = useApi('admin:services', adminApi.services)
+  const toast = useToast()
   const [editing, setEditing] = useState<{ id: number | null; values: ServiceInput } | null>(null)
+  const [deleting, setDeleting] = useState<Service | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   if (services.loading) return <PageLoader />
   if (services.error) return <ErrorState message={services.error.message} onRetry={services.reload} />
@@ -51,7 +54,7 @@ export default function AdminServicesPage() {
                 <th scope="col" className="px-5 py-3 font-semibold">Duration</th>
                 <th scope="col" className="px-5 py-3 font-semibold">From</th>
                 <th scope="col" className="px-5 py-3 font-semibold">Status</th>
-                <th scope="col" className="px-5 py-3"><span className="sr-only">Edit</span></th>
+                <th scope="col" className="px-5 py-3"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-100">
@@ -68,17 +71,29 @@ export default function AdminServicesPage() {
                   <td className="px-5 py-3.5 text-ink-900 tabular-nums">{formatPrice(s.price_from) ?? '—'}</td>
                   <td className="px-5 py-3.5">{s.is_active ? <Badge tone="success">Active</Badge> : <Badge tone="danger">Hidden</Badge>}</td>
                   <td className="px-5 py-3.5 text-right">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const { id, ...values } = s
-                        setEditing({ id, values })
-                      }}
-                      className="grid size-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100 hover:text-ink-800"
-                      aria-label={`Edit ${s.name}`}
-                    >
-                      <Pencil className="size-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const { id, ...values } = s
+                          setEditing({ id, values })
+                        }}
+                        className="grid size-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100 hover:text-ink-800 transition-colors cursor-pointer"
+                        aria-label={`Edit ${s.name}`}
+                        title={`Edit ${s.name}`}
+                      >
+                        <Pencil className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleting(s)}
+                        className="grid size-8 place-items-center rounded-lg text-ink-400 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+                        aria-label={`Delete ${s.name}`}
+                        title={`Delete ${s.name}`}
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -97,6 +112,50 @@ export default function AdminServicesPage() {
             services.reload()
           }}
         />
+      )}
+      {deleting && (
+        <Modal
+          open
+          onClose={() => !isDeleting && setDeleting(null)}
+          title="Delete Service"
+          size="md"
+          footer={
+            <>
+              <Button variant="outline" onClick={() => setDeleting(null)} disabled={isDeleting}>
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                loading={isDeleting}
+                onClick={async () => {
+                  setIsDeleting(true)
+                  try {
+                    await adminApi.deleteService(deleting.id)
+                    toast.success('Service removed', `${deleting.name} was removed from the clinic services and AI knowledge base.`)
+                    invalidate('services:')
+                    setDeleting(null)
+                    services.reload()
+                  } catch (err) {
+                    toast.error('Could not delete service', (err as ApiError).message)
+                  } finally {
+                    setIsDeleting(false)
+                  }
+                }}
+              >
+                Delete service
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-3">
+            <p className="text-sm text-ink-800">
+              Are you sure you want to permanently delete <strong>{deleting.name}</strong>?
+            </p>
+            <p className="text-xs leading-relaxed text-ink-500">
+              This will remove the treatment from the website directory and update the AI Chatbot's knowledge base.
+            </p>
+          </div>
+        </Modal>
       )}
     </>
   )

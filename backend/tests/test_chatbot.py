@@ -29,7 +29,7 @@ def use_llm(llm):
     [
         ("What are the clinic's opening hours?", "Monday: 09:00 to 20:00", "opening hours"),
         ("Where is the clinic located?", "48 Lakeside Avenue", "location"),
-        ("How do I book an appointment?", "+91 80 0123 4567", "book an appointment"),
+        ("How do I book an appointment?", "+91 94835 41927", "book an appointment"),
         ("Do you accept insurance?", "cashless", "Frequently asked questions"),
         ("How much does teeth whitening cost?", "Teeth Whitening", "Dental"),
     ],
@@ -74,7 +74,7 @@ def test_unrelated_question_returns_no_context(client, knowledge):
     use_llm(llm)
     body = ask(client, "What is the capital of France?")
     assert body["status"] == "no_context"
-    assert "couldn't find" in body["answer"] and "+91 80 0123 4567" in body["answer"]
+    assert "couldn't find" in body["answer"] and "+91 94835 41927" in body["answer"]
     assert llm.calls == []  # nothing relevant was retrieved, so the LLM was never asked
 
 

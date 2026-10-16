@@ -1,66 +1,132 @@
-# Deployment guide
+# Deployment Guide
 
-The database, API and frontend are deployed separately. The plan below uses free tiers that persist data and support pgvector.
+This guide covers deploying the full-stack Cedarline Clinic platform (Database, FastAPI Backend API, React Frontend SPA) and setting up CI/CD with GitHub Actions.
 
 ```
-Vercel / Netlify (static SPA)  ──►  Render web service (Docker, FastAPI)  ──►  Neon Postgres (pgvector)
+┌─────────────────────────────────┐       ┌────────────────────────────────┐       ┌───────────────────────────────┐
+│ React Frontend (Render / Vercel)│ ────► │ FastAPI Backend (Render Docker)│ ────► │ PostgreSQL + pgvector (Neon)  │
+└─────────────────────────────────┘       └────────────────────────────────┘       └───────────────────────────────┘
 ```
 
-## 1. Database: Neon
+---
 
-1. Create a project at neon.tech, with a database named `clinic`.
-2. Copy the connection string (`postgresql://user:pass@ep-xxx.<region>.aws.neon.tech/clinic?sslmode=require`).
-3. Nothing else is needed. The Alembic migration runs `CREATE EXTENSION IF NOT EXISTS vector`, and Neon supports pgvector on every plan.
+## 1. Database: Neon (Recommended) or Render Postgres
 
-Alternatives: Render Postgres (pgvector supported; the free instance expires) or Supabase (pgvector supported).
+The backend requires PostgreSQL with the `pgvector` extension enabled.
 
-## 2. API: Render
+1. Create a free account at [neon.tech](https://neon.tech) and create a project/database named `clinic`.
+2. Copy the pooled or direct connection string:
+   ```
+   postgresql://user:password@ep-xyz.region.aws.neon.tech/clinic?sslmode=require
+   ```
+3. The Alembic migrations in `backend/alembic` automatically run `CREATE EXTENSION IF NOT EXISTS vector` on boot.
 
-**Option A: Blueprint.** Push the repo to GitHub. In Render, choose New → Blueprint and select the repo. Render reads `render.yaml`, then asks for:
+*(Alternative: Render Postgres also supports `pgvector`. Note that Render free-tier databases expire after 30 days unless upgraded.)*
 
-| Variable | Value |
-|---|---|
-| `DATABASE_URL` | the Neon string from step 1 (`postgresql://` is normalised automatically) |
-| `CORS_ORIGINS` | your frontend URL, e.g. `https://cedarline-clinic.vercel.app` |
-| `ADMIN_PASSWORD`, `STAFF_PASSWORD` | strong passwords |
-| `GEMINI_API_KEY` | a key from Google AI Studio |
+---
 
-`JWT_SECRET` is generated automatically.
+## 2. Deploy on Render (1-Click Blueprint or Manual)
 
-**Option B: Manual.** Create a Web Service with Runtime **Docker**, root directory `backend`, and health check path `/api/v1/health`. Then set the variables above, plus `ENVIRONMENT=production`, `EMBEDDING_PROVIDER=gemini`, `LLM_PROVIDER=gemini` and `SEED_ON_START=true`.
+### Option A: Render Blueprint (Recommended - Full Stack in 1 Click)
 
-On every boot, `scripts/start.sh`:
-1. Runs `alembic upgrade head`.
-2. Seeds the database idempotently. If the AI provider is down, the error is logged and the API still starts.
-3. Starts uvicorn on `$PORT`.
+The repository includes a root `render.yaml` configuring both the backend API (Docker) and the frontend SPA (Static Site).
 
-Check that it worked:
+1. Push your repository to GitHub: `git push origin main`.
+2. In the [Render Dashboard](https://dashboard.render.com/), click **New +** → **Blueprint**.
+3. Select your GitHub repository (`healthcare-platform`).
+4. Render automatically parses `render.yaml` and presents the two services:
+   - `cedarline-api` (Docker web service)
+   - `cedarline-frontend` (Static site)
+5. Fill in the required environment variables:
+   - `DATABASE_URL`: Your Neon PostgreSQL connection string.
+   - `GEMINI_API_KEY`: Your Google Gemini API key.
+   - `ADMIN_PASSWORD`: Secure password for `admin@cedarline.example`.
+   - `STAFF_PASSWORD`: Secure password for `staff@cedarline.example`.
+   - `DOCTOR_PASSWORD`: Secure password for `doctor@cedarline.example`.
+   - `CORS_ORIGINS`: Your frontend URL (e.g. `https://cedarline-frontend.onrender.com`).
+   - `VITE_API_URL`: Your backend API URL (e.g. `https://cedarline-api.onrender.com`).
+   - `VITE_SITE_URL`: Your frontend URL (e.g. `https://cedarline-frontend.onrender.com`).
+6. Click **Apply**. Render builds the backend Docker container, runs migrations & seeds automatically via `scripts/start.sh`, and builds the frontend static site with SPA routing.
 
+### Option B: Manual Service Creation on Render
+
+#### Backend API Service:
+- **Type**: Web Service
+- **Runtime**: Docker
+- **Root Directory**: `backend`
+- **Health Check Path**: `/api/v1/health`
+- **Environment Variables**:
+  - `ENVIRONMENT=production`
+  - `DATABASE_URL=postgresql://...`
+  - `JWT_SECRET=<long-random-string>`
+  - `CORS_ORIGINS=https://cedarline-frontend.onrender.com`
+  - `ADMIN_EMAIL=admin@cedarline.example`
+  - `ADMIN_PASSWORD=<strong-password>`
+  - `STAFF_EMAIL=staff@cedarline.example`
+  - `STAFF_PASSWORD=<strong-password>`
+  - `DOCTOR_EMAIL=doctor@cedarline.example`
+  - `DOCTOR_PASSWORD=<strong-password>`
+  - `EMBEDDING_PROVIDER=gemini`
+  - `EMBEDDING_MODEL=gemini-embedding-001`
+  - `EMBEDDING_DIM=768`
+  - `LLM_PROVIDER=gemini`
+  - `LLM_MODEL=gemini-2.5-flash`
+  - `GEMINI_API_KEY=<your-key>`
+  - `SEED_ON_START=true`
+
+#### Frontend Static Site:
+- **Type**: Static Site
+- **Root Directory**: `frontend`
+- **Build Command**: `npm ci && npm run build`
+- **Publish Directory**: `./dist`
+- **Redirects / Rewrites**:
+  - `/*` -> `/index.html` (Rewrite for SPA router)
+- **Environment Variables**:
+  - `VITE_API_URL=https://<your-backend-api>.onrender.com`
+  - `VITE_SITE_URL=https://<your-frontend-site>.onrender.com`
+
+---
+
+## 3. CI/CD with GitHub Actions
+
+The repository includes `.github/workflows/ci-cd.yml` which triggers automatically on every push or pull request to `main`.
+
+### CI Checks:
+1. **Frontend Job**:
+   - Node 22 setup with npm caching.
+   - `npm ci`
+   - `oxlint` code quality and linting.
+   - TypeScript build (`tsc -b && vite build`).
+2. **Backend Job**:
+   - Python 3.12 setup with pip caching.
+   - Spawns a real PostgreSQL + `pgvector` container (`pgvector/pgvector:pg17`).
+   - Verifies Python bytecode compilation (`python -m compileall app`).
+   - Runs the complete test suite with `pytest`.
+
+### CD (Continuous Deployment) to Render:
+- **Automatic Git Deploys**: Render automatically listens for new commits on the `main` branch and triggers a fresh deploy.
+- **Optional Webhook Deploys**: Under your Render service settings, copy the **Deploy Hook** URL. Add it to GitHub repository secrets:
+  - `RENDER_API_DEPLOY_HOOK`: Webhook URL for the backend API.
+  - `RENDER_FRONTEND_DEPLOY_HOOK`: Webhook URL for the frontend static site.
+  The workflow will automatically ping the hooks upon successful CI tests.
+
+---
+
+## 4. Verification After Deployment
+
+Verify the backend:
 ```bash
-curl https://<api-host>/api/v1/health        # {"status":"ok","database":"ok"}
-curl https://<api-host>/api/v1/chat/health   # indexed_chunks > 0, embedding_model gemini:...
+# Health check
+curl https://<api-host>/api/v1/health
+# Expected: {"status":"ok","database":"ok"}
+
+# AI & RAG health check
+curl https://<api-host>/api/v1/chat/health
+# Expected: indexed_chunks > 0, provider: gemini
 ```
 
-Free Render services sleep when idle, so the first request after a while can take about 30–60 seconds.
-
-## 3. Frontend: Vercel (or Netlify)
-
-1. Import the repo into Vercel, with root directory `frontend`, framework **Vite**, build command `npm run build` and output directory `dist`.
-2. Set these environment variables:
-   - `VITE_API_URL=https://<api-host>` (no trailing slash, no `/api/v1`)
-   - `VITE_SITE_URL=https://<your-vercel-domain>` (used for canonical tags, `sitemap.xml` and `robots.txt`)
-3. Deploy. `vercel.json` rewrites client routes (for example `/services/dental`) to `index.html`.
-4. Add the final frontend URL to the API's `CORS_ORIGINS` and redeploy the API.
-
-On Netlify, use the same settings; `public/_redirects` handles the SPA fallback.
-
-## 4. After deploying
-
-- Sign in at `https://<frontend>/admin` with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
-- Go to Chatbot knowledge, check the status shows **Ready**, and run **Re-index everything** once if you changed providers.
-- Ask the chatbot a few questions (see the README), then check they appear on the dashboard.
-- Set `GEMINI_API_KEY` only in the Render dashboard. Never put it in a frontend variable or commit it.
-
-## Switching embedding models later
-
-The vector column is `vector(768)`. Models that can output 768 dimensions (such as `gemini-embedding-001` with `outputDimensionality`, or `text-embedding-3-small` with `dimensions`) work without a migration; just run a re-index. For a different size, add an Alembic migration that alters `knowledge_chunks.embedding`, set `EMBEDDING_DIM`, and re-index.
+Verify the frontend:
+- Open `https://<frontend-host>/`
+- Test patient appointment booking.
+- Test the Medical AI chatbot widget.
+- Navigate to `https://<frontend-host>/admin` and log in with your configured admin credentials.

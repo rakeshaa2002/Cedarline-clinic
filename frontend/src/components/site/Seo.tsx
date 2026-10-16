@@ -13,7 +13,7 @@ interface SeoProps {
  * Per-page SEO tags. React 19 hoists <title>, <meta> and <link> rendered anywhere
  * in the tree into <head>, so no helmet library is needed.
  */
-export function Seo({ title, description, path, image = '/images/hero-consultation.webp', noindex }: SeoProps) {
+export function Seo({ title, description, path, image = '/images/hero-consultation.jpg', noindex }: SeoProps) {
   const fullTitle = path === '/' ? `${SITE_NAME} | ${title}` : `${title} | ${SITE_NAME}`
   const url = `${SITE_URL}${path}`
   return (

@@ -73,11 +73,15 @@ def seed_catalogue(db: Session) -> None:
         upsert(db, BlogPost, "slug", values)
 
 
+from app.models import BlogPost, ClinicInfo, ContactMessage, Doctor, Service, User
+
+
 def seed_users(db: Session) -> None:
     settings = get_settings()
     accounts = [
         (settings.admin_email, settings.admin_password, "Clinic Administrator", "admin"),
         (settings.staff_email, settings.staff_password, "Front Desk", "staff"),
+        (settings.doctor_email, settings.doctor_password, "Dr. Ananya Rao", "doctor"),
     ]
     for email, password, name, role in accounts:
         existing = db.scalar(select(User).where(func.lower(User.email) == email.lower()))
@@ -96,6 +100,56 @@ def seed_users(db: Session) -> None:
             db.add(User(email=email, full_name=name, role=role, hashed_password=hash_password(password)))
 
 
+def seed_sample_messages(db: Session) -> None:
+    count = db.scalar(select(func.count(ContactMessage.id))) or 0
+    if count >= 3:
+        return
+    sample_patients = [
+        {
+            "name": "Priya Sharma",
+            "email": "priya.sharma@example.com",
+            "phone": "+91 98451 23456",
+            "subject": "Appointment Request: Dr. Ananya Rao (General Medicine)",
+            "message": "Looking for an annual preventive health checkup and fatigue consultation with Dr. Ananya Rao this Friday around 10:30 AM.",
+            "is_read": False,
+        },
+        {
+            "name": "Rahul Varma",
+            "email": "rahul.varma@example.com",
+            "phone": "+91 97412 88990",
+            "subject": "Appointment Request: Dr. Arjun Nair (Dental / Braces)",
+            "message": "Need consultation for orthodontic braces and clear aligner evaluation for mild front tooth crowding. Available on Saturday afternoon.",
+            "is_read": False,
+        },
+        {
+            "name": "Sneha Kulkarni",
+            "email": "sneha.k@example.com",
+            "phone": "+91 99001 44556",
+            "subject": "Appointment Request: Dr. Naomi Fernandes (Dermatology)",
+            "message": "Severe cystic acne flare-up on cheeks for 3 weeks. Requesting clinical skin examination with Dr. Naomi Fernandes on Tuesday evening.",
+            "is_read": False,
+        },
+        {
+            "name": "Amit Patel",
+            "email": "amit.patel@example.com",
+            "phone": "+91 98860 11223",
+            "subject": "Appointment Request: Dr. Sara Thomas (Hair & Scalp)",
+            "message": "Experiencing rapid crown hair thinning and dry scalp. Would like a digital trichoscopy consultation with Dr. Sara Thomas on Monday.",
+            "is_read": False,
+        },
+        {
+            "name": "Divya Nambiar",
+            "email": "divya.n@example.com",
+            "phone": "+91 94481 77889",
+            "subject": "Appointment Request: Dr. Leela Krishnan (Paediatrics)",
+            "message": "6-month booster vaccination and developmental milestone checkup for baby boy. Preferred time: Wednesday morning.",
+            "is_read": False,
+        },
+    ]
+    for p in sample_patients:
+        db.add(ContactMessage(**p))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--skip-knowledge", action="store_true")
@@ -108,6 +162,7 @@ def main() -> None:
         seed_clinic(db)
         seed_catalogue(db)
         seed_users(db)
+        seed_sample_messages(db)
         db.commit()
         log.info("Clinic info, %d doctors, %d services, %d articles, users ready",
                  len(data.DOCTORS), len(data.SERVICES), len(data.BLOG_POSTS))

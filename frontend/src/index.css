@@ -37,19 +37,108 @@
   --color-accent-700: #b04312;
 
   --radius-card: 1.25rem;
-  --shadow-card: 0 1px 2px rgb(13 33 57 / 0.04), 0 8px 24px -12px rgb(13 33 57 / 0.12);
-  --shadow-lift: 0 2px 4px rgb(13 33 57 / 0.05), 0 18px 40px -18px rgb(13 33 57 / 0.25);
+  --shadow-card: 0 1px 3px rgb(13 33 57 / 0.05), 0 10px 28px -12px rgb(13 33 57 / 0.12);
+  --shadow-lift: 0 4px 6px rgb(13 33 57 / 0.05), 0 20px 48px -16px rgb(13 33 57 / 0.22);
+  --shadow-glow: 0 0 35px -5px rgba(32, 133, 137, 0.25);
+  --shadow-glow-accent: 0 0 35px -5px rgba(238, 108, 42, 0.3);
 
-  --animate-fade-up: fade-up 0.5s ease-out both;
-  --animate-pop: pop 0.18s ease-out both;
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-pop: pop 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-ai-float: ai-float 3.5s ease-in-out infinite;
+  --animate-ai-glow: ai-glow 3s ease-in-out infinite;
+  --animate-ai-shimmer: ai-shimmer 4s ease-in-out infinite;
+  --animate-ai-ping-slow: ai-ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-ai-sparkle: ai-sparkle 2.5s ease-in-out infinite;
+  --animate-ai-concentric: ai-concentric 3.5s ease-in-out infinite;
 
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes pop {
-    from { opacity: 0; transform: scale(0.96) translateY(6px); }
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.03); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes ai-float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-7px);
+    }
+  }
+  @keyframes ai-glow {
+    0%, 100% {
+      opacity: 0.45;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.08);
+    }
+  }
+  @keyframes ai-shimmer {
+    0% {
+      transform: translateX(-160%) skewX(-20deg);
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.75;
+    }
+    50% {
+      transform: translateX(260%) skewX(-20deg);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(260%) skewX(-20deg);
+      opacity: 0;
+    }
+  }
+  @keyframes ai-ping-slow {
+    0% {
+      transform: scale(0.98);
+      opacity: 0.7;
+    }
+    60%, 100% {
+      transform: scale(1.38);
+      opacity: 0;
+    }
+  }
+  @keyframes ai-sparkle {
+    0%, 100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 0.85;
+    }
+    50% {
+      transform: scale(1.28) rotate(14deg);
+      opacity: 1;
+      filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.9));
+    }
+  }
+  @keyframes ai-concentric {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.35;
+    }
+    50% {
+      transform: scale(1.12);
+      opacity: 0.7;
+    }
   }
 }
 
@@ -96,6 +185,36 @@
   .prose-clinic p {
     @apply mb-5 text-[1.0625rem] leading-8 text-ink-700;
   }
+
+  /* Interactive smooth hover lift */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift;
+  }
+
+  /* Glassmorphism primitives */
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/60 shadow-card;
+  }
+  .glass-nav {
+    @apply bg-white/90 backdrop-blur-xl border-b border-ink-100/70;
+  }
+}
+
+/* Sleek custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  border: 2px solid #f1f5f9;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #208589;
 }
 
 @media (prefers-reduced-motion: reduce) {

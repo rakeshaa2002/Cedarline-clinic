@@ -5,6 +5,7 @@ import type {
   ChatHealth,
   ChatResponse,
   ChatTurn,
+  ClinicHighlights,
   ClinicInfo,
   ContactMessage,
   Department,
@@ -13,6 +14,7 @@ import type {
   Overview,
   Page,
   Service,
+  Testimonial,
   TokenResponse,
   User,
 } from '@/types'
@@ -30,6 +32,8 @@ export const clinicApi = {
   blogPost: (slug: string) => api.get<BlogPost>(`/blog/${encodeURIComponent(slug)}`).then((r) => r.data),
   contact: (data: { name: string; email: string; phone?: string; subject: string; message: string }) =>
     api.post<{ message: string }>('/contact', data).then((r) => r.data),
+  testimonials: () => api.get<Testimonial[]>('/testimonials').then((r) => r.data),
+  highlights: () => api.get<ClinicHighlights>('/clinic-highlights').then((r) => r.data),
 }
 
 /* ---------- Chat ---------- */
@@ -56,11 +60,13 @@ export const adminApi = {
   doctors: () => api.get<Doctor[]>('/admin/doctors').then((r) => r.data),
   createDoctor: (data: DoctorInput) => api.post<Doctor>('/admin/doctors', data).then((r) => r.data),
   updateDoctor: (id: number, data: DoctorInput) => api.put<Doctor>(`/admin/doctors/${id}`, data).then((r) => r.data),
+  deleteDoctor: (id: number) => api.delete<void>(`/admin/doctors/${id}`).then((r) => r.data),
 
   services: () => api.get<Service[]>('/admin/services').then((r) => r.data),
   createService: (data: ServiceInput) => api.post<Service>('/admin/services', data).then((r) => r.data),
   updateService: (id: number, data: ServiceInput) =>
     api.put<Service>(`/admin/services/${id}`, data).then((r) => r.data),
+  deleteService: (id: number) => api.delete<void>(`/admin/services/${id}`).then((r) => r.data),
 
   messages: () => api.get<ContactMessage[]>('/admin/messages').then((r) => r.data),
   markMessageRead: (id: number) => api.patch<ContactMessage>(`/admin/messages/${id}/read`).then((r) => r.data),

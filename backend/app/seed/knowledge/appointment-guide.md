@@ -2,7 +2,7 @@
 
 ## How can I book an appointment?
 You can book an appointment in three ways:
-- Call the front desk on +91 80 0123 4567 during opening hours (Monday to Saturday).
+- Call or WhatsApp the front desk on +91 94835 41927 during opening hours (Monday to Saturday).
 - Email hello@cedarline.example with your name, phone number, the doctor or service you need and two or three preferred dates. The front desk will reply to confirm a time.
 - Visit the reception desk at the clinic in person.
 

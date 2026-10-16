@@ -1,0 +1,5 @@
+# Auto detect text files and perform LF normalization on checkout
+* text=auto
+
+# Ensure shell scripts always have LF line endings in git and on checkout
+*.sh text eol=lf

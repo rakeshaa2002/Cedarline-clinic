@@ -7,12 +7,12 @@ type Variant = 'primary' | 'accent' | 'outline' | 'ghost' | 'danger' | 'white'
 type Size = 'sm' | 'md' | 'lg'
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-brand-700 text-white hover:bg-brand-800 shadow-sm',
-  accent: 'bg-accent-500 text-white hover:bg-accent-600 shadow-sm shadow-accent-500/20',
-  outline: 'border border-ink-200 bg-white text-ink-800 hover:border-brand-300 hover:bg-brand-50',
-  ghost: 'text-ink-700 hover:bg-ink-100',
-  danger: 'bg-red-600 text-white hover:bg-red-700',
-  white: 'bg-white text-brand-800 hover:bg-brand-50 shadow-sm',
+  primary: 'bg-brand-700 text-white hover:bg-brand-800 shadow-sm hover:shadow-md hover:shadow-brand-700/20',
+  accent: 'bg-accent-500 text-white hover:bg-accent-600 shadow-sm shadow-accent-500/20 hover:shadow-lg hover:shadow-accent-500/30',
+  outline: 'border border-ink-200 bg-white text-ink-800 hover:border-brand-300 hover:bg-brand-50 hover:shadow-sm',
+  ghost: 'text-ink-700 hover:bg-ink-100 hover:text-brand-700',
+  danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md hover:shadow-red-600/20',
+  white: 'bg-white text-brand-800 hover:bg-brand-50 shadow-sm hover:shadow-md',
 }
 
 const SIZES: Record<Size, string> = {
@@ -23,8 +23,9 @@ const SIZES: Record<Size, string> = {
 
 export function buttonClasses(variant: Variant = 'primary', size: Size = 'md', extra?: string) {
   return cn(
-    'inline-flex items-center justify-center rounded-xl font-semibold whitespace-nowrap transition-colors duration-150',
-    'disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2',
+    'inline-flex items-center justify-center rounded-xl font-semibold whitespace-nowrap cursor-pointer transition-all duration-200 ease-out',
+    'hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
+    'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2',
     VARIANTS[variant],
     SIZES[size],
     extra,

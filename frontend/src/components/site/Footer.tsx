@@ -1,6 +1,7 @@
 import { Clock, Mail, MapPin, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Logo } from '@/components/site/Logo'
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
 import { useClinicInfo } from '@/hooks/useClinic'
 
 const COLUMNS = [
@@ -11,6 +12,7 @@ const COLUMNS = [
       { to: '/doctors', label: 'Our Doctors' },
       { to: '/blog', label: 'Patient Education' },
       { to: '/contact', label: 'Contact Us' },
+      { to: '/doctor/login', label: 'Doctor & Staff Portal' },
     ],
   },
   {
@@ -76,6 +78,17 @@ export function Footer() {
                 <Phone className="mt-0.5 size-4 shrink-0 text-brand-300" aria-hidden="true" />
                 <a href={`tel:${clinic.phone.replace(/\s/g, '')}`} className="hover:text-white">
                   {clinic.phone}
+                </a>
+              </li>
+              <li className="flex gap-3">
+                <WhatsAppIcon className="mt-0.5 size-4 shrink-0 text-[#25D366]" aria-hidden="true" />
+                <a
+                  href={`https://wa.me/${(clinic.whatsapp || clinic.phone).replace(/\D/g, '')}?text=${encodeURIComponent('Hello Cedarline Clinic, I have an enquiry.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white"
+                >
+                  WhatsApp: {clinic.whatsapp || clinic.phone}
                 </a>
               </li>
               <li className="flex gap-3">

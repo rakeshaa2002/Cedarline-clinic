@@ -34,7 +34,7 @@ function seoFiles(siteUrl: string): Plugin {
       this.emitFile({
         type: 'asset',
         fileName: 'robots.txt',
-        source: `User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: ${base}/sitemap.xml\n`,
+        source: `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /doctor\n\nSitemap: ${base}/sitemap.xml\n`,
       })
     },
   }

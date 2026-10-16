@@ -6,15 +6,28 @@ import { PageLoader } from '@/components/ui/Feedback'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/utils/format'
 
-const NAV = [
-  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true, adminOnly: false },
-  { to: '/admin/messages', label: 'Messages', icon: Mail, adminOnly: false },
-  { to: '/admin/doctors', label: 'Doctors', icon: UsersRound, adminOnly: true },
-  { to: '/admin/services', label: 'Services', icon: Stethoscope, adminOnly: true },
-  { to: '/admin/knowledge', label: 'Chatbot knowledge', icon: BookOpenText, adminOnly: true },
-]
+const getNav = (role: 'admin' | 'staff' | 'doctor') => {
+  if (role === 'doctor') {
+    return [
+      { to: '/admin', label: 'Doctor Dashboard', icon: LayoutDashboard, end: true },
+      { to: '/admin/messages', label: 'Patient Appointments', icon: Mail, end: false },
+      { to: '/admin/doctors', label: 'Clinic Schedule & Doctors', icon: UsersRound, end: false },
+    ]
+  }
+  return [
+    { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/admin/messages', label: 'Messages', icon: Mail, end: false },
+    { to: '/admin/doctors', label: 'Doctors', icon: UsersRound, end: false },
+    ...(role === 'admin'
+      ? [
+          { to: '/admin/services', label: 'Services', icon: Stethoscope, end: false },
+          { to: '/admin/knowledge', label: 'Chatbot knowledge', icon: BookOpenText, end: false },
+        ]
+      : []),
+  ]
+}
 
-/** Authenticated shell for staff and admins. Unauthenticated visitors are sent to the login page. */
+/** Authenticated shell for doctors, staff and admins. Unauthenticated visitors are sent to the login page. */
 export function AdminLayout() {
   const { user, loading, logout } = useAuth()
   const location = useLocation()
@@ -29,13 +42,17 @@ export function AdminLayout() {
   if (loading) return <PageLoader label="Checking your session…" />
   if (!user) return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />
 
-  const items = NAV.filter((n) => !n.adminOnly || user.role === 'admin')
-  const adminOnlyRoute = NAV.find((n) => n.adminOnly && location.pathname.startsWith(n.to))
-  if (adminOnlyRoute && user.role !== 'admin') return <Navigate to="/admin" replace />
+  // Admin-only route protection
+  if (user.role !== 'admin' && (location.pathname.startsWith('/admin/services') || location.pathname.startsWith('/admin/knowledge'))) {
+    return <Navigate to="/admin" replace />
+  }
+
+  const items = getNav(user.role)
+  const isDoctor = user.role === 'doctor'
 
   const sidebar = (
     <nav aria-label="Admin" className="flex h-full flex-col">
-      <Link to="/admin" className="px-5 py-5">
+      <Link to="/admin" className="px-5 py-5 flex items-center justify-between">
         <Logo tone="light" />
       </Link>
       <ul className="flex-1 space-y-1 px-3 py-2">
@@ -57,10 +74,17 @@ export function AdminLayout() {
         ))}
       </ul>
       <div className="border-t border-white/10 p-4">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span
+            className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+              isDoctor ? 'bg-brand-500/20 text-brand-300 border border-brand-400/30' : 'bg-white/10 text-ink-300'
+            }`}
+          >
+            {isDoctor ? '🩺 Doctor Portal' : user.role}
+          </span>
+        </div>
         <p className="truncate text-sm font-semibold text-white">{user.full_name}</p>
-        <p className="truncate text-xs text-ink-400">
-          {user.email} · {user.role}
-        </p>
+        <p className="truncate text-xs text-ink-400">{user.email}</p>
         <div className="mt-3 flex gap-2">
           <Link to="/" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/8 py-2 text-xs font-semibold text-ink-200 hover:bg-white/12">
             <ExternalLink className="size-3.5" aria-hidden="true" /> Website
@@ -68,7 +92,7 @@ export function AdminLayout() {
           <button
             type="button"
             onClick={logout}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/8 py-2 text-xs font-semibold text-ink-200 hover:bg-white/12"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/8 py-2 text-xs font-semibold text-ink-200 hover:bg-white/12 cursor-pointer"
           >
             <LogOut className="size-3.5" aria-hidden="true" /> Sign out
           </button>
@@ -79,7 +103,7 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-ink-50">
-      <title>Admin | Cedarline Clinic</title>
+      <title>{isDoctor ? 'Doctor Portal' : 'Admin'} | Cedarline Clinic</title>
       <meta name="robots" content="noindex, nofollow" />
       <aside className="fixed inset-y-0 left-0 hidden w-64 bg-ink-950 lg:block">{sidebar}</aside>
 

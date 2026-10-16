@@ -1,4 +1,4 @@
-import { Pencil, Plus } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { DoctorPhoto } from '@/components/site/Cards'
 import { Button } from '@/components/ui/Button'
@@ -8,6 +8,7 @@ import { Badge, Card } from '@/components/ui/Layout'
 import { Modal } from '@/components/ui/Modal'
 import { useToast } from '@/components/ui/Toast'
 import { invalidate, useApi } from '@/hooks/useApi'
+import { useAuth } from '@/hooks/useAuth'
 import { AdminPageHeader } from '@/layouts/AdminLayout'
 import type { ApiError } from '@/services/api'
 import { adminApi, type DoctorInput } from '@/services/endpoints'
@@ -32,8 +33,14 @@ const EMPTY: DoctorInput = {
 }
 
 export default function AdminDoctorsPage() {
+  const { user } = useAuth()
   const doctors = useApi('admin:doctors', adminApi.doctors)
+  const toast = useToast()
   const [editing, setEditing] = useState<{ id: number | null; values: DoctorInput } | null>(null)
+  const [deleting, setDeleting] = useState<Doctor | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const isAdmin = user?.role === 'admin'
 
   if (doctors.loading) return <PageLoader />
   if (doctors.error) return <ErrorState message={doctors.error.message} onRetry={doctors.reload} />
@@ -41,12 +48,18 @@ export default function AdminDoctorsPage() {
   return (
     <>
       <AdminPageHeader
-        title="Doctors"
-        description="Profiles and weekly schedules. Changes update the website, booking slots and the chatbot's knowledge."
+        title={isAdmin ? "Doctors" : "Clinic Schedule & Doctors"}
+        description={
+          isAdmin
+            ? "Profiles and weekly schedules. Changes update the website, booking slots and the chatbot's knowledge."
+            : "Review consultant specialties, consultation days and outpatient clinic shift hours."
+        }
         action={
-          <Button icon={<Plus className="size-4" aria-hidden="true" />} onClick={() => setEditing({ id: null, values: EMPTY })}>
-            Add doctor
-          </Button>
+          isAdmin ? (
+            <Button icon={<Plus className="size-4" aria-hidden="true" />} onClick={() => setEditing({ id: null, values: EMPTY })}>
+              Add doctor
+            </Button>
+          ) : undefined
         }
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -59,18 +72,33 @@ export default function AdminDoctorsPage() {
                   <p className="font-semibold text-ink-900">{d.full_name}</p>
                   <p className="text-sm text-ink-500">{d.specialization}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const { id, ...values } = d
-                    setEditing({ id, values })
-                  }}
-                  className="grid size-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100 hover:text-ink-800"
-                  aria-label={`Edit ${d.full_name}`}
-                >
-                  <Pencil className="size-4" />
-                </button>
+                {isAdmin && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const { id, ...values } = d
+                        setEditing({ id, values })
+                      }}
+                      className="grid size-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-100 hover:text-ink-800 transition-colors cursor-pointer"
+                      aria-label={`Edit ${d.full_name}`}
+                      title={`Edit ${d.full_name}`}
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeleting(d)}
+                      className="grid size-8 place-items-center rounded-lg text-ink-400 hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+                      aria-label={`Delete ${d.full_name}`}
+                      title={`Delete ${d.full_name}`}
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                )}
               </div>
+
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <Badge tone="brand">{DEPARTMENT_LABELS[d.department]}</Badge>
                 {!d.is_active && <Badge tone="danger">Inactive</Badge>}
@@ -93,6 +121,50 @@ export default function AdminDoctorsPage() {
             doctors.reload()
           }}
         />
+      )}
+      {deleting && (
+        <Modal
+          open
+          onClose={() => !isDeleting && setDeleting(null)}
+          title="Delete Doctor"
+          size="md"
+          footer={
+            <>
+              <Button variant="outline" onClick={() => setDeleting(null)} disabled={isDeleting}>
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                loading={isDeleting}
+                onClick={async () => {
+                  setIsDeleting(true)
+                  try {
+                    await adminApi.deleteDoctor(deleting.id)
+                    toast.success('Doctor removed', `${deleting.full_name} was removed from the clinic directory and AI knowledge base.`)
+                    invalidate('doctors:')
+                    setDeleting(null)
+                    doctors.reload()
+                  } catch (err) {
+                    toast.error('Could not delete doctor', (err as ApiError).message)
+                  } finally {
+                    setIsDeleting(false)
+                  }
+                }}
+              >
+                Delete doctor
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-3">
+            <p className="text-sm text-ink-800">
+              Are you sure you want to permanently delete <strong>{deleting.full_name}</strong>?
+            </p>
+            <p className="text-xs leading-relaxed text-ink-500">
+              This will remove their profile from the website, weekly consultation calendar, and will automatically update the AI Chatbot's knowledge base.
+            </p>
+          </div>
+        </Modal>
       )}
     </>
   )

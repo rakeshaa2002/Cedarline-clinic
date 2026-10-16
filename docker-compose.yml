@@ -36,6 +36,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
       STAFF_EMAIL: ${STAFF_EMAIL:-staff@cedarline.example}
       STAFF_PASSWORD: ${STAFF_PASSWORD:-}
+      DOCTOR_EMAIL: ${DOCTOR_EMAIL:-doctor@cedarline.example}
+      DOCTOR_PASSWORD: ${DOCTOR_PASSWORD:-}
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-hashing}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-gemini-embedding-001}
       EMBEDDING_DIM: ${EMBEDDING_DIM:-768}

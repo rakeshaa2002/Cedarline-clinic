@@ -7,12 +7,20 @@ import { ButtonLink } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Feedback'
 import { SectionHeading } from '@/components/ui/Layout'
 import { FACILITIES, VALUES } from '@/content/site'
+import { useApi } from '@/hooks/useApi'
 import { useClinicInfo, useDoctors } from '@/hooks/useClinic'
+import { clinicApi } from '@/services/endpoints'
 
 export default function AboutPage() {
   const { data: clinic } = useClinicInfo()
   const doctors = useDoctors()
-  const leads = doctors.data?.filter((d) => ['ananya-rao', 'meera-iyer', 'naomi-fernandes'].includes(d.slug)) ?? []
+  const highlights = useApi('clinic:highlights', clinicApi.highlights)
+  const leads = (doctors.data ?? []).slice(0, 3)
+  const valuesList = highlights.data?.values ? highlights.data.values.map(v => {
+    const orig = VALUES.find(o => o.title === v.title)
+    return { icon: orig?.icon ?? VALUES[0].icon, title: v.title, text: v.text }
+  }) : VALUES
+  const facilitiesList = highlights.data?.facilities ?? FACILITIES
 
   return (
     <>
@@ -44,12 +52,12 @@ export default function AboutPage() {
             </div>
           </div>
           <img
-            src="/images/care-team.webp"
-            alt="Cedarline clinicians discussing a patient's imaging results"
+            src="/images/care-team.jpg"
+            alt="Cedarline specialist doctor and clinical care team in modern outpatient clinic"
             loading="lazy"
             width={1200}
             height={900}
-            className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-lift"
+            className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-lift hover:scale-[1.01] transition-transform duration-500"
           />
         </div>
       </section>
@@ -58,7 +66,7 @@ export default function AboutPage() {
         <div className="container-page">
           <SectionHeading eyebrow="What we believe" title="Our approach to care" align="center" />
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {VALUES.map(({ icon: Icon, title, text }) => (
+            {valuesList.map(({ icon: Icon, title, text }) => (
               <div key={title} className="rounded-[var(--radius-card)] border border-ink-100 bg-white p-7 shadow-card">
                 <span className="grid size-12 place-items-center rounded-2xl bg-brand-50 text-brand-700 ring-1 ring-brand-100">
                   <Icon className="size-6" aria-hidden="true" />
@@ -85,7 +93,7 @@ export default function AboutPage() {
             <p className="eyebrow mb-3">Facilities</p>
             <h2 className="text-3xl font-bold sm:text-4xl">Modern rooms and equipment for everyday specialist care</h2>
             <ul className="mt-8 grid gap-4 sm:grid-cols-2">
-              {FACILITIES.map((f) => (
+              {facilitiesList.map((f) => (
                 <li key={f} className="flex gap-3 rounded-2xl border border-ink-100 bg-white p-4 text-sm font-medium text-ink-800">
                   <CheckCircle2 className="size-5 shrink-0 text-brand-600" aria-hidden="true" /> {f}
                 </li>

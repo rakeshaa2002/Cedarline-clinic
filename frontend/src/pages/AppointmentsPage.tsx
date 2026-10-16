@@ -8,6 +8,7 @@ import { Seo } from '@/components/site/Seo'
 import { Button, buttonClasses } from '@/components/ui/Button'
 import { ErrorState, Skeleton } from '@/components/ui/Feedback'
 import { Card, SectionHeading } from '@/components/ui/Layout'
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
 import { hoursSummary, todayHours, useClinicInfo, useDoctors } from '@/hooks/useClinic'
 import type { Department, Doctor } from '@/types'
 import { DEPARTMENT_LABELS, WEEKDAYS, WEEKDAYS_SHORT, cn, formatTime } from '@/utils/format'
@@ -50,6 +51,9 @@ export default function AppointmentsPage() {
     ? `mailto:${clinic.email}?subject=${encodeURIComponent('Appointment request')}&body=${encodeURIComponent(EMAIL_BODY)}`
     : undefined
 
+  const whatsappNumber = (clinic?.whatsapp || clinic?.phone || '+91 94835 41927').replace(/\D/g, '')
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hello Cedarline Clinic, I would like to book an appointment.')}`
+
   const listed = (doctors.data ?? [])
     .filter((d) => department === 'all' || d.department === department)
     .sort((a, b) => DEPT_ORDER.indexOf(a.department) - DEPT_ORDER.indexOf(b.department))
@@ -69,9 +73,19 @@ export default function AppointmentsPage() {
         image="/images/clinic-reception.webp"
       >
         {clinic && (
-          <a href={tel} className={buttonClasses('accent', 'lg')}>
-            <Phone className="size-5" aria-hidden="true" /> Call {clinic.phone}
-          </a>
+          <>
+            <a href={tel} className={buttonClasses('accent', 'lg')}>
+              <Phone className="size-5" aria-hidden="true" /> Call {clinic.phone}
+            </a>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-base font-semibold text-white shadow-sm transition-all hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+            >
+              <WhatsAppIcon className="size-5" aria-hidden="true" /> Chat on WhatsApp
+            </a>
+          </>
         )}
         <Button variant="white" size="lg" icon={<Bot className="size-5" aria-hidden="true" />} onClick={() => openChat()}>
           Ask the AI assistant
@@ -81,8 +95,8 @@ export default function AppointmentsPage() {
       {/* Ways to book */}
       <section className="section">
         <div className="container-page">
-          <SectionHeading eyebrow="Three ways to book" title="Choose what's easiest for you" />
-          <div className="grid gap-6 md:grid-cols-3">
+          <SectionHeading eyebrow="Ways to book" title="Choose what's easiest for you" />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <WayToBook
               icon={<Phone className="size-6" />}
               title="Call the front desk"
@@ -96,6 +110,28 @@ export default function AppointmentsPage() {
                   <p className="text-sm text-ink-500">
                     {today ? (today.closed ? 'Closed today' : `Open today ${today.open} – ${today.close}`) : null}
                   </p>
+                </>
+              ) : (
+                <Skeleton className="h-12" />
+              )}
+            </WayToBook>
+            <WayToBook
+              icon={<WhatsAppIcon className="size-6 text-[#25D366]" />}
+              title="Chat on WhatsApp"
+              text="Message our front desk directly on WhatsApp to check open slots and receive fast appointment confirmation."
+            >
+              {clinic ? (
+                <>
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-lg font-bold text-emerald-700 hover:text-emerald-800"
+                  >
+                    <span>{clinic.whatsapp || clinic.phone}</span>
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">Chat now</span>
+                  </a>
+                  <p className="text-sm text-ink-500">Instant front-desk chat</p>
                 </>
               ) : (
                 <Skeleton className="h-12" />
@@ -192,17 +228,17 @@ export default function AppointmentsPage() {
               Open the assistant
             </Button>
           </div>
-          <Card className="p-6">
-            <p className="flex items-center gap-2 text-sm font-semibold text-ink-700">
-              <MessageCircleQuestion className="size-5 text-brand-600" aria-hidden="true" /> Try asking
+          <Card className="p-6 transition-all duration-300 hover:shadow-lift">
+            <p className="flex items-center gap-2 text-sm font-bold text-ink-800">
+              <MessageCircleQuestion className="size-5 text-brand-600" aria-hidden="true" /> Try asking our AI assistant
             </p>
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-4 space-y-2.5">
               {ASK_EXAMPLES.map((q) => (
                 <li key={q}>
                   <button
                     type="button"
                     onClick={() => openChat(q)}
-                    className="w-full rounded-xl border border-ink-100 bg-ink-50/60 px-4 py-3 text-left text-[0.9375rem] font-medium text-ink-800 transition-colors hover:border-brand-200 hover:bg-brand-50 hover:text-brand-800"
+                    className="w-full rounded-xl border border-ink-100 bg-ink-50/70 px-4 py-3 text-left text-[0.9375rem] font-medium text-ink-800 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-800 hover:shadow-xs cursor-pointer active:scale-98"
                   >
                     “{q}”
                   </button>
@@ -216,7 +252,7 @@ export default function AppointmentsPage() {
       {/* Before your visit */}
       <section className="section bg-ink-50/70">
         <div className="container-page grid gap-6 lg:grid-cols-2">
-          <Card className="p-6 sm:p-8">
+          <Card className="p-6 sm:p-8 transition-all duration-300 hover:shadow-lift">
             <h2 className="text-xl font-bold">Before your visit</h2>
             <ul className="mt-5 space-y-3">
               {[
@@ -231,7 +267,7 @@ export default function AppointmentsPage() {
               ))}
             </ul>
           </Card>
-          <Card className="border-red-100 bg-red-50/60 p-6 sm:p-8">
+          <Card className="border-red-100 bg-red-50/60 p-6 sm:p-8 transition-all duration-300 hover:shadow-lift">
             <h2 className="flex items-center gap-2 text-xl font-bold text-red-900">
               <Siren className="size-5" aria-hidden="true" /> In an emergency
             </h2>
@@ -239,7 +275,7 @@ export default function AppointmentsPage() {
               {clinic?.emergency_note ??
                 'Cedarline is an outpatient clinic. For a medical emergency, call 112 or go to the nearest hospital emergency department.'}
             </p>
-            <p className="mt-4 flex items-center gap-2 text-sm text-red-900/70">
+            <p className="mt-4 flex items-center gap-2 text-sm text-red-900/70 font-medium">
               <Clock className="size-4" aria-hidden="true" /> Don't wait for an appointment or a reply to an email.
             </p>
           </Card>
@@ -251,11 +287,11 @@ export default function AppointmentsPage() {
 
 function WayToBook({ icon, title, text, children }: { icon: ReactNode; title: string; text: string; children: ReactNode }) {
   return (
-    <Card className="flex flex-col p-6">
-      <span className="grid size-12 place-items-center rounded-2xl bg-brand-50 text-brand-700" aria-hidden="true">
+    <Card className="group flex flex-col p-6 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-brand-300/80 hover:shadow-lift">
+      <span className="grid size-12 place-items-center rounded-2xl bg-brand-50 text-brand-700 shadow-xs ring-1 ring-brand-100 transition-all duration-300 group-hover:scale-110 group-hover:bg-brand-700 group-hover:text-white group-hover:shadow-md" aria-hidden="true">
         {icon}
       </span>
-      <h3 className="mt-5 text-lg font-bold">{title}</h3>
+      <h3 className="mt-5 text-lg font-bold group-hover:text-brand-700 transition-colors">{title}</h3>
       <p className="mt-2 flex-1 text-[0.9375rem] leading-7 text-ink-600">{text}</p>
       <div className="mt-5 border-t border-ink-100 pt-4">{children}</div>
     </Card>
@@ -268,7 +304,7 @@ function ScheduleRow({ doctor, highlighted }: { doctor: Doctor; highlighted?: bo
     <li
       id={`doctor-${doctor.slug}`}
       className={cn(
-        'grid scroll-mt-48 gap-4 p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center lg:grid-cols-[minmax(0,1.2fr)_auto_minmax(9rem,auto)]',
+        'grid scroll-mt-48 gap-4 p-5 transition-all duration-200 hover:bg-brand-50/40 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center lg:grid-cols-[minmax(0,1.2fr)_auto_minmax(9rem,auto)]',
         highlighted && 'bg-brand-50 ring-2 ring-brand-300 ring-inset',
       )}
     >

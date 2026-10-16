@@ -179,3 +179,26 @@ class ContactOut(ORMModel):
     message: str
     is_read: bool
     created_at: datetime
+
+
+# --- Highlights & Testimonials ----------------------------------------------------
+
+
+class TestimonialOut(BaseModel):
+    id: int
+    quote: str
+    name: str
+    detail: str
+
+
+class HighlightItem(BaseModel):
+    icon: str
+    title: str
+    text: str
+
+
+class ClinicHighlightsOut(BaseModel):
+    values: list[HighlightItem]
+    facilities: list[str]
+    why_choose: list[HighlightItem]
+

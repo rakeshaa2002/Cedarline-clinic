@@ -128,6 +128,17 @@ def update_doctor(doctor_id: int, data: DoctorUpdate, db: DbSession, _: AdminUse
     return doctor
 
 
+@router.delete("/doctors/{doctor_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_doctor(doctor_id: int, db: DbSession, _: AdminUser, tasks: BackgroundTasks):
+    doctor = db.get(Doctor, doctor_id)
+    if not doctor:
+        raise NotFoundError("Doctor not found.")
+    db.delete(doctor)
+    db.commit()
+    tasks.add_task(refresh_knowledge_base)
+    return None
+
+
 # --- Services (admin only) -----------------------------------------------------------
 
 
@@ -161,6 +172,17 @@ def update_service(service_id: int, data: ServiceUpdate, db: DbSession, _: Admin
     db.refresh(service)
     tasks.add_task(refresh_knowledge_base)
     return service
+
+
+@router.delete("/services/{service_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_service(service_id: int, db: DbSession, _: AdminUser, tasks: BackgroundTasks):
+    service = db.get(Service, service_id)
+    if not service:
+        raise NotFoundError("Service not found.")
+    db.delete(service)
+    db.commit()
+    tasks.add_task(refresh_knowledge_base)
+    return None
 
 
 # --- Contact messages ------------------------------------------------------------------

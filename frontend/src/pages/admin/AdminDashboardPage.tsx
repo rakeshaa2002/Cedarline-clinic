@@ -50,10 +50,51 @@ export default function AdminDashboardPage() {
   }))
   const outcomes = OUTCOMES.map((o) => ({ ...o, count: chat.by_status[o.status] ?? 0 }))
   const isAdmin = user?.role === 'admin'
+  const isDoctor = user?.role === 'doctor'
 
   return (
     <>
-      <AdminPageHeader title="Dashboard" description="How the AI assistant is being used, and the health of its knowledge base." />
+      <AdminPageHeader
+        title={isDoctor ? `Doctor Portal: Welcome, ${user?.full_name}` : 'Dashboard'}
+        description={
+          isDoctor
+            ? 'Monitor incoming patient consultation requests, clinic schedule, and AI assistant inquiries.'
+            : 'How the AI assistant is being used, and the health of its knowledge base.'
+        }
+      />
+
+      {isDoctor && (
+        <div className="mb-6 rounded-2xl bg-gradient-to-r from-brand-700 to-brand-900 p-6 text-white shadow-md">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur-xs">
+                <span>🩺 Outpatient Consultant</span>
+                <span>•</span>
+                <span>Cedarline Multispeciality</span>
+              </div>
+              <h2 className="mt-2 text-xl font-bold sm:text-2xl">{user?.full_name}</h2>
+              <p className="mt-1 text-sm text-brand-100 max-w-xl">
+                You have <strong className="text-white underline">{unread_messages} patient appointment request{unread_messages === 1 ? '' : 's'}</strong> awaiting your review or front-desk confirmation.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2.5">
+              <Link
+                to="/admin/messages"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-brand-900 shadow-sm hover:bg-brand-50 transition-colors"
+              >
+                <span>View Patient List</span>
+                <ArrowRight className="size-4" />
+              </Link>
+              <Link
+                to="/admin/doctors"
+                className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-xs font-semibold text-white backdrop-blur-xs hover:bg-white/25 transition-colors"
+              >
+                <span>Clinic Schedule</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile icon={<MessagesSquare className="size-5" />} label="Questions today" value={chat.today} highlight />
