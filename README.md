@@ -31,7 +31,7 @@ Built for the Arquette Digital Full Stack Developer assessment (Task 1: website,
 8. [Configuration](#configuration)
 9. [Conventions](#conventions)
 10. [API reference](#api-reference)
-11. [Deployment](#deployment)
+11. [Deployment & CI/CD](#deployment--cicd)
 12. [Troubleshooting](#troubleshooting)
 13. [Known limitations](#known-limitations)
 14. [AI tools used](#ai-tools-used)
@@ -49,7 +49,7 @@ More detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (design decisions, saf
 | Database | PostgreSQL 17 + pgvector: one database holds both the app data and the vectors; there is no separate vector database |
 | AI | Google Gemini: `gemini-embedding-001` (768 dimensions) for search, `gemini-2.5-flash` for answers. An OpenAI-compatible API also works, and an offline mode needs no API key |
 | Tests | pytest against a real PostgreSQL + pgvector database (AI calls mocked); `tsc` + oxlint for the frontend |
-| Delivery | Docker, Docker Compose, nginx; Render (API), Neon (Postgres), Vercel or Netlify (frontend) |
+| Delivery | Docker, Docker Compose, nginx; Render (API & Frontend Blueprint), GitHub Actions (CI/CD), Neon (Postgres), Vercel or Netlify (frontend) |
 
 ---
 
@@ -170,12 +170,13 @@ npm run dev                       # proxies /api to http://127.0.0.1:8000
 - `GET http://localhost:8000/api/v1/chat/health` shows `indexed_chunks` above 0.
 - Open the site, click **Ask Cedarline** (bottom right), and ask "What are the clinic timings?".
 
-**Logins.** The seed creates two accounts from `.env`. There is no sign-up page.
+**Logins.** The seed creates initial accounts from `.env`. There is no public sign-up page.
 
 | Role | Can do |
 |---|---|
 | `admin` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`) | Everything: dashboard, messages, edit doctors and services, upload/delete chatbot documents, re-index |
 | `staff` (`STAFF_EMAIL` / `STAFF_PASSWORD`) | Dashboard, messages, view doctors and services |
+| `doctor` (`DOCTOR_EMAIL` / `DOCTOR_PASSWORD`) | Doctor portal, appointment schedules, patient medical records |
 
 The login page is at `/admin/login`; it isn't linked from the public site.
 
@@ -330,7 +331,7 @@ Settings are read from environment variables (or `backend/.env`) by [`core/confi
 | `DATABASE_URL` | PostgreSQL connection string. `postgres://` / `postgresql://` are normalised automatically |
 | `JWT_SECRET` | Signs login tokens. In production the API refuses to start unless it is at least 32 characters and not the dev default |
 | `CORS_ORIGINS` | Comma-separated frontend origins allowed to call the API |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `STAFF_EMAIL`, `STAFF_PASSWORD` | Accounts created by the seeder |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `STAFF_EMAIL`, `STAFF_PASSWORD`, `DOCTOR_EMAIL`, `DOCTOR_PASSWORD` | Accounts created by the seeder |
 | `EMBEDDING_PROVIDER` | `gemini` · `openai` · `hashing` (offline) |
 | `EMBEDDING_MODEL`, `EMBEDDING_DIM` | Embedding model and vector size. **`EMBEDDING_DIM` must be 768** to match the database column |
 | `LLM_PROVIDER` | `gemini` · `openai` · `extractive` (offline: quotes the matching text instead of writing prose) |
@@ -381,15 +382,43 @@ Interactive docs: `/docs` (Swagger UI) and `/redoc` on the API host.
 
 ---
 
-## Deployment
+## Deployment & CI/CD
 
-| Part | Recommended host | Notes |
-|---|---|---|
-| Database | **Neon** (free tier) | pgvector is available; the first migration runs `CREATE EXTENSION vector` |
-| API | **Render** (Docker) | [`render.yaml`](render.yaml) included. Set `DATABASE_URL`, `CORS_ORIGINS`, `ADMIN_PASSWORD`, `STAFF_PASSWORD` and `GEMINI_API_KEY` in the Render dashboard |
-| Frontend | **Vercel** or **Netlify** | Root `frontend`, build `npm run build`, output `dist`. Set `VITE_API_URL` and `VITE_SITE_URL` |
+### 1-Click Full-Stack Deployment on Render
 
-Full step-by-step guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+This repository includes a production-ready Render Blueprint [`render.yaml`](render.yaml) that provisions and coordinates both services on Render:
+
+| Service | Type | Runtime | Root Dir | Build / Start Command | Notes |
+|---|---|---|---|---|---|
+| **`cedarline-api`** | Web Service | Docker | `backend` | `./scripts/start.sh` | Health check `/api/v1/health`, runs migrations & seeds automatically, pgvector ready |
+| **`cedarline-frontend`** | Static Site | Static | `frontend` | `npm ci && npm run build` | Static publish path `./dist`, SPA routing rewrite `/*` → `/index.html` |
+
+#### How to Deploy to Render in 1 Click:
+1. Push this repository to GitHub: `git push origin main`.
+2. Open the [Render Dashboard](https://dashboard.render.com/) and click **New +** → **Blueprint**.
+3. Select your repository (`healthcare-platform`).
+4. Enter the required environment variables:
+   - `DATABASE_URL`: Connection string from [Neon](https://neon.tech) (`postgresql://user:pass@ep-xyz.neon.tech/clinic?sslmode=require`) or Render PostgreSQL.
+   - `GEMINI_API_KEY`: API key from Google AI Studio.
+   - `ADMIN_PASSWORD`, `STAFF_PASSWORD`, `DOCTOR_PASSWORD`: Secure credentials for seed accounts.
+   - `CORS_ORIGINS`: Your frontend URL (e.g. `https://cedarline-frontend.onrender.com`).
+   - `VITE_API_URL`: Your backend API URL (e.g. `https://cedarline-api.onrender.com`).
+   - `VITE_SITE_URL`: Your frontend URL (e.g. `https://cedarline-frontend.onrender.com`).
+5. Click **Apply**. Render will automatically build the backend Docker container, run migrations and seeds, and build the frontend static SPA.
+
+*(Alternative: The frontend can also be deployed to **Vercel** or **Netlify** with root directory `frontend` and publish directory `dist`.)*
+
+### CI/CD Pipeline (GitHub Actions)
+
+Continuous Integration and Continuous Deployment are automated via [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml) on every push and pull request to `main`:
+
+- **Frontend CI**: Sets up Node 22 with dependency caching, runs `oxlint` linting, and validates TypeScript build compilation (`tsc -b && vite build`).
+- **Backend CI**: Sets up Python 3.12, verifies Python syntax & bytecode compilation (`compileall`), spins up a PostgreSQL + `pgvector` container (`pgvector/pgvector:pg17`), and runs the full `pytest` suite.
+- **Continuous Deployment (CD)**:
+  - Render automatically deploys new commits pushed to `main`.
+  - Optionally, Render Deploy Webhooks can be triggered immediately by configuring `RENDER_API_DEPLOY_HOOK` and `RENDER_FRONTEND_DEPLOY_HOOK` in your GitHub repository secrets.
+
+For full step-by-step instructions, see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ---
 
