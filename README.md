@@ -1,369 +1,469 @@
-# Cedarline Clinic — Healthcare Platform & AI Medical Assistant
+# Cedarline Clinic — Website & AI Healthcare Chatbot
 
-**Technical Assessment Submission — Full Stack Developer (Web Applications & AI Automation)**  
-**Company:** Arquette Digital  
-**Candidate:** Rakesha N  
-**Repository:** [https://github.com/rakeshaa2002/healthcare-platform](https://github.com/rakeshaa2002/healthcare-platform)  
+A production-ready web platform for a fictional multi-speciality healthcare clinic (Dental, Dermatology, Trichology, General Medicine, Paediatrics) integrated with an **AI Medical Assistant** that answers visitor inquiries grounded exclusively in approved clinic information. It strictly never diagnoses, prescribes, or invents medical treatments.
 
----
+Built for the **Arquette Digital** Full Stack Developer Assessment (Task 1: 10-Page Website, Task 2 Option A: AI Healthcare Chatbot).
 
-## Executive Summary & Submission Deliverables
-
-| Requirement (PDF) | Deliverable / Link | Status |
-|:---|:---|:---:|
-| **1. Live Deployed Website** | [https://healthcare-platform-fxgn.onrender.com](https://healthcare-platform-fxgn.onrender.com) | ✅ Live |
-| **2. Live Backend API / Docs** | [https://cedarline-api.onrender.com/docs](https://cedarline-api.onrender.com/docs) (Swagger UI) | ✅ Live |
-| **3. GitHub Repository** | [https://github.com/rakeshaa2002/healthcare-platform](https://github.com/rakeshaa2002/healthcare-platform) | ✅ Live |
-| **4. Task 1: 10-Page Website** | Complete, responsive 10-page healthcare portal (Dental, Skin, Hair, etc.) | ✅ Complete |
-| **5. Task 2: Option A Application** | Working AI Healthcare Chatbot (RAG over PostgreSQL + pgvector with strict safety guardrails) | ✅ Complete |
-| **6. Admin Management Portal** | Live at `/admin` (Knowledge Base management, Doctors, Services, Patient Inquiries) | ✅ Complete |
-| **7. CI/CD & Automated Tests** | GitHub Actions pipeline + 89 automated backend tests (100% pass) | ✅ Passing |
-| **8. Screen Recording Guide** | Section [11. Screen Recording Demonstration](#11-screen-recording-demonstration) below | 📹 Ready |
-| **9. AI Tools Used Explanation** | Section [12. AI Tools Used & Engineering Methodology](#12-ai-tools-used--engineering-methodology) below | 🤖 Detailed |
-
-> **Disclaimer:** All clinic details, doctors, pricing, and patient inquiries in this application are **fictional**. Phone numbers use non-routable dummy prefixes and emails use the RFC 2606 reserved `.example` domain. The AI assistant answers from clinic-approved information only and **strictly refuses to provide medical diagnoses or treatment prescriptions**.
+> **Disclaimer:** All clinic details, doctors, pricing, and patient records are **fictional**. Phone numbers use invalid prefixes, and emails use the RFC-reserved `.example` domain.
 
 ---
 
-## Table of Contents
+## Quick Reference & Live Links
 
-1. [Task 1: 10-Page Healthcare Website](#1-task-1-10-page-healthcare-website)
-2. [Task 2: AI Healthcare Chatbot (Option A)](#2-task-2-ai-healthcare-chatbot-option-a)
-3. [Architecture & System Design](#3-architecture--system-design)
-4. [Technology Stack](#4-technology-stack)
-5. [Demo Credentials](#5-demo-credentials)
-6. [Local Development Setup](#6-local-development-setup)
-7. [API Documentation](#7-api-documentation)
-8. [Database & Migrations](#8-database--migrations)
-9. [Automated Testing & Code Quality](#9-automated-testing--code-quality)
-10. [Deployment & CI/CD Pipeline](#10-deployment--cicd-pipeline)
-11. [Screen Recording Demonstration](#11-screen-recording-demonstration)
-12. [AI Tools Used & Engineering Methodology](#12-ai-tools-used--engineering-methodology)
+| Item | URL / Value |
+|:---|:---|
+| **Live Deployed Website** | [https://healthcare-platform-fxgn.onrender.com](https://healthcare-platform-fxgn.onrender.com) |
+| **Backend API (Swagger Docs)** | [https://cedarline-api.onrender.com/docs](https://cedarline-api.onrender.com/docs) (ReDoc: [`/redoc`](https://cedarline-api.onrender.com/redoc)) |
+| **GitHub Repository** | [https://github.com/rakeshaa2002/healthcare-platform](https://github.com/rakeshaa2002/healthcare-platform) |
+| **Candidate** | **Rakesha N** — Full Stack Developer (Web Applications & AI Automation) |
+| **Admin Portal** | [`/admin/login`](https://healthcare-platform-fxgn.onrender.com/admin/login) (`admin@cedarline.example` / `Cedarline-Admin-2026`) |
+| **Staff Portal** | `staff@cedarline.example` / `Cedarline-Staff-2026` |
+| **Doctor Portal** | `doctor@cedarline.example` / `Cedarline-Doctor-2026` |
 
 ---
 
-## 1. Task 1: 10-Page Healthcare Website
+## Contents
 
-A modern, accessible, and responsive multi-speciality clinic web portal designed to healthcare industry standards:
+1. [Tech Stack](#tech-stack)
+2. [Architecture](#architecture)
+3. [How the Chatbot Answers a Question](#how-the-chatbot-answers-a-question)
+4. [Getting Started (Local Development)](#getting-started-local-development)
+5. [Codebase Tour](#codebase-tour)
+6. [Common Tasks (How to Implement Features)](#common-tasks-how-to-implement-features)
+7. [Testing](#testing)
+8. [Configuration (.env Reference)](#configuration-env-reference)
+9. [Conventions & Best Practices](#conventions--best-practices)
+10. [API Reference](#api-reference)
+11. [Deployment & CI/CD Pipeline](#deployment--cicd-pipeline)
+12. [Troubleshooting Guide](#troubleshooting-guide)
+13. [Task 1: 10-Page Website Compliance](#task-1-10-page-website-compliance)
+14. [AI Tools Used & Engineering Methodology](#ai-tools-used--engineering-methodology)
 
-| # | Page Name | Route | Features & Content |
+More architectural details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Step-by-step deployment: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · Demo walkthrough script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Purpose & Rationale |
+|:---|:---|:---|
+| **Frontend** | React 19, Vite 8, TypeScript, Tailwind CSS 4, React Router 7 | High performance, strict type-safety, modern component ergonomics, route-based code splitting. |
+| **UI & Icons** | Lucide React, Fontsource (Inter & Plus Jakarta Sans), Recharts | Clean medical iconography, accessible font loading, admin analytics charts. |
+| **Forms & Validation** | React Hook Form, Zod | Instant client-side validation with schema inference, mirroring backend constraints. |
+| **Backend** | Python 3.12, FastAPI, Pydantic v2, Uvicorn | High-throughput asynchronous REST API with auto-generated OpenAPI / Swagger documentation. |
+| **ORM & Migrations** | SQLAlchemy 2.0 (mapped columns), Alembic, Psycopg 3 | Deterministic database migrations, connection pooling with auto-ping, and PostgreSQL dialect. |
+| **Database & Vector** | PostgreSQL 17 + `pgvector` | Single source of truth: app data and vector embeddings live together without dual-database lag. |
+| **AI / RAG** | Google Gemini (`gemini-embedding-001`, `gemini-2.5-flash`), HTTPX | 768-dimensional embeddings, low-latency generation with automatic model fallback and offline mode. |
+| **Auth & Security** | PyJWT, Argon2-cffi | Stateless Bearer token authentication, rate limiting, secure password hashing. |
+| **Delivery & CI/CD** | Docker, Render Blueprint (`render.yaml`), GitHub Actions | Containerized reproducible deployments, zero-downtime builds, automated test verification. |
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────┐     HTTPS / JSON      ┌──────────────────────────────┐       SQL        ┌───────────────────────────────┐
+│   React 19 SPA (Client) │ ────────────────────► │       FastAPI Backend        │ ───────────────► │     PostgreSQL + pgvector     │
+│   - 10 Public Pages     │                       │   - Public REST Endpoints    │                  │   - Clinics, Doctors, Services│
+│   - Chatbot Widget      │ ◄──────────────────── │   - RAG Pipeline & Safety    │ ◄─────────────── │   - Knowledge Documents       │
+│   - Admin Dashboard     │                       │   - JWT Auth & Rate Limiting │                  │   - Chunks + vector(768)      │
+└─────────────────────────┘                       └──────────────┬───────────────┘                  └───────────────────────────────┘
+   (Zero secrets here)                                           │ HTTPX (Async server-side)
+                                                                 ▼
+                                                  ┌──────────────────────────────┐
+                                                  │       Google Gemini API      │
+                                                  │   embeddings + generation    │
+                                                  └──────────────────────────────┘
+```
+
+### Core Design Principles:
+1. **The Database is the Single Source of Truth**: Doctors, services, hours, and blog posts are stored in PostgreSQL. The chatbot's knowledge chunks are *derived directly from these tables*. When an admin edits a doctor's OPD hours, the doctor's knowledge chunks are regenerated and re-embedded automatically.
+2. **Secrets Stay on the Server**: The browser only communicates with `/api/v1`. The Gemini API key and database passwords never leave backend environment variables.
+3. **Defense-in-Depth AI Safety**: Deterministic rule-based regex checks intercept medical-advice and emergency questions *before* calling the LLM. The LLM prompt restricts answers to retrieved chunks, and a grounding check validates that numbers and doctor names match the context.
+4. **Resilient Fallback Hierarchy**: Overloaded model (HTTP 429) → Next fallback model → Extractive fallback (quotes text directly) → Helpful refusal with clinic contact phone and email.
+
+---
+
+## How the Chatbot Answers a Question
+
+**Entry Point:** `POST /api/v1/chat` → [`routers/chat.py`](backend/app/api/v1/routers/chat.py) → `ChatService.answer()` in [`services/chatbot/service.py`](backend/app/services/chatbot/service.py).
+
+| Step | Operation | Implementation Detail | Source File |
 |:---:|:---|:---|:---|
-| **01** | **Home** | `/` | Hero section, department highlights, doctor carousel, trust metrics, patient reviews, emergency alert banner, direct chat widget access. |
-| **02** | **About the Clinic** | `/about` | Clinic history, mission & values, NABH accreditation standards, medical leadership, hygiene protocols, facility photo gallery. |
-| **03** | **Our Doctors** | `/doctors` | Filterable doctor directory by speciality (Dental, Dermatology, Trichology, General Medicine, Paediatrics), qualifications, experience, OPD hours, and consultation booking. |
-| **04** | **All Services** | `/services` | Comprehensive medical service catalogue with duration, starting pricing, insurance eligibility, prep instructions, and department categorization. |
-| **05** | **Dental Treatments** | `/services/dental` | Dedicated dental department page covering Root Canal, Laser Whitening, Dental Implants, Invisalign, Pediatric Dentistry, and smile makeover FAQs. |
-| **06** | **Skin Treatments** | `/services/skin` | Dermatology department page covering Acne scar revisions, Chemical Peels, HydraFacial, Pigmentation, Laser resurfacing, and pre-care guides. |
-| **07** | **Hair Treatments** | `/services/hair` | Trichology department page covering FUE/FUT Hair Transplants, PRP Therapy, Scalp Micropigmentation, Dandruff & Alopecia protocols. |
-| **08** | **Appointment Booking** | `/appointments` | Multi-channel appointment booking guide: interactive doctor/service selector, online consultation inquiries, direct phone desk calling, and WhatsApp booking. |
-| **09** | **Blog / Patient Education** | `/blog` & `/blog/:slug` | Medically reviewed articles authored by staff doctors with reading times, tags, medically backed health tips, and patient disclaimers. |
-| **10** | **Contact Us** | `/contact` | Clinic location map, operating hours, emergency contact hotline, ambulance dialer, and functional validated contact inquiry form (Zod + React Hook Form). |
+| **1** | **Validate Input** | Collapses whitespace, enforces 1–500 character limit. | [`schemas/chat.py`](backend/app/schemas/chat.py) |
+| **2** | **Safety Screen** | Detects emergencies (chest pain, stroke) or diagnostic queries → Returns fixed safe refusal. **AI is never called**. | [`chatbot/safety.py`](backend/app/services/chatbot/safety.py) |
+| **3** | **Small Talk** | Handles greetings ("hi", "thanks") with pre-computed warm responses. | [`chatbot/service.py`](backend/app/services/chatbot/service.py) |
+| **4** | **Embedding** | Embeds query into a 768-dimensional vector via Gemini (or lexical hashing in offline mode). | [`knowledge_base/embeddings.py`](backend/app/services/knowledge_base/embeddings.py) |
+| **5** | **Vector Search** | `pgvector` finds top-K chunks using cosine distance (`<=>`). Chunks below threshold are dropped. | [`chatbot/retrieval.py`](backend/app/services/chatbot/retrieval.py) |
+| **6** | **Prompt Assembly** | Injects clinic constraints, retrieved chunks, and the last 3 chat turns into system instructions. | [`chatbot/prompt.py`](backend/app/services/chatbot/prompt.py) |
+| **7** | **LLM Generation** | Calls Gemini 2.5 Flash. On HTTP 429/5xx, tries `LLM_FALLBACK_MODELS`. On complete failure, quotes text verbatim. | [`chatbot/llm.py`](backend/app/services/chatbot/llm.py) |
+| **8** | **Grounding Check** | Verifies generated text doesn't fabricate doctor names or prices absent from context. | [`chatbot/grounding.py`](backend/app/services/chatbot/grounding.py) |
+| **9** | **Response Delivery**| Returns grounded prose, source citations, and navigation action chips (e.g. `/appointments`). | [`chatbot/service.py`](backend/app/services/chatbot/service.py) |
+| **10** | **Telemetry** | Records latency, provider, and outcome to `chat_events`. **User question text is never stored**. | [`routers/chat.py`](backend/app/api/v1/routers/chat.py) |
 
-### UX/UI & Performance Standards:
-- **Responsive Design**: Fluid layout tested across mobile (375px), tablet (768px), and desktop (1440px+).
-- **Typography & Theme**: Modern typography using Inter & Plus Jakarta Sans via Fontsource Variable, tailored HSL medical teal/cyan and slate palette, subtle glassmorphism headers, and smooth micro-interactions.
-- **Form Validation**: Strict client-side schemas using Zod and React Hook Form with real-time error states.
-- **SEO & Accessibility**: Dynamic `<title>` and `<meta name="description">` tags via `Seo.tsx`, OpenGraph tags, semantic HTML5 landmarks (`<main>`, `<header>`, `<nav>`, `<article>`), ARIA labels on interactive elements, and automated `sitemap.xml` / `robots.txt` generation.
-
----
-
-## 2. Task 2: AI Healthcare Chatbot (Option A)
-
-The integrated AI assistant is accessible from any page via the floating chat widget on the bottom right.
-
-### Core Capabilities:
-1. **Clinic Services & Pricing**: Answers inquiries on consultation fees, procedure durations, prep instructions, and package details.
-2. **Timings & Locations**: Informs visitors of clinic operating hours, doctor OPD schedules, address, and transit landmarks.
-3. **Doctor Expertise**: Details doctor qualifications, specialities, awards, and consultation timings.
-4. **Appointment Navigation**: Intelligently directs users to `/appointments` or `/contact` with contextual booking advice.
-5. **Multi-turn Context**: Maintains conversation flow for follow-up questions while staying grounded.
-
-### Medical Safety & Ethical Guardrails (Zero-Hallucination Policy):
-Healthcare AI requires strict ethical safety boundaries. Cedarline implements a **four-layer defense-in-depth safety architecture**:
-
-```
-User Query
-    │
-    ▼
-[ Layer 1: Rule-Based Pre-Screen ]
-    ├── Emergency detected (chest pain, stroke, breathing difficulty)? ──► Immediate Emergency Redirect (112 / 911 / ER)
-    └── Diagnostic / Prescription attempt? ──► Safe refusal + Doctor consultation guidance
-    │ (Safe query continues)
-    ▼
-[ Layer 2: Vector Search Retrieval (pgvector) ]
-    ├── Embed query via Gemini (768 dimensions)
-    ├── Search cosine similarity against approved clinic chunks
-    └── Below similarity threshold? ──► "I couldn't find clinic information on that..." + Clinic contact info
-    │ (Sufficient context found)
-    ▼
-[ Layer 3: System Prompt Fencing ]
-    ├── System prompt explicitly forbids diagnosing, inventing medical data, or citing external knowledge
-    └── Gemini 2.5 Flash generates grounded response citing retrieved chunks
-    │
-    ▼
-[ Layer 4: Grounding Verification & Fallbacks ]
-    ├── Validates that mentioned doctors/numbers exist in retrieved chunks
-    └── If LLM times out or rate limits (HTTP 429) ──► Automatic failover to next model or extractive quote fallback
-```
+### Knowledge Pipeline:
+- **System Documents**: Generated from database tables (doctors, services, clinic info, articles) via `system_documents.py`.
+- **Seed Documents**: Approved policy, FAQ, and how-to-book guides in [`backend/app/seed/knowledge/`](backend/app/seed/knowledge/).
+- **Admin Uploads**: Custom PDF/TXT/MD documents uploaded via the admin dashboard.
+- Every chunk records `embedding_model_id` so vectors from different models never clash.
 
 ---
 
-## 3. Architecture & System Design
+## Getting Started (Local Development)
 
-```
-┌────────────────────────────────────────────────────────┐
-│                   React 19 Frontend                    │
-│   (Single Page App, Tailwind CSS 4, React Router 7)    │
-└───────────────────────────┬────────────────────────────┘
-                            │ HTTPS / JSON REST API
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│                   FastAPI Backend                      │
-│  ├── /api/v1/clinic-info, /doctors, /services, /blog  │
-│  ├── /api/v1/chat  (RAG Pipeline & Safety Filters)     │
-│  └── /api/v1/admin (JWT Auth, Knowledge Base Reindex)  │
-└───────────────┬────────────────────────────┬───────────┘
-                │ SQL Queries                │ Async HTTP (Server-side)
-                ▼                            ▼
-┌───────────────────────────────┐  ┌───────────────────────────────────┐
-│     PostgreSQL + pgvector     │  │          Google Gemini            │
-│  - Relational clinic tables   │  │  - gemini-embedding-001 (768-dim) │
-│  - Knowledge chunks & vectors │  │  - gemini-2.5-flash (generation)  │
-└───────────────────────────────┘  └───────────────────────────────────┘
-```
+### Option A: Docker Compose (Fastest — One Command)
 
-### Key Architectural Strengths:
-- **Unified PostgreSQL Storage**: Relational clinic models and vector embeddings share a single PostgreSQL database with `pgvector`. No separate vector database (like Pinecone) is required, eliminating synchronization lag and dual-billing.
-- **Dynamic Single Source of Truth**: The knowledge base is synced directly from database records. Whenever an administrator updates a doctor's OPD hours or adds a service, the associated knowledge chunks are automatically re-indexed.
-- **Zero Client-Side Secrets**: Gemini API keys, database credentials, and JWT secrets reside exclusively in server-side environment variables.
-
----
-
-## 4. Technology Stack
-
-### Frontend:
-- **Framework**: React 19, TypeScript
-- **Bundler & Tooling**: Vite 8, Oxlint
-- **Routing**: React Router 7 (code-splitting with `React.lazy`)
-- **Styling**: Tailwind CSS 4, Lucide React icons
-- **State & Forms**: React Hook Form, Zod validation
-- **Charts**: Recharts (for admin analytics)
-- **HTTP Client**: Axios (configured with interceptors and base URL)
-
-### Backend:
-- **Framework**: FastAPI (Python 3.12)
-- **Validation & Settings**: Pydantic v2, Pydantic-Settings
-- **ORM & Database**: SQLAlchemy 2.0, Alembic (database migrations), Psycopg 3
-- **Vector Search**: PostgreSQL 17 + `pgvector`
-- **Security & Auth**: PyJWT, Argon2-cffi password hashing
-- **HTTP Client**: HTTPX (async communication with Gemini API)
-
-### Infrastructure & Deployment:
-- **Hosting**: Render (Web Service for Backend Docker, Static Site for React Frontend)
-- **Database**: Neon Serverless PostgreSQL (`pgvector` enabled)
-- **CI/CD**: GitHub Actions automated pipeline
-
----
-
-## 5. Demo Credentials
-
-The platform seeds default administrative and staff accounts upon initialization. You can use these to test the Admin Management Dashboard at `https://healthcare-platform-fxgn.onrender.com/admin/login`:
-
-| Role | Email | Password | Permissions |
-|:---|:---|:---|:---|
-| **Admin** | `admin@cedarline.example` | `Cedarline-Admin-2026` | Full access: edit doctors, services, manage knowledge base documents, trigger re-indexing, view patient inquiries. |
-| **Staff** | `staff@cedarline.example` | `Cedarline-Staff-2026` | Read-only access to doctors and services, view incoming patient contact inquiries. |
-| **Doctor** | `doctor@cedarline.example` | `Cedarline-Doctor-2026` | Doctor portal access. |
-
----
-
-## 6. Local Development Setup
-
-### Option 1: Quickstart with Docker Compose (Recommended)
-
-Ensure you have Docker and Docker Compose installed:
+Requirements: Docker & Docker Compose.
 
 ```bash
 # 1. Clone repository
 git clone https://github.com/rakeshaa2002/healthcare-platform.git
 cd healthcare-platform
 
-# 2. Configure environment variables
+# 2. Setup environment variables
 cp .env.example .env
-# Edit .env and insert your GEMINI_API_KEY (from https://aistudio.google.com/)
+# Edit .env: Add your GEMINI_API_KEY (from https://aistudio.google.com/)
 
-# 3. Start PostgreSQL with pgvector, Backend, and Frontend
-docker compose up -d
-
-# 4. View application
-# Frontend: http://localhost:5173
-# Backend Swagger Docs: http://localhost:8000/docs
+# 3. Launch stack (PostgreSQL + pgvector, Backend API, Frontend)
+docker compose up --build
 ```
+
+Access points:
+- **Frontend App**: `http://localhost:8080` (or `http://localhost:5173`)
+- **Backend Swagger API**: `http://localhost:8000/docs`
+- **Admin Portal**: `http://localhost:8080/admin` (Log in with `admin@cedarline.example` / `Cedarline-Admin-2026`)
 
 ---
 
-### Option 2: Running Without Docker
+### Option B: Local Development with Hot Reload
 
-#### Prerequisites:
-- Node.js 20+ & npm
-- Python 3.12+
-- PostgreSQL with `pgvector` installed
+Requirements: Python 3.12+, Node.js 20+, Docker (used to run PostgreSQL with `pgvector`).
 
-#### 1. Backend Setup:
+#### 1. Start Database Container:
+```bash
+docker run -d --name clinic-pg \
+  -e POSTGRES_USER=clinic \
+  -e POSTGRES_PASSWORD=clinic_dev_password \
+  -e POSTGRES_DB=clinic \
+  -p 5434:5432 \
+  pgvector/pgvector:pg17
+```
+
+#### 2. Start Backend API:
 ```bash
 cd backend
 python -m venv .venv
 
-# On Windows (PowerShell):
+# Activate virtual environment
+# Windows (PowerShell):
 .\.venv\Scripts\Activate.ps1
-# On macOS/Linux:
+# macOS/Linux:
 # source .venv/bin/activate
 
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 cp .env.example .env
-# Set DATABASE_URL and GEMINI_API_KEY in backend/.env
+# Set DATABASE_URL=postgresql+psycopg://clinic:clinic_dev_password@localhost:5434/clinic
+# Set your GEMINI_API_KEY (or use EMBEDDING_PROVIDER=hashing, LLM_PROVIDER=extractive for offline mode)
 
-# Run migrations and seed clinic data
+# Run database migrations and seed data
 alembic upgrade head
 python -m app.seed.run
 
-# Start FastAPI dev server
+# Start Uvicorn reload server
 uvicorn app.main:app --reload --port 8000
 ```
 
-#### 2. Frontend Setup:
+#### 3. Start Frontend App:
 ```bash
 cd frontend
 npm install
 npm run dev
-# Vite runs at http://localhost:5173 with auto-proxying /api requests to :8000
+# Vite server starts at http://localhost:5173 and automatically proxies /api to http://127.0.0.1:8000
+```
+
+#### Health Check Verification:
+- `http://localhost:8000/api/v1/health` → `{"status":"ok","database":"ok"}`
+- `http://localhost:8000/api/v1/chat/health` → `indexed_chunks > 0`
+
+---
+
+## Codebase Tour
+
+### Backend Layout (`backend/app/`)
+
+```
+backend/
+├── alembic/                 # Database migrations (0001: initial schema, 0002: chat_events, 0003: doctor role)
+├── app/
+│   ├── main.py              # Application factory: CORS regex, GZip, error handlers, routers
+│   ├── api/
+│   │   ├── deps.py          # Dependencies: DbSession, CurrentUser, StaffUser, AdminUser guards
+│   │   └── v1/
+│   │       ├── router.py    # Master router grouping all endpoints under /api/v1
+│   │       └── routers/     # health, clinic, chat, auth, admin, knowledge
+│   ├── core/
+│   │   ├── config.py        # Settings loaded from environment variables (Pydantic BaseSettings)
+│   │   ├── security.py      # Argon2 password hashing and JWT token generation/verification
+│   │   ├── rate_limit.py    # In-memory per-IP sliding-window rate limiter
+│   │   ├── exceptions.py    # AppError hierarchy returning uniform structured JSON errors
+│   │   └── logging.py       # Production structured logging configuration
+│   ├── db/
+│   │   ├── base.py          # SQLAlchemy Base with deterministic naming conventions
+│   │   └── session.py       # Engine creation, connection pooling, and get_db dependency
+│   ├── models/              # ORM entities: clinic, user, knowledge, chat_event
+│   ├── schemas/             # Pydantic request/response schemas (API contract)
+│   ├── services/
+│   │   ├── chatbot/         # safety, retrieval, prompt, llm, grounding, service
+│   │   └── knowledge_base/  # extraction, chunking, embeddings, ingestion, system_documents
+│   └── seed/
+│       ├── data.py          # Fictional clinic metadata, doctors, services, articles
+│       ├── run.py           # Idempotent seed runner script (python -m app.seed.run)
+│       └── knowledge/*.md   # Approved clinic knowledge markdown files
+└── tests/                   # 89 pytest unit and integration test suites
+```
+
+**Architecture Rule:** Routers handle HTTP parsing, status codes, and authorization only. Domain logic belongs in `services/`. Routers return Pydantic schemas, never raw SQLAlchemy ORM instances.
+
+---
+
+### Frontend Layout (`frontend/src/`)
+
+```
+frontend/src/
+├── main.tsx                 # Application bootstrap with AuthProvider and ToastProvider
+├── router/index.tsx         # Route definitions with React.lazy code splitting
+├── layouts/
+│   ├── SiteLayout.tsx       # Public shell: Navbar, Footer, Floating Chatbot Widget, ScrollToTop
+│   └── AdminLayout.tsx      # Admin dashboard shell with navigation sidebar and auth guards
+├── pages/
+│   ├── HomePage.tsx         # Modern landing page with interactive trust metrics & highlights
+│   ├── AboutPage.tsx        # Accreditation, mission, medical leadership, hygiene standards
+│   ├── DoctorsPage.tsx      # Filterable doctor directory by speciality & OPD schedule
+│   ├── ServicesPage.tsx     # Comprehensive service catalogue grouped by department
+│   ├── departments/         # DentalPage, SkinPage, HairPage powered by DepartmentPage template
+│   ├── AppointmentsPage.tsx # Multi-channel booking guide (phone, WhatsApp, online inquiry)
+│   ├── BlogPage.tsx         # Medically reviewed articles with category filters
+│   ├── BlogPostPage.tsx     # Full article view with author bio and medical disclaimers
+│   ├── ContactPage.tsx      # Interactive contact form (Zod + React Hook Form), maps, emergency hotline
+│   └── admin/               # AdminDashboardPage, AdminDoctorsPage, AdminServicesPage, AdminKnowledgePage, AdminMessagesPage
+├── components/
+│   ├── ui/                  # Design system: Button, Input, Select, Card, Modal, Toast, Skeleton, Badge
+│   ├── site/                # Navbar, Footer, PageHero, Seo, Cards, TrustBadges
+│   └── chat/                # ChatWidget, ChatMessage, RichText (safe markdown), openChat helper
+├── hooks/
+│   ├── useApi.ts            # SWR-like data fetching with in-memory caching and request deduplication
+│   ├── useClinic.ts         # High-level data hooks for clinic info, doctors, and services
+│   └── useAuth.tsx          # JWT session management in sessionStorage with role inspection
+├── services/
+│   ├── api.ts               # Axios client instance with base URL, bearer tokens, and error handling
+│   └── endpoints.ts         # Strictly typed API endpoints (clinicApi, chatApi, authApi, adminApi)
+├── types/index.ts           # TypeScript interfaces matching backend Pydantic models
+└── index.css                # Tailwind CSS 4 theme variables (ink, brand teal, accent orange)
 ```
 
 ---
 
-## 7. API Documentation
+## Common Tasks (How to Implement Features)
 
-Interactive Swagger and ReDoc documentation are available on the live backend:
-- **Swagger UI**: `https://cedarline-api.onrender.com/docs`
-- **ReDoc**: `https://cedarline-api.onrender.com/redoc`
+### 1. How to Modify Clinic Content (Doctors, Services, Hours)
+- **From UI**: Log in as admin at `/admin/login`, open **Doctors** or **Services**, and edit. Saving automatically invokes a background task that regenerates and re-embeds the affected knowledge chunks.
+- **In Seed Data**: Edit [`backend/app/seed/data.py`](backend/app/seed/data.py) and run `python -m app.seed.run`. The seeder upserts by slug and updates only modified content.
 
-### Key Endpoints:
+### 2. How to Teach the Chatbot New Information
+- **Quick (Dashboard)**: Go to **Admin** → **Chatbot Knowledge** → upload a PDF, TXT, or MD document. It is parsed, chunked, embedded, and immediately searchable.
+- **Permanent (Code)**: Add a Markdown file into [`backend/app/seed/knowledge/`](backend/app/seed/knowledge/) and run `python -m app.seed.run`. Start with `# Title`, use `## Question-style headings`, and mention the subject explicitly in sentences.
 
-| Method | Endpoint | Description |
-|:---|:---|:---|
-| `GET` | `/api/v1/health` | Service & database connectivity health check |
-| `GET` | `/api/v1/clinic-info` | Clinic operational hours, address, phone numbers |
-| `GET` | `/api/v1/doctors` | List all doctors with specialities & OPD hours |
-| `GET` | `/api/v1/services` | Service catalogue grouped by medical department |
-| `GET` | `/api/v1/blog` | Medically reviewed patient education articles |
-| `POST` | `/api/v1/chat` | AI Healthcare Chatbot query endpoint |
-| `GET` | `/api/v1/chat/health` | RAG status: indexed chunk count & active embedding provider |
-| `POST` | `/api/v1/contact` | Submit appointment or contact inquiry |
-| `POST` | `/api/v1/auth/login` | JWT authentication for Admin & Staff |
-| `GET` | `/api/v1/admin/knowledge/documents` | List indexed knowledge base documents |
-| `POST` | `/api/v1/admin/knowledge/reindex` | Trigger asynchronous re-indexing of clinic data |
+### 3. How to Adjust Safety Rules or System Prompts
+- **Emergency / Medical Refusals**: Edit regex triggers in [`backend/app/services/chatbot/safety.py`](backend/app/services/chatbot/safety.py). Add corresponding test assertions in `tests/test_chatbot.py`.
+- **System Tone & Prompt**: Edit the prompt template in [`backend/app/services/chatbot/prompt.py`](backend/app/services/chatbot/prompt.py).
+- **Retrieval Threshold**: Change `RAG_SIMILARITY_THRESHOLD` in `.env` (default `0.55` for Gemini).
+
+### 4. How to Add a New API Endpoint
+1. Define Pydantic request and response schemas in `backend/app/schemas/`.
+2. Add the endpoint route in `backend/app/api/v1/routers/`. Protect with `StaffUser` or `AdminUser` from `api/deps.py` if authorization is required.
+3. Put business logic in `backend/app/services/`.
+4. Write tests in `backend/tests/`.
+5. On the frontend, add the type to `frontend/src/types/index.ts`, add the API call in `services/endpoints.ts`, and consume with `useApi('cache:key', fetcher)`.
+
+### 5. How to Change the Database Schema
+1. Modify or create a model in `backend/app/models/`. Import any new model in `backend/app/models/__init__.py`.
+2. Generate migration: `alembic revision --autogenerate --rev-id 0004 -m "add new field"`.
+3. Inspect the migration script in `backend/alembic/versions/`.
+4. Apply migration: `alembic upgrade head`.
+
+### 6. How to Open the Chatbot from Any React Component
+```tsx
+import { openChat } from '@/components/chat/openChat'
+
+// Open empty widget
+<button onClick={() => openChat()}>Need help?</button>
+
+// Open pre-populated with a question
+<button onClick={() => openChat('How much does dental laser whitening cost?')}>
+  Ask about Whitening
+</button>
+```
 
 ---
 
-## 8. Database & Migrations
+## Testing
 
-The database uses SQLAlchemy 2 Declarative Models managed by Alembic:
+The backend includes a comprehensive automated test suite with **89 tests** exercising every layer against a real PostgreSQL + `pgvector` container:
 
-- `0001_initial_schema.py`: Initial relational schema (clinics, doctors, services, users, appointments, contact messages, knowledge documents, and chunks with `VECTOR(768)`).
-- `0002_chatbot_only.py`: Adds `chat_events` for telemetry, tracking response latency, top similarity scores, and safety redirection metrics.
-- `0003_add_doctor_role.py`: Extends user check constraint to safely accommodate `doctor`, `staff`, and `admin` roles.
-
----
-
-## 9. Automated Testing & Code Quality
-
-The backend has an automated test suite executed with `pytest`:
-- **89 unit and integration tests** verifying:
-  - Chatbot prompt engineering and response grounding
-  - Emergency safety triggers and medical advice refusals
-  - Vector cosine similarity calculations and retrieval filters
-  - JWT authentication, role-based authorization, and token expiration
-  - CRUD operations on doctors, services, and contact messages
-  - Database migrations and schema constraints
-
-Run the test suite locally:
 ```bash
 cd backend
+# Run complete test suite (~70 seconds)
 pytest
-# Output: 89 passed in ~1.1s
+
+# Run specific test module
+pytest tests/test_chatbot.py -k safety
 ```
 
-Frontend quality checks:
+### What the Tests Verify:
+- **Zero AI API Costs**: Gemini HTTP requests are mocked via `httpx.MockTransport` and `FakeLLM`. Tests run offline and deterministically without network egress or API keys.
+- **Safety**: Emergency trigger detection, medical-advice refusals, and prevention of false-positive redirects.
+- **Grounding**: Verification that the model rejects invented prices and fabricated doctor names.
+- **Auth & Access Control**: JWT generation, expiry handling, and role-based route guard enforcement.
+- **Chunking & Vector Ingestion**: Text extraction from PDFs and pgvector cosine distance ranking.
+
+### Frontend Quality Checks:
 ```bash
 cd frontend
-# TypeScript compiler check
+# TypeScript type check
 npx tsc -b
-# Oxlint code quality verification
-npx oxlint
+# Code quality & linting
+npm run lint
+# Production bundle verification
+npm run build
 ```
 
 ---
 
-## 10. Deployment & CI/CD Pipeline
+## Configuration (.env Reference)
 
-The project is fully deployed to production using Render and Neon:
+All configurations are validated on startup via Pydantic (`backend/app/core/config.py`):
+
+| Variable | Default | Purpose |
+|:---|:---|:---|
+| `ENVIRONMENT` | `development` | Set to `production` in production (enforces secure secret length). |
+| `DATABASE_URL` | `postgresql+psycopg://...` | PostgreSQL connection string (`postgresql://` is auto-normalized). |
+| `JWT_SECRET` | *dev-secret* | Cryptographic key for signing JWT tokens (min 32 chars in production). |
+| `CORS_ORIGINS` | `http://localhost:5173` | Comma-separated list of allowed origins. (Auto-regex handles all `.onrender.com` domains). |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `admin@cedarline.example` | Initial admin account seeded on boot. |
+| `STAFF_EMAIL` / `STAFF_PASSWORD` | `staff@cedarline.example` | Initial staff account seeded on boot. |
+| `DOCTOR_EMAIL` / `DOCTOR_PASSWORD`| `doctor@cedarline.example` | Initial doctor account seeded on boot. |
+| `EMBEDDING_PROVIDER` | `gemini` | `gemini` · `openai` · `hashing` (offline dev mode). |
+| `EMBEDDING_MODEL` | `gemini-embedding-001` | Active embedding model. |
+| `EMBEDDING_DIM` | `768` | Vector dimension (must match PostgreSQL `VECTOR(768)`). |
+| `LLM_PROVIDER` | `gemini` | `gemini` · `openai` · `extractive` (offline quote fallback). |
+| `LLM_MODEL` | `gemini-2.5-flash` | Primary generative LLM. |
+| `LLM_FALLBACK_MODELS` | `gemini-flash-lite-latest` | Comma-separated fallback models tried on HTTP 429/5xx. |
+| `GEMINI_API_KEY` | `""` | Google AI Studio API key (backend only). |
+| `VITE_API_URL` | `""` | Production backend URL for frontend build (e.g. `https://cedarline-api.onrender.com`). |
+
+---
+
+## Conventions & Best Practices
+
+- **Uniform Error Handling**: All API exceptions derive from `AppError` and yield consistent JSON `{ "error": { "code": "...", "message": "...", "details": [] } }`.
+- **Dual-Layer Validation**: Frontend inputs validate immediately via Zod; backend endpoints re-validate via Pydantic schemas.
+- **Privacy by Design**: Chat conversation text is stored only in the visitor's local tab session (`sessionStorage`). Server telemetry in `chat_events` logs only outcome status, latency, and similarity scores.
+- **Tailwind Color Tokens**: UI strictly utilizes semantic tokens defined in `index.css` (`ink-*` neutrals, `brand-*` medical teal, `accent-*` coral) rather than hardcoded hex values.
+
+---
+
+## API Reference
+
+Interactive documentation is available at `/docs` (Swagger UI) and `/redoc`.
+
+| Method | Endpoint | Access | Description |
+|:---|:---|:---|:---|
+| `GET` | `/api/v1/health` | Public | Liveness probe and database connectivity verification. |
+| `GET` | `/api/v1/clinic-info` | Public | Clinic metadata, operational timings, contact details. |
+| `GET` | `/api/v1/services` | Public | Filterable services catalogue by department. |
+| `GET` | `/api/v1/doctors` | Public | Doctors list with specialities, qualifications, and OPD hours. |
+| `GET` | `/api/v1/blog` | Public | Paginated medically reviewed articles with author bios. |
+| `POST` | `/api/v1/contact` | Public (Rate-limited) | Submits a patient inquiry or appointment booking request. |
+| `POST` | `/api/v1/chat` | Public (Rate-limited) | AI Healthcare Chatbot query endpoint with conversation history. |
+| `GET` | `/api/v1/chat/health` | Public | Chatbot diagnostic endpoint reporting indexed chunk count. |
+| `POST` | `/api/v1/auth/login` | Public (Rate-limited) | Authenticates credentials and issues Bearer JWT. |
+| `GET` | `/api/v1/admin/overview` | Staff / Admin | Dashboard statistics: daily chat outcomes, messages, KB size. |
+| `GET` | `/api/v1/admin/messages` | Staff / Admin | Incoming patient appointment and contact requests. |
+| `POST` | `/api/v1/admin/doctors` | Admin | Create or update doctor profile and auto-sync knowledge chunks. |
+| `POST` | `/api/v1/admin/services`| Admin | Create or update service item and auto-sync knowledge chunks. |
+| `POST` | `/api/v1/admin/knowledge/documents` | Admin | Upload PDF, TXT, or MD documents into the knowledge base. |
+| `POST` | `/api/v1/admin/knowledge/reindex` | Admin | Asynchronously triggers full knowledge re-indexing. |
+
+---
+
+## Deployment & CI/CD Pipeline
+
+The application is deployed to production across Render and Neon:
+
+```
+GitHub Push (main) ──► GitHub Actions CI/CD ──► Auto-Deploy to Render
+                        ├── Frontend: oxlint + tsc
+                        └── Backend: pgvector + 89 pytest tests
+```
 
 ### 1. Render Blueprint (`render.yaml`)
-A single root blueprint defines:
-- **`cedarline-api`**: Docker Web Service running the FastAPI backend with health check `/api/v1/health` and automated migration/seeding on startup.
-- **`cedarline-frontend`**: Static Site building the React SPA (`npm ci && npm run build`) publishing from `dist` with client-side SPA routing rewrites (`/*` → `/index.html`).
+The root `render.yaml` orchestrates the full-stack architecture:
+- **`cedarline-api`** (Docker Web Service): Runs FastAPI on port 8000 with health check `/api/v1/health`. Automatically runs `alembic upgrade head` and `python -m app.seed.run` on every deployment.
+- **`cedarline-frontend`** (Static Site): Builds React 19 SPA (`npm ci && npm run build`) with output directory `./dist` and SPA fallback routing rewrite (`/*` → `/index.html`).
 
-### 2. GitHub Actions (`.github/workflows/ci-cd.yml`)
-Every push or pull request to `main` runs automated CI/CD checks:
-1. **Frontend Job**: Node 22 setup, caching, `oxlint`, and TypeScript compile (`tsc -b`).
-2. **Backend Job**: Python 3.12 setup, bytecode compile check (`compileall`), spins up a containerized PostgreSQL + `pgvector` instance, and runs all 89 `pytest` tests.
-3. **CD Delivery**: Automatically deploys passing builds directly to Render.
-
----
-
-## 11. Screen Recording Demonstration
-
-A recommended 3-to-4 minute walkthrough structure for video evaluation:
-
-1. **Introduction (30s)**:
-   - Introduce yourself (Rakesha N), the position (Full Stack Developer — Web Applications & AI Automation), and Arquette Digital.
-   - Mention the repository and live Render deployment URLs.
-2. **Task 1: 10-Page Website Walkthrough (90s)**:
-   - Navigate through the 10 required pages: Home, About, Doctors, Services, Dental, Skin, Hair, Appointments, Blog, and Contact Us.
-   - Highlight the responsive mobile view using browser DevTools.
-   - Show form validation on the Contact / Appointment inquiry page.
-3. **Task 2: AI Healthcare Chatbot Demo (90s)**:
-   - Open the chatbot widget on the bottom right.
-   - **Query 1 (Services/Pricing)**: *"How much does laser teeth whitening cost and how long does it take?"* → Bot answers with accurate pricing and duration from the clinic database.
-   - **Query 2 (Doctors/Timings)**: *"When is Dr. Ananya Rao available for consultation?"* → Bot responds with her OPD schedule.
-   - **Query 3 (Safety Guardrail / Diagnostic Refusal)**: *"I have sudden chest pain and shortness of breath, what medicine should I take?"* → Bot immediately triggers emergency protocol, displays emergency hotline (112), and refuses to prescribe or diagnose.
-   - **Query 4 (Out-of-Scope / Non-Hallucination)**: *"Can you fix my car's engine?"* → Bot politely explains it only answers questions about Cedarline Clinic.
-4. **Admin Management & Knowledge Base (30s)**:
-   - Log in at `/admin/login` using `admin@cedarline.example`.
-   - Show the Analytics Dashboard, Doctors list, and Knowledge Base document status.
-   - Show test suite execution in terminal (`89 passed`).
+### 2. GitHub Actions CI/CD (`.github/workflows/ci-cd.yml`)
+Every push to `main` runs:
+1. **Frontend Pipeline**: Node 22, dependency caching, Oxlint linter, and TypeScript compiler check.
+2. **Backend Pipeline**: Python 3.12, syntax validation, spins up a PostgreSQL + `pgvector` container, and executes all 89 `pytest` test suites.
 
 ---
 
-## 12. AI Tools Used & Engineering Methodology
+## Troubleshooting Guide
 
-*(Per Section 6 of Arquette Digital Assessment Guidelines)*
-
-AI tools were leveraged as an engineering multiplier to accelerate development, improve test coverage, and enforce strict healthcare compliance:
-
-### 1. Tools Employed:
-- **Antigravity IDE & Gemini 2.5 Flash**: Used as an AI pair programmer for rapid boilerplate generation, code refactoring, TypeScript interfaces, and automated test suite creation.
-- **Google Gemini API (`gemini-embedding-001` & `gemini-2.5-flash`)**: Core LLM and embedding models powering the production RAG pipeline.
-
-### 2. How the Output was Verified & Problem-Solving:
-- **Architectural Guardrails**: The RAG prompt and safety layer were manually designed using deterministic regex screens *before* the LLM is invoked, ensuring safety-critical refusals never rely on probabilistic LLM responses.
-- **Rigorous Automated Testing**: 89 test cases were developed to test edge cases, including token expiration, vector similarity edge cases, and CORS header handling.
-- **Debugging & Resolution**:
-  - *Database Check Constraint*: Diagnosed and resolved a PostgreSQL check constraint collision (`ck_users_role_valid`) when adding the doctor role by writing an idempotent Alembic migration using raw DDL.
-  - *Production CORS Configuration*: Enhanced FastAPI's CORS middleware with regex matching (`^https://.*\.onrender\.com$`) to handle arbitrary Render preview subdomains cleanly.
-- **Codebase Ownership**: Every line of code, database migration, and Dockerfile was reviewed, verified in local development, and validated in cloud deployment.
+| Issue | Root Cause | Solution |
+|:---|:---|:---|
+| `psycopg.errors.CheckViolation: ck_users_role_valid` | Role 'doctor' not permitted by older check constraint. | Migration `0003_add_doctor_role.py` resolves this automatically using raw DDL. Run `alembic upgrade head`. |
+| `CORS error` in browser network tab | Frontend domain not permitted by backend. | Configured `allow_origin_regex=r"^https://.*\.onrender\.com$"` in `app/main.py`. Any `.onrender.com` domain is automatically accepted. |
+| `Publish directory dist does not exist!` | Build command was empty in Render static site settings. | Set Build Command to `npm install && npm run build` and Publish Directory to `dist`. |
+| `ArgumentError: Could not parse SQLAlchemy URL` | Quotes (`'`) or `psql` copied inside `DATABASE_URL`. | Ensure `DATABASE_URL` starts cleanly with `postgresql://user:pass@host/db?sslmode=require` without quotes or `psql`. |
+| `Chatbot always returns fallback refusal` | Knowledge base empty or API key missing. | Check `/api/v1/chat/health`. If `indexed_chunks: 0`, run `python -m app.seed.run`. Verify `GEMINI_API_KEY`. |
+| `401 Unauthorized` on Admin pages | JWT token expired (120 min duration). | Re-authenticate at `/admin/login`. |
 
 ---
 
-**Submitted by:** Rakesha N  
-**Assessment:** Arquette Digital — Full Stack Developer (Web Applications & AI Automation)
+## Task 1: 10-Page Website Compliance
+
+| Page | Route | Key Features |
+|:---|:---|:---|
+| **1. Home** | `/` | Hero section, department cards, doctor profiles, testimonials, emergency alerts, chatbot widget. |
+| **2. About the Clinic** | `/about` | Clinic mission, NABH accreditation, medical leadership, hygiene standards, facilities. |
+| **3. Our Doctors** | `/doctors` | Filterable doctor directory by speciality, credentials, experience, and OPD timings. |
+| **4. All Services** | `/services` | Comprehensive medical service catalogue with pricing, duration, and preparation notes. |
+| **5. Dental Treatments** | `/services/dental` | Specialized dental department page (Implants, Whitening, Root Canal, Orthodontics). |
+| **6. Skin Treatments** | `/services/skin` | Dermatology department page (Acne scars, Chemical Peels, HydraFacial, Laser treatments). |
+| **7. Hair Treatments** | `/services/hair` | Trichology department page (FUE/FUT Transplants, PRP Therapy, Alopecia protocols). |
+| **8. Appointment Booking** | `/appointments` | Multi-channel appointment booking guide with doctor/service selectors and inquiry submission. |
+| **9. Blog / Education** | `/blog` | Medically reviewed articles with category filtering, reading times, and patient disclaimers. |
+| **10. Contact Us** | `/contact` | Validated contact form (Zod + React Hook Form), emergency hotline, and interactive location map. |
+
+---
+
+## AI Tools Used & Engineering Methodology
+
+*(Per Criterion 6 of the Arquette Digital Assessment Guidelines)*
+
+AI tools were utilized as an engineering pair-programmer to accelerate delivery, expand test coverage, and enforce strict healthcare compliance:
+
+1. **AI Tools Employed**:
+   - **Antigravity IDE & Gemini 2.5 Flash**: Rapid scaffolding of TypeScript interfaces, Pydantic schemas, and comprehensive pytest test fixtures.
+   - **Google Gemini API (`gemini-embedding-001` & `gemini-2.5-flash`)**: Vector search embedding generation and grounded multi-turn patient dialogue.
+2. **Human Engineering Verification & Problem Solving**:
+   - **Deterministic Safety**: Implemented hard regex pre-screens so critical emergency refusals (chest pain, stroke) never depend on probabilistic LLM responses.
+   - **Constraint Debugging**: Resolved PostgreSQL check constraint collisions by authoring idempotent Alembic migrations with raw SQL.
+   - **Production Readiness**: Added dynamic CORS regex support (`^https://.*\.onrender\.com$`) to handle cloud preview domains cleanly without hardcoding URLs.
+   - **Quality Assurance**: Every component and router was verified through 89 automated tests, type checks, and manual responsive browser testing.
+
+---
+
+**Developed & Maintained by:** Rakesha N  
+**Technical Assessment:** Arquette Digital — Full Stack Developer (Web Applications & AI Automation)
