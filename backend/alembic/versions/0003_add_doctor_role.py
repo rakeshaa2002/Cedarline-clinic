@@ -15,18 +15,13 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.drop_constraint('ck_users_role_valid', 'users', type_='check')
-    op.create_check_constraint(
-        'ck_users_role_valid',
-        'users',
-        "role IN ('admin', 'staff', 'doctor')"
-    )
+    # Drop constraint safely using raw SQL to prevent naming convention doubling (ck_users_ck_users_...)
+    op.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS ck_users_role_valid")
+    op.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS ck_users_ck_users_role_valid")
+    op.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS role_valid")
+    op.execute("ALTER TABLE users ADD CONSTRAINT ck_users_role_valid CHECK (role IN ('admin', 'staff', 'doctor'))")
 
 
 def downgrade() -> None:
-    op.drop_constraint('ck_users_role_valid', 'users', type_='check')
-    op.create_check_constraint(
-        'ck_users_role_valid',
-        'users',
-        "role IN ('admin', 'staff')"
-    )
+    op.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS ck_users_role_valid")
+    op.execute("ALTER TABLE users ADD CONSTRAINT ck_users_role_valid CHECK (role IN ('admin', 'staff'))")
