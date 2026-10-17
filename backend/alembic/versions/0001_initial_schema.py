@@ -134,7 +134,7 @@ def upgrade() -> None:
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.CheckConstraint("role IN ('admin', 'staff')", name=op.f('ck_users_role_valid')),
+    sa.CheckConstraint("role IN ('admin', 'staff', 'doctor')", name=op.f('ck_users_role_valid')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_users'))
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
