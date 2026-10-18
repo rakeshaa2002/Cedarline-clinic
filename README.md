@@ -466,4 +466,3 @@ AI tools were utilized as an engineering pair-programmer to accelerate delivery,
 ---
 
 **Developed & Maintained by:** Rakesha N  
-**Technical Assessment:** Arquette Digital — Full Stack Developer (Web Applications & AI Automation)
