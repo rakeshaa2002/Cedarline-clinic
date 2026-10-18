@@ -40,10 +40,8 @@ export default function HomePage() {
             fetchPriority="high"
             className="size-full object-cover object-[center_35%] transition-all duration-700"
           />
-          {/* Elegant readability scrim: soft white gradient on the left for crisp typography, clear architectural view on the right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-white/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-white/20" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent" />
+          {/* Subtle readability scrim: enables the clinic architectural background banner to remain vibrant and clearly visible */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-white/20 to-transparent" />
         </div>
 
         <div className="container-page relative z-10 grid items-center gap-10 py-12 sm:py-16 lg:min-h-[calc(100svh-6.75rem)] lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-12 xl:gap-20">
@@ -51,10 +49,10 @@ export default function HomePage() {
             <p className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-3.5 py-1.5 text-xs font-semibold text-brand-700 shadow-xs ring-1 ring-brand-200/80">
               <MapPin className="size-3.5 text-brand-600" aria-hidden="true" /> Multispeciality clinic · Indiranagar, Bengaluru
             </p>
-            <h1 className="mt-6 text-[2.1rem] leading-[1.08] font-extrabold tracking-tight min-[400px]:text-4xl sm:text-5xl lg:text-[3.4rem] xl:text-[3.9rem] 2xl:text-[4.4rem]">
+            <h1 className="mt-6 text-[2.1rem] leading-[1.08] font-extrabold tracking-tight min-[400px]:text-4xl sm:text-5xl lg:text-[3.4rem] xl:text-[3.9rem] 2xl:text-[4.4rem] text-ink-950">
               Specialist care for your <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-700 via-brand-600 to-teal-600">smile, skin and hair</span> — and the whole family.
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-ink-600 2xl:max-w-2xl 2xl:text-xl">
+            <p className="mt-6 max-w-xl text-lg leading-8 text-ink-800 2xl:max-w-2xl 2xl:text-xl font-medium">
               Dentists, dermatologists, a trichologist, family physicians and a paediatrician working together in one calm,
               modern clinic. Have a question? Our AI assistant answers from the clinic’s own information, any time.
             </p>
@@ -65,11 +63,11 @@ export default function HomePage() {
               <Button variant="white" size="lg" icon={<Bot className="size-5 text-brand-600" aria-hidden="true" />} onClick={() => openChat()}>
                 Ask AI Assistant
               </Button>
-              <ButtonLink to="/services" variant="outline" size="lg">
+              <ButtonLink to="/services" variant="outline" size="lg" className="bg-white/85 backdrop-blur-xs hover:bg-white">
                 Explore services <ArrowRight className="size-4" aria-hidden="true" />
               </ButtonLink>
             </div>
-            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-ink-100/80 pt-8 sm:gap-6">
+            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-ink-200/60 pt-8 sm:gap-6">
               {[
                 [doctors.data ? String(doctors.data.length) : '9', 'Specialist doctors'],
                 [services.data ? `${services.data.length}+` : '20+', 'Treatments offered'],
