@@ -14,6 +14,14 @@ const PUBLIC_ROUTES = [
   '/appointments',
   '/blog',
   '/contact',
+  '/blog/how-often-should-you-see-the-dentist',
+  '/blog/clear-aligners-or-braces',
+  '/blog/simple-daily-skincare-routine',
+  '/blog/sunscreen-basics',
+  '/blog/hair-fall-when-to-see-a-specialist',
+  '/blog/preparing-for-your-first-appointment',
+  '/blog/why-preventive-health-checkups-matter',
+  '/blog/keeping-track-of-childhood-vaccinations',
 ]
 
 /** Emits sitemap.xml and robots.txt at build time using VITE_SITE_URL. */
@@ -42,8 +50,11 @@ function seoFiles(siteUrl: string): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  const siteUrl = env.VITE_SITE_URL && !env.VITE_SITE_URL.includes('localhost')
+    ? env.VITE_SITE_URL
+    : 'https://cedarline-clinic.onrender.com'
   return {
-    plugins: [react(), tailwindcss(), seoFiles(env.VITE_SITE_URL || 'http://localhost:5173')],
+    plugins: [react(), tailwindcss(), seoFiles(siteUrl)],
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },
