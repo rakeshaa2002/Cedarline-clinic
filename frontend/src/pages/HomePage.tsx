@@ -40,13 +40,14 @@ export default function HomePage() {
             fetchPriority="high"
             className="size-full object-cover object-[center_35%] transition-all duration-700"
           />
-          {/* Subtle readability scrim: enables the clinic architectural background banner to remain vibrant and clearly visible */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-white/20 to-transparent" />
+          {/* Readability scrim: balanced white gradient ensuring text legibility while keeping architectural clinic banner visible */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/50 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-white/80 to-transparent" />
         </div>
 
         <div className="container-page relative z-10 grid items-center gap-10 py-12 sm:py-16 lg:min-h-[calc(100svh-6.75rem)] lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-12 xl:gap-20">
           <div className="animate-fade-up">
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-3.5 py-1.5 text-xs font-semibold text-brand-700 shadow-xs ring-1 ring-brand-200/80">
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1.5 text-xs font-semibold text-brand-700 shadow-xs ring-1 ring-brand-200/80">
               <MapPin className="size-3.5 text-brand-600" aria-hidden="true" /> Multispeciality clinic · Indiranagar, Bengaluru
             </p>
             <h1 className="mt-6 text-[2.1rem] leading-[1.08] font-extrabold tracking-tight min-[400px]:text-4xl sm:text-5xl lg:text-[3.4rem] xl:text-[3.9rem] 2xl:text-[4.4rem] text-ink-950">
@@ -63,19 +64,19 @@ export default function HomePage() {
               <Button variant="white" size="lg" icon={<Bot className="size-5 text-brand-600" aria-hidden="true" />} onClick={() => openChat()}>
                 Ask AI Assistant
               </Button>
-              <ButtonLink to="/services" variant="outline" size="lg" className="bg-white/85 backdrop-blur-xs hover:bg-white">
+              <ButtonLink to="/services" variant="outline" size="lg" className="bg-white/90 backdrop-blur-xs hover:bg-white shadow-xs">
                 Explore services <ArrowRight className="size-4" aria-hidden="true" />
               </ButtonLink>
             </div>
-            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-ink-200/60 pt-8 sm:gap-6">
+            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-ink-200/80 pt-8 sm:gap-6">
               {[
                 [doctors.data ? String(doctors.data.length) : '9', 'Specialist doctors'],
                 [services.data ? `${services.data.length}+` : '20+', 'Treatments offered'],
                 [clinic ? `${clinic.opening_hours.filter((h) => !h.closed).length} days` : '6 days', 'Open every week'],
               ].map(([value, label]) => (
                 <div key={label} className="group">
-                  <dt className="text-sm text-ink-500 font-medium">{label}</dt>
-                  <dd className="order-first font-display text-2xl font-bold text-ink-900 sm:text-3xl tracking-tight transition-transform duration-300 group-hover:scale-105 group-hover:text-brand-700">{value}</dd>
+                  <dt className="text-sm text-ink-700 font-semibold">{label}</dt>
+                  <dd className="order-first font-display text-2xl font-bold text-ink-950 sm:text-3xl tracking-tight transition-transform duration-300 group-hover:scale-105 group-hover:text-brand-700">{value}</dd>
                 </div>
               ))}
             </dl>
