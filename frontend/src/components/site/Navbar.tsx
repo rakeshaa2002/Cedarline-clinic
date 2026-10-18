@@ -175,13 +175,6 @@ export function Navbar() {
                 <Phone className="size-4.5 text-brand-300 transition-transform group-hover:scale-110" aria-hidden="true" />
                 <span>{clinic.phone}</span>
               </a>
-              <span className="hidden md:inline text-ink-600">·</span>
-              <Link
-                to="/doctor/login"
-                className="hidden md:inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white transition-all hover:bg-white/20 border border-white/15 hover:border-white/30"
-              >
-                <span>🩺 Doctor Portal</span>
-              </Link>
             </div>
           )}
         </div>
