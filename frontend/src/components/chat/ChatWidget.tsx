@@ -241,7 +241,7 @@ export function ChatWidget() {
             }}
             aria-expanded={open}
             aria-controls="clinic-chat"
-            aria-label={open ? 'Close medical AI assistant' : 'Open medical AI assistant chat'}
+            aria-label={open ? 'Close Cedarline AI assistant' : 'Open Cedarline AI assistant chat'}
             className={cn(
               'group relative inline-flex h-16 items-center gap-3 overflow-hidden rounded-full border border-emerald-400/40 bg-gradient-to-r from-brand-950 via-brand-900 to-teal-950 pl-2.5 pr-5 font-bold text-white cursor-pointer select-none sm:h-[4.5rem] sm:gap-3.5 sm:pl-3 sm:pr-6',
               'shadow-[0_14px_40px_rgba(20,133,137,0.55)] transition-all duration-300 ease-out',
@@ -286,7 +286,7 @@ export function ChatWidget() {
             {/* Intuitive Label for Non-Technical Users */}
             <div className="flex flex-col text-left">
               <span className="font-display text-[0.9375rem] font-extrabold tracking-tight text-white leading-tight flex items-center gap-1.5 sm:text-[1.0625rem]">
-                {open ? 'Close' : 'Ask Medical AI'}
+                {open ? 'Close' : 'Ask Cedarline AI'}
                 {!open && (
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/25 text-emerald-300 border border-emerald-400/40 uppercase tracking-wider">
                     24/7
