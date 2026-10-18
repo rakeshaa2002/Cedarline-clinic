@@ -35,9 +35,28 @@ export function DepartmentPage({ config }: { config: DepartmentConfig }) {
   const [selected, setSelected] = useState<Doctor | null>(null)
   const [openFaq, setOpenFaq] = useState<number | null>(0)
 
+  const faqSchema = config.faqs && config.faqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: config.faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.a,
+      },
+    })),
+  } : undefined
+
   return (
     <>
-      <Seo title={config.seoTitle} description={config.seoDescription} path={config.path} image={config.heroImage} />
+      <Seo
+        title={config.seoTitle}
+        description={config.seoDescription}
+        path={config.path}
+        image={config.heroImage}
+        schema={faqSchema}
+      />
       <PageHero
         eyebrow={config.eyebrow}
         title={config.title}

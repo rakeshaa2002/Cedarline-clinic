@@ -11,6 +11,9 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
+export const SITE_NAME = 'Cedarline Multispeciality Clinic'
+export const SITE_URL = (import.meta.env.VITE_SITE_URL ?? '').replace(/\/$/, '')
+
 /** Static marketing copy for the fictional clinic. Dynamic data (doctors, services, hours) comes from the API. */
 
 export const DEPARTMENTS = [

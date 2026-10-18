@@ -8,6 +8,7 @@ import { PageHero } from '@/components/site/PageHero'
 import { Seo } from '@/components/site/Seo'
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback'
 import { Input } from '@/components/ui/Form'
+import { SITE_URL } from '@/content/site'
 import { useDoctors } from '@/hooks/useClinic'
 import type { Department, Doctor } from '@/types'
 import { DEPARTMENT_LABELS, cn } from '@/utils/format'
@@ -30,12 +31,39 @@ export default function DoctorsPage() {
     )
   }, [data, department, query])
 
+  const doctorsSchema = useMemo(() => {
+    if (!data || data.length === 0) return undefined
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      itemListElement: data.map((doc, idx) => ({
+        '@type': 'ListItem',
+        position: idx + 1,
+        item: {
+          '@type': 'Physician',
+          name: doc.full_name,
+          jobTitle: doc.specialization,
+          description: doc.bio,
+          knowsAbout: doc.qualifications,
+          knowsLanguage: doc.languages,
+          image: doc.photo_url ? (doc.photo_url.startsWith('http') ? doc.photo_url : `${SITE_URL}${doc.photo_url}`) : undefined,
+          worksFor: {
+            '@type': 'MedicalClinic',
+            name: 'Cedarline Multispeciality Clinic',
+            url: SITE_URL,
+          },
+        },
+      })),
+    }
+  }, [data])
+
   return (
     <>
       <Seo
         title="Our Doctors"
         description="Meet Cedarline's dentists, dermatologists, trichologist, family physicians and paediatrician. See consultation days and book an appointment."
         path="/doctors"
+        schema={doctorsSchema}
       />
       <PageHero
         eyebrow="Our doctors"

@@ -5,6 +5,7 @@ import { Seo } from '@/components/site/Seo'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState, PageLoader } from '@/components/ui/Feedback'
 import { Badge, Breadcrumbs } from '@/components/ui/Layout'
+import { SITE_URL } from '@/content/site'
 import { useApi } from '@/hooks/useApi'
 import { clinicApi } from '@/services/endpoints'
 import { formatLongDate } from '@/utils/format'
@@ -54,9 +55,39 @@ export default function BlogPostPage() {
   const a = post.data
   const others = related.data?.items.filter((p) => p.slug !== a.slug).slice(0, 3) ?? []
 
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalWebPage',
+    headline: a.title,
+    description: a.excerpt,
+    url: `${SITE_URL}/blog/${a.slug}`,
+    image: a.cover_image ? (a.cover_image.startsWith('http') ? a.cover_image : `${SITE_URL}${a.cover_image}`) : undefined,
+    datePublished: a.published_at,
+    inLanguage: 'en-IN',
+    author: a.author
+      ? {
+          '@type': 'Physician',
+          name: a.author.full_name,
+          jobTitle: a.author.specialization,
+          url: `${SITE_URL}/doctors`,
+        }
+      : undefined,
+    publisher: {
+      '@type': 'MedicalClinic',
+      name: 'Cedarline Multispeciality Clinic',
+      url: SITE_URL,
+    },
+  }
+
   return (
     <>
-      <Seo title={a.title} description={a.excerpt} path={`/blog/${a.slug}`} image={a.cover_image ?? undefined} />
+      <Seo
+        title={a.title}
+        description={a.excerpt}
+        path={`/blog/${a.slug}`}
+        image={a.cover_image ?? undefined}
+        schema={articleSchema}
+      />
       <article>
         <header className="bg-ink-50/70">
           <div className="container-page max-w-3xl pt-10 pb-12 sm:pt-14">
