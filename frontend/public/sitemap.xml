@@ -2,94 +2,94 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Core Clinic Pages -->
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/</loc>
+    <loc>https://cedarline-clinic.onrender.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/about</loc>
+    <loc>https://cedarline-clinic.onrender.com/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/doctors</loc>
+    <loc>https://cedarline-clinic.onrender.com/doctors</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/services</loc>
+    <loc>https://cedarline-clinic.onrender.com/services</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/services/dental</loc>
+    <loc>https://cedarline-clinic.onrender.com/services/dental</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/services/skin</loc>
+    <loc>https://cedarline-clinic.onrender.com/services/skin</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/services/hair</loc>
+    <loc>https://cedarline-clinic.onrender.com/services/hair</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/appointments</loc>
+    <loc>https://cedarline-clinic.onrender.com/appointments</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/contact</loc>
+    <loc>https://cedarline-clinic.onrender.com/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/blog</loc>
+    <loc>https://cedarline-clinic.onrender.com/blog</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Doctor-written Patient Education Blog Posts -->
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/blog/how-often-should-you-see-the-dentist</loc>
+    <loc>https://cedarline-clinic.onrender.com/blog/how-often-should-you-see-the-dentist</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/blog/clear-aligners-or-braces</loc>
+    <loc>https://cedarline-clinic.onrender.com/blog/clear-aligners-or-braces</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/blog/simple-daily-skincare-routine</loc>
+    <loc>https://cedarline-clinic.onrender.com/blog/simple-daily-skincare-routine</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/blog/sunscreen-basics</loc>
+    <loc>https://cedarline-clinic.onrender.com/blog/sunscreen-basics</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/blog/hair-fall-when-to-see-a-specialist</loc>
+    <loc>https://cedarline-clinic.onrender.com/blog/hair-fall-when-to-see-a-specialist</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/blog/preparing-for-your-first-appointment</loc>
+    <loc>https://cedarline-clinic.onrender.com/blog/preparing-for-your-first-appointment</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/blog/why-preventive-health-checkups-matter</loc>
+    <loc>https://cedarline-clinic.onrender.com/blog/why-preventive-health-checkups-matter</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://healthcare-platform-fxgn.onrender.com/blog/keeping-track-of-childhood-vaccinations</loc>
+    <loc>https://cedarline-clinic.onrender.com/blog/keeping-track-of-childhood-vaccinations</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

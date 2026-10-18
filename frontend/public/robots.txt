@@ -6,4 +6,4 @@ Disallow: /doctor
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://healthcare-platform-fxgn.onrender.com/sitemap.xml
+Sitemap: https://cedarline-clinic.onrender.com/sitemap.xml
