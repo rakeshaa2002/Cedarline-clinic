@@ -139,41 +139,55 @@ export function Navbar() {
     <header className="sticky top-0 z-50">
       {/* Utility bar */}
       <div className="bg-ink-900 text-ink-200 border-b border-white/10 shadow-xs">
-        <div className="container-page flex min-h-[3rem] py-2.5 sm:h-13 items-center justify-between text-sm sm:text-[0.9375rem]">
-          <div className="flex items-center gap-2.5 sm:gap-3.5 flex-wrap">
-            <span className="relative flex size-2.5">
+        <div className="container-page flex h-10 sm:h-12 items-center justify-between text-xs sm:text-[0.9375rem] gap-2 whitespace-nowrap">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 whitespace-nowrap">
+            <span className="relative flex size-2 sm:size-2.5 shrink-0">
               <span className={cn('absolute inline-flex size-full animate-ping rounded-full opacity-75', today?.closed ? 'bg-amber-400' : 'bg-emerald-400')} />
-              <span className={cn('relative inline-flex size-2.5 rounded-full', today?.closed ? 'bg-amber-500' : 'bg-emerald-500')} />
+              <span className={cn('relative inline-flex size-2 sm:size-2.5 rounded-full', today?.closed ? 'bg-amber-500' : 'bg-emerald-500')} />
             </span>
-            <span className="flex items-center gap-2 font-medium text-ink-100">
-              <Clock className="size-4.5 text-brand-300 shrink-0" aria-hidden="true" />
-              <span className="font-semibold text-white">
-                {today ? (today.closed ? 'Closed today' : `Open today ${today.open} – ${today.close}`) : 'Mon–Sat appointments'}
+            <span className="inline-flex items-center gap-1.5 font-medium text-ink-100 whitespace-nowrap">
+              <Clock className="size-3.5 sm:size-4 text-brand-300 shrink-0" aria-hidden="true" />
+              <span className="font-semibold text-white whitespace-nowrap">
+                {today ? (
+                  today.closed ? (
+                    'Closed today'
+                  ) : (
+                    <>
+                      <span>Open </span>
+                      <span className="hidden min-[400px]:inline">today </span>
+                      <span>{today.open}–{today.close}</span>
+                    </>
+                  )
+                ) : (
+                  'Mon–Sat appointments'
+                )}
               </span>
             </span>
-            <span className="hidden sm:inline text-ink-500">·</span>
-            <span className="hidden sm:inline text-ink-300 font-medium">
+            <span className="hidden lg:inline text-ink-500">·</span>
+            <span className="hidden lg:inline text-ink-300 font-medium">
               {clinic ? `${clinic.address_line.split(',').slice(-1)[0].trim()}, ${clinic.city}` : 'Indiranagar, Bengaluru'}
             </span>
           </div>
           {clinic && (
-            <div className="flex items-center gap-4 sm:gap-6 text-sm sm:text-[0.9375rem]">
+            <div className="flex items-center gap-2 sm:gap-5 shrink-0 text-xs sm:text-[0.9375rem] whitespace-nowrap">
               <a
                 href={`https://wa.me/${(clinic.whatsapp || clinic.phone).replace(/\D/g, '')}?text=${encodeURIComponent('Hello Cedarline Clinic, I have an enquiry.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-2 font-semibold text-white transition-colors hover:text-emerald-400"
+                className="group inline-flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-emerald-400 shrink-0"
+                aria-label="Chat with Cedarline on WhatsApp"
               >
-                <WhatsAppIcon className="size-5 text-[#25D366] transition-transform group-hover:scale-110" aria-hidden="true" />
-                <span className="hidden sm:inline">WhatsApp</span>
+                <WhatsAppIcon className="size-4 sm:size-4.5 text-[#25D366] transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />
+                <span className="hidden md:inline">WhatsApp</span>
               </a>
-              <span className="text-ink-600">·</span>
+              <span className="text-ink-600 hidden min-[360px]:inline">·</span>
               <a
                 href={`tel:${clinic.phone.replace(/\s/g, '')}`}
-                className="group flex items-center gap-2 font-bold text-white transition-colors hover:text-brand-300"
+                className="group inline-flex items-center gap-1.5 font-bold text-white transition-colors hover:text-brand-300 shrink-0 whitespace-nowrap"
+                aria-label={`Call ${clinic.phone}`}
               >
-                <Phone className="size-4.5 text-brand-300 transition-transform group-hover:scale-110" aria-hidden="true" />
-                <span>{clinic.phone}</span>
+                <Phone className="size-3.5 sm:size-4 text-brand-300 transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />
+                <span className="whitespace-nowrap">{clinic.phone}</span>
               </a>
             </div>
           )}
