@@ -14,7 +14,25 @@ import {
 export const SITE_NAME = 'Cedarline Multispeciality Clinic'
 export const SITE_URL = (import.meta.env.VITE_SITE_URL ?? '').replace(/\/$/, '')
 
+export const DEFAULT_CLINIC = {
+  name: SITE_NAME,
+  phone: '+91 94835 41927',
+  whatsapp: '+91 94835 41927',
+  address_line: '2nd Floor, Cedar Court, 48 Lakeside Avenue, Indiranagar',
+  city: 'Bengaluru',
+  opening_hours: [
+    { day: 'Monday', open: '09:00', close: '20:00', closed: false },
+    { day: 'Tuesday', open: '09:00', close: '20:00', closed: false },
+    { day: 'Wednesday', open: '09:00', close: '20:00', closed: false },
+    { day: 'Thursday', open: '09:00', close: '20:00', closed: false },
+    { day: 'Friday', open: '09:00', close: '20:00', closed: false },
+    { day: 'Saturday', open: '09:00', close: '17:00', closed: false },
+    { day: 'Sunday', open: null, close: null, closed: true },
+  ],
+}
+
 /** Static marketing copy for the fictional clinic. Dynamic data (doctors, services, hours) comes from the API. */
+
 
 export const DEPARTMENTS = [
   {

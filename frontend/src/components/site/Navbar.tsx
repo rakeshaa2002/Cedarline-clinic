@@ -16,6 +16,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ButtonLink } from '@/components/ui/Button'
 import { Logo } from '@/components/site/Logo'
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
+import { DEFAULT_CLINIC } from '@/content/site'
 import { getClinicCurrentStatus, useClinicInfo, useServices } from '@/hooks/useClinic'
 import { cn } from '@/utils/format'
 
@@ -78,7 +79,8 @@ export function Navbar() {
     const timer = setInterval(() => setNow(new Date()), 30000)
     return () => clearInterval(timer)
   }, [])
-  const status = clinic ? getClinicCurrentStatus(clinic.opening_hours, now) : undefined
+  const activeClinic = clinic ?? DEFAULT_CLINIC
+  const status = getClinicCurrentStatus(activeClinic.opening_hours, now)
   const servicesActive = location.pathname.startsWith('/services')
   const count = servicesList?.length
   const SERVICE_LINKS = BASE_SERVICE_LINKS.map((s) =>
@@ -193,32 +195,30 @@ export function Navbar() {
             </span>
             <span className="hidden lg:inline text-ink-500">·</span>
             <span className="hidden lg:inline text-ink-300 font-medium">
-              {clinic ? `${clinic.address_line.split(',').slice(-1)[0].trim()}, ${clinic.city}` : 'Indiranagar, Bengaluru'}
+              {`${activeClinic.address_line.split(',').slice(-1)[0].trim()}, ${activeClinic.city}`}
             </span>
           </div>
-          {clinic && (
-            <div className="flex items-center gap-2 sm:gap-5 shrink-0 text-xs sm:text-[0.9375rem] whitespace-nowrap">
-              <a
-                href={`https://wa.me/${(clinic.whatsapp || clinic.phone).replace(/\D/g, '')}?text=${encodeURIComponent('Hello Cedarline Clinic, I have an enquiry.')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-emerald-400 shrink-0"
-                aria-label="Chat with Cedarline on WhatsApp"
-              >
-                <WhatsAppIcon className="size-4 sm:size-4.5 text-[#25D366] transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />
-                <span className="hidden md:inline">WhatsApp</span>
-              </a>
-              <span className="text-ink-600 hidden min-[360px]:inline">·</span>
-              <a
-                href={`tel:${clinic.phone.replace(/\s/g, '')}`}
-                className="group inline-flex items-center gap-1.5 font-bold text-white transition-colors hover:text-brand-300 shrink-0 whitespace-nowrap"
-                aria-label={`Call ${clinic.phone}`}
-              >
-                <Phone className="size-3.5 sm:size-4 text-brand-300 transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />
-                <span className="whitespace-nowrap">{clinic.phone}</span>
-              </a>
-            </div>
-          )}
+          <div className="flex items-center gap-2 sm:gap-5 shrink-0 text-xs sm:text-[0.9375rem] whitespace-nowrap">
+            <a
+              href={`https://wa.me/${(activeClinic.whatsapp || activeClinic.phone).replace(/\D/g, '')}?text=${encodeURIComponent('Hello Cedarline Clinic, I have an enquiry.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-emerald-400 shrink-0"
+              aria-label="Chat with Cedarline on WhatsApp"
+            >
+              <WhatsAppIcon className="size-4 sm:size-4.5 text-[#25D366] transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />
+              <span className="hidden md:inline">WhatsApp</span>
+            </a>
+            <span className="text-ink-600 hidden min-[360px]:inline">·</span>
+            <a
+              href={`tel:${activeClinic.phone.replace(/\s/g, '')}`}
+              className="group inline-flex items-center gap-1.5 font-bold text-white transition-colors hover:text-brand-300 shrink-0 whitespace-nowrap"
+              aria-label={`Call ${activeClinic.phone}`}
+            >
+              <Phone className="size-3.5 sm:size-4 text-brand-300 transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />
+              <span className="whitespace-nowrap">{activeClinic.phone}</span>
+            </a>
+          </div>
         </div>
       </div>
 
