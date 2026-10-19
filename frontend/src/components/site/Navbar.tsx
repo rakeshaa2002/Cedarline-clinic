@@ -16,7 +16,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { ButtonLink } from '@/components/ui/Button'
 import { Logo } from '@/components/site/Logo'
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
-import { todayHours, useClinicInfo, useServices } from '@/hooks/useClinic'
+import { getClinicCurrentStatus, useClinicInfo, useServices } from '@/hooks/useClinic'
 import { cn } from '@/utils/format'
 
 const BASE_SERVICE_LINKS = [
@@ -73,7 +73,12 @@ export function Navbar() {
   const { data: clinic } = useClinicInfo()
   const { data: servicesList } = useServices()
   const menuRef = useRef<HTMLLIElement>(null)
-  const today = clinic ? todayHours(clinic.opening_hours) : undefined
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30000)
+    return () => clearInterval(timer)
+  }, [])
+  const status = clinic ? getClinicCurrentStatus(clinic.opening_hours, now) : undefined
   const servicesActive = location.pathname.startsWith('/services')
   const count = servicesList?.length
   const SERVICE_LINKS = BASE_SERVICE_LINKS.map((s) =>
@@ -141,23 +146,46 @@ export function Navbar() {
       <div className="bg-ink-900 text-ink-200 border-b border-white/10 shadow-xs">
         <div className="container-page flex h-10 sm:h-12 items-center justify-between text-xs sm:text-[0.9375rem] gap-2 whitespace-nowrap">
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 whitespace-nowrap">
+            {/* Real-time Open / Closed Status Dot */}
             <span className="relative flex size-2 sm:size-2.5 shrink-0">
-              <span className={cn('absolute inline-flex size-full animate-ping rounded-full opacity-75', today?.closed ? 'bg-amber-400' : 'bg-emerald-400')} />
-              <span className={cn('relative inline-flex size-2 sm:size-2.5 rounded-full', today?.closed ? 'bg-amber-500' : 'bg-emerald-500')} />
+              {status?.isOpen && (
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              )}
+              <span
+                className={cn(
+                  'relative inline-flex size-2 sm:size-2.5 rounded-full',
+                  status?.isOpen ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-rose-500',
+                )}
+              />
             </span>
             <span className="inline-flex items-center gap-1.5 font-medium text-ink-100 whitespace-nowrap">
-              <Clock className="size-3.5 sm:size-4 text-brand-300 shrink-0" aria-hidden="true" />
+              <Clock className={cn('size-3.5 sm:size-4 shrink-0', status?.isOpen ? 'text-emerald-400' : 'text-rose-400')} aria-hidden="true" />
               <span className="font-semibold text-white whitespace-nowrap">
-                {today ? (
-                  today.closed ? (
-                    'Closed today'
-                  ) : (
-                    <>
-                      <span>Open </span>
-                      <span className="hidden min-[400px]:inline">today </span>
-                      <span>{today.open}–{today.close}</span>
-                    </>
-                  )
+                {status ? (
+                  <>
+                    {/* Desktop: detailed status */}
+                    <span className="hidden sm:inline">
+                      <span className={status.isOpen ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                        {status.isOpen ? 'Currently Open' : 'Currently Closed'}
+                      </span>
+                      <span className="text-ink-400"> · </span>
+                      <span className="text-ink-200">
+                        {status.isOpen ? `Closes ${status.todayRecord?.close}` : status.label.replace('Currently Closed · ', '')}
+                      </span>
+                    </span>
+                    {/* Mobile: concise single-line label */}
+                    <span className="sm:hidden">
+                      <span className={status.isOpen ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                        {status.isOpen ? 'Open now' : 'Closed now'}
+                      </span>
+                      <span className="text-ink-400"> · </span>
+                      <span className="text-ink-200">
+                        {status.isOpen
+                          ? (status.todayRecord?.close ? `Closes ${status.todayRecord.close}` : 'Open')
+                          : (status.label.includes('tomorrow') ? 'Opens 09:00' : status.label.replace('Currently Closed · ', ''))}
+                      </span>
+                    </span>
+                  </>
                 ) : (
                   'Mon–Sat appointments'
                 )}
