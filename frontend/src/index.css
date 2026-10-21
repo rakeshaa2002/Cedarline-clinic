@@ -27,6 +27,7 @@
   --color-brand-700: #135a5f;
   --color-brand-800: #10494d;
   --color-brand-900: #0d3b3e;
+  --color-brand-950: #082a2c;
 
   --color-accent-50: #fff4ec;
   --color-accent-100: #ffe4d1;
@@ -184,6 +185,22 @@
   }
   .prose-clinic p {
     @apply mb-5 text-[1.0625rem] leading-8 text-ink-700;
+  }
+  .prose-clinic h3 {
+    @apply mt-8 mb-2 text-xl font-bold;
+  }
+  .prose-clinic ul,
+  .prose-clinic ol {
+    @apply mb-5 space-y-2 pl-6 text-[1.0625rem] leading-8 text-ink-700;
+  }
+  .prose-clinic ul {
+    @apply list-disc marker:text-brand-500;
+  }
+  .prose-clinic ol {
+    @apply list-decimal marker:font-semibold marker:text-brand-700;
+  }
+  .prose-clinic a {
+    @apply font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800;
   }
 
   /* Interactive smooth hover lift */

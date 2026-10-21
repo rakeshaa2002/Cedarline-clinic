@@ -8,12 +8,17 @@ import { PageLoader } from '@/components/ui/Feedback'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthProvider } from '@/hooks/useAuth'
 import { router } from '@/router'
+import { ThemeSync } from '@/theme/ThemeSync'
+import { applyStoredTheme } from '@/theme/themes'
+
+applyStoredTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ToastProvider>
       <AuthProvider>
         <Suspense fallback={<PageLoader />}>
+          <ThemeSync />
           <RouterProvider router={router} />
         </Suspense>
       </AuthProvider>

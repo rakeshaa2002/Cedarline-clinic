@@ -24,6 +24,10 @@ const AdminDoctorsPage = lazy(() => import('@/pages/admin/AdminDoctorsPage'))
 const AdminServicesPage = lazy(() => import('@/pages/admin/AdminServicesPage'))
 const AdminKnowledgePage = lazy(() => import('@/pages/admin/AdminKnowledgePage'))
 const AdminMessagesPage = lazy(() => import('@/pages/admin/AdminMessagesPage'))
+const AdminAppointmentsPage = lazy(() => import('@/pages/admin/AdminAppointmentsPage'))
+const AdminBlogPage = lazy(() => import('@/pages/admin/AdminBlogPage'))
+const AdminGalleryPage = lazy(() => import('@/pages/admin/AdminGalleryPage'))
+const AdminThemePage = lazy(() => import('@/pages/admin/AdminThemePage'))
 
 export const router = createBrowserRouter([
   {
@@ -57,6 +61,10 @@ export const router = createBrowserRouter([
       { path: 'services', element: <AdminServicesPage /> },
       { path: 'knowledge', element: <AdminKnowledgePage /> },
       { path: 'messages', element: <AdminMessagesPage /> },
+      { path: 'appointments', element: <AdminAppointmentsPage /> },
+      { path: 'blog', element: <AdminBlogPage /> },
+      { path: 'gallery', element: <AdminGalleryPage /> },
+      { path: 'theme', element: <AdminThemePage /> },
     ],
   },
 ])

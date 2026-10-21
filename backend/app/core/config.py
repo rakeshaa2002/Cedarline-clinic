@@ -4,6 +4,7 @@ Nothing secret is hard-coded here: secrets have no default, or a default that th
 app refuses to use in production (see `validate_production`).
 """
 
+
 from functools import lru_cache
 from typing import Literal
 
@@ -48,6 +49,29 @@ class Settings(BaseSettings):
     rate_limit_chat_per_minute: int = 20
     rate_limit_login_per_minute: int = 5
     rate_limit_contact_per_minute: int = 5
+    rate_limit_booking_per_minute: int = 5
+
+    # --- Online booking ------------------------------------------------------
+    booking_window_days: int = 60  # how far ahead patients can book
+    booking_min_notice_minutes: int = 60  # same-day slots must start at least this far ahead
+    # Public website origin, used for links in emails ("reschedule", "view clinic").
+    public_site_url: str = "http://localhost:5173"
+
+    # --- Email (SMTP). Unset host = emails are logged as "skipped", never sent. ----
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_from_email: str | None = None  # defaults to SMTP_USERNAME
+    smtp_from_name: str = "Cedarline Multispeciality Clinic"
+    smtp_use_ssl: bool = False  # True for implicit TLS (port 465); otherwise STARTTLS
+    smtp_timeout_seconds: float = 15.0
+
+    # --- Media uploads: Cloudinary when configured, else stored in PostgreSQL ----
+    cloudinary_cloud_name: str | None = None
+    cloudinary_api_key: str | None = None
+    cloudinary_api_secret: str | None = None
+    cloudinary_folder: str = "cedarline"
 
     # --- Embeddings ----------------------------------------------------------
     # "gemini" | "openai" (any OpenAI-compatible API) | "hashing" (offline, dev/test only)
@@ -64,7 +88,8 @@ class Settings(BaseSettings):
     llm_fallback_models: str = "gemini-flash-lite-latest"
     llm_temperature: float = 0.2
     # Generous because "thinking" models spend part of this budget before answering.
-    llm_max_output_tokens: int = 1024
+    # Full doctor/price listings from the live directory need room too.
+    llm_max_output_tokens: int = 2048
     ai_request_timeout_seconds: float = 20.0
 
     gemini_api_key: str | None = None
@@ -92,6 +117,25 @@ class Settings(BaseSettings):
             if v.startswith(prefix):
                 return "postgresql+psycopg://" + v[len(prefix):]
         return v
+
+    @field_validator("smtp_password")
+    @classmethod
+    def _clean_app_password(cls, v: str | None) -> str | None:
+        # Google shows app passwords as "abcd efgh ijkl mnop" and people paste them with quotes.
+        return v.strip().strip("'\"").replace(" ", "") if v else v
+
+    @field_validator("public_site_url")
+    @classmethod
+    def _no_trailing_slash(cls, v: str) -> str:
+        return v.rstrip("/")
+
+    @property
+    def smtp_configured(self) -> bool:
+        return bool(self.smtp_host and (self.smtp_from_email or self.smtp_username))
+
+    @property
+    def cloudinary_configured(self) -> bool:
+        return bool(self.cloudinary_cloud_name and self.cloudinary_api_key and self.cloudinary_api_secret)
 
     @field_validator("rag_chunk_overlap")
     @classmethod

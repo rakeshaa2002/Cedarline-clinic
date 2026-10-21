@@ -100,12 +100,12 @@ def emergency_reply(clinic_phone: str | None) -> str:
 
 
 def medical_advice_reply(department: str | None) -> str:
-    who = DEPARTMENT_NAMES.get(department or "", "one of our doctors")
+    # Routing, not diagnosis: point to the department whose doctors can examine the patient.
+    who = DEPARTMENT_NAMES[department or "general"]
     return (
         "I'm sorry, I can't diagnose conditions or recommend treatments or medicines — that needs "
         "a qualified healthcare professional who can examine you and review your history.\n\n"
-        f"You can book a consultation with {who} by calling the clinic or visiting the front desk "
-        "(see the How to book page), and they can advise you properly. If your symptoms are severe or getting worse quickly, please seek urgent "
-        "medical care.\n\nI'm happy to help with general questions about our services, doctors, "
-        "timings or booking."
+        f"The right place to start is **{who}**. You can book a consultation with one of the doctors below "
+        "(right here in the chat or on the How to book page), call the clinic or visit the front desk. "
+        "If your symptoms are severe or getting worse quickly, please seek urgent medical care."
     )

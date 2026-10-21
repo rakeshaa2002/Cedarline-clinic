@@ -1,5 +1,6 @@
 import { CalendarCheck, CheckCircle2, ChevronDown } from 'lucide-react'
 import { useState } from 'react'
+import { TransformationsSection } from '@/components/site/BeforeAfter'
 import { DoctorCard, ServiceCard } from '@/components/site/Cards'
 import { CtaBanner } from '@/components/site/CtaBanner'
 import { DoctorProfileModal } from '@/components/site/DoctorProfileModal'
@@ -134,6 +135,8 @@ export function DepartmentPage({ config }: { config: DepartmentConfig }) {
           </div>
         </div>
       </section>
+
+      <TransformationsSection department={config.department} />
 
       <section className="section">
         <div className="container-page max-w-3xl">

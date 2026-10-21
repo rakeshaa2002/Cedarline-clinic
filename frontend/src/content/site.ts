@@ -10,9 +10,16 @@ import {
   UsersRound,
   type LucideIcon,
 } from 'lucide-react'
+import { assetUrl } from '@/services/api'
 
 export const SITE_NAME = 'Cedarline Multispeciality Clinic'
 export const SITE_URL = (import.meta.env.VITE_SITE_URL ?? '').replace(/\/$/, '')
+
+/** Absolute URL for an image path: structured data and Open Graph tags need full URLs. */
+export function absoluteUrl(path: string): string {
+  const url = assetUrl(path)
+  return /^https?:/.test(url) ? url : `${SITE_URL}${url}`
+}
 
 export const DEFAULT_CLINIC = {
   name: SITE_NAME,

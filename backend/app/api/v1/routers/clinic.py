@@ -2,14 +2,14 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload
 
 from app.api.deps import DbSession
 from app.core.exceptions import NotFoundError
 from app.core.rate_limit import rate_limit
-from app.models import BlogPost, ClinicInfo, ContactMessage, Doctor, Service
+from app.models import BlogPost, ClinicInfo, ContactMessage, Doctor, MediaFile, Service, TransformationCase
 from app.schemas.clinic import (
     BlogPostOut,
     BlogPostSummary,
@@ -20,6 +20,7 @@ from app.schemas.clinic import (
     DoctorOut,
     ServiceOut,
     TestimonialOut,
+    TransformationOut,
 )
 from app.schemas.common import Message, Page
 from app.seed import data
@@ -136,3 +137,25 @@ def get_testimonials():
 def get_clinic_highlights():
     return data.CLINIC_HIGHLIGHTS
 
+
+
+@router.get("/transformations", response_model=list[TransformationOut])
+def list_transformations(db: DbSession, department: Department | None = None):
+    """Published before/after cases (each has the patient's written consent on file)."""
+    stmt = select(TransformationCase).where(TransformationCase.is_published, TransformationCase.patient_consent)
+    if department:
+        stmt = stmt.where(TransformationCase.department == department)
+    return db.scalars(stmt.order_by(TransformationCase.sort_order, TransformationCase.id)).all()
+
+
+@router.get("/media/{media_id}", include_in_schema=False)
+def get_media(media_id: int, db: DbSession):
+    media = db.get(MediaFile, media_id)
+    if media is None:
+        raise NotFoundError("Image not found.")
+    # Uploads are never edited in place (a new upload gets a new id), so they can be cached forever.
+    return Response(
+        content=media.data,
+        media_type=media.content_type,
+        headers={"Cache-Control": "public, max-age=31536000, immutable", "X-Content-Type-Options": "nosniff"},
+    )

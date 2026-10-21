@@ -1,4 +1,4 @@
-import { BookOpenText, ExternalLink, LayoutDashboard, LogOut, Mail, Menu, Stethoscope, UsersRound, X } from 'lucide-react'
+import { BookOpenText, CalendarCheck, ExternalLink, Images, LayoutDashboard, LogOut, Mail, Menu, Newspaper, Palette, Stethoscope, UsersRound, X } from 'lucide-react'
 import { Suspense, useState, type ReactNode } from 'react'
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Logo } from '@/components/site/Logo'
@@ -10,17 +10,21 @@ const getNav = (role: 'admin' | 'staff' | 'doctor') => {
   if (role === 'doctor') {
     return [
       { to: '/admin', label: 'Doctor Dashboard', icon: LayoutDashboard, end: true },
-      { to: '/admin/messages', label: 'Patient Appointments', icon: Mail, end: false },
+      { to: '/admin/appointments', label: 'My Appointments', icon: CalendarCheck, end: false },
       { to: '/admin/doctors', label: 'Clinic Schedule & Doctors', icon: UsersRound, end: false },
     ]
   }
   return [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/admin/appointments', label: 'Appointments', icon: CalendarCheck, end: false },
     { to: '/admin/messages', label: 'Messages', icon: Mail, end: false },
     { to: '/admin/doctors', label: 'Doctors', icon: UsersRound, end: false },
     ...(role === 'admin'
       ? [
           { to: '/admin/services', label: 'Services', icon: Stethoscope, end: false },
+          { to: '/admin/blog', label: 'Blog', icon: Newspaper, end: false },
+          { to: '/admin/gallery', label: 'Before & after', icon: Images, end: false },
+          { to: '/admin/theme', label: 'Brand theme', icon: Palette, end: false },
           { to: '/admin/knowledge', label: 'Chatbot knowledge', icon: BookOpenText, end: false },
         ]
       : []),
@@ -43,7 +47,8 @@ export function AdminLayout() {
   if (!user) return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />
 
   // Admin-only route protection
-  if (user.role !== 'admin' && (location.pathname.startsWith('/admin/services') || location.pathname.startsWith('/admin/knowledge'))) {
+  const adminOnly = ['/admin/services', '/admin/knowledge', '/admin/blog', '/admin/gallery', '/admin/theme']
+  if (user.role !== 'admin' && adminOnly.some((p) => location.pathname.startsWith(p))) {
     return <Navigate to="/admin" replace />
   }
 

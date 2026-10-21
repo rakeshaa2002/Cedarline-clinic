@@ -12,6 +12,7 @@ one is generated and printed once.
 
 import argparse
 import logging
+import random
 import secrets
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -23,8 +24,9 @@ from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models import BlogPost, ClinicInfo, Doctor, Service, User
+from app.models import Appointment, BlogPost, ClinicInfo, Doctor, Service, User
 from app.seed import data
+from app.services.appointments import clinic_now, new_reference, slot_grid
 from app.services.knowledge_base.embeddings import get_embedder
 from app.services.knowledge_base.system_documents import reindex_all, sync_generated_documents
 
@@ -98,6 +100,65 @@ def seed_users(db: Session) -> None:
             existing.role, existing.is_active = role, True
         else:
             db.add(User(email=email, full_name=name, role=role, hashed_password=hash_password(password)))
+    db.flush()
+    # The demo doctor login is Dr. Ananya Rao: her portal shows only her own patients.
+    doctor_user = db.scalar(select(User).where(func.lower(User.email) == settings.doctor_email.lower()))
+    if doctor_user and doctor_user.doctor_id is None:
+        doctor_user.doctor_id = db.scalar(select(Doctor.id).where(Doctor.slug == "ananya-rao"))
+
+
+SAMPLE_PATIENTS = [
+    ("Priya Sharma", "+91 98451 23456", "Annual preventive health check-up; feeling tired lately"),
+    ("Rahul Varma", "+91 97412 88990", "Braces / clear aligner evaluation for crowded front teeth"),
+    ("Sneha Kulkarni", "+91 99001 44556", "Acne flare-up on cheeks for three weeks"),
+    ("Amit Patel", "+91 98860 11223", "Hair thinning at the crown and dry scalp"),
+    ("Divya Nambiar", "+91 94481 77889", "Booster vaccination and growth check for my son"),
+    ("Karthik Iyer", "+91 99863 45120", "Routine dental cleaning and check-up"),
+    ("Meghana Rao", "+91 98805 66771", "Blood pressure review and medication follow-up"),
+    ("Farhan Sheikh", "+91 97390 21456", "Pigmentation on forehead, would like a consultation"),
+    ("Lakshmi Menon", "+91 98444 90876", "Hair transplant consultation"),
+    ("Arjun Desai", "+91 99161 33452", "Tooth sensitivity when drinking cold water"),
+]
+CANCEL_REASONS = ["Doctor on emergency duty", "Requested by patient", "Slot overbooked"]
+
+
+def seed_sample_appointments(db: Session) -> None:
+    """Fictional bookings so the triage queue and analytics have something to show (only into an empty table)."""
+    if db.scalar(select(func.count(Appointment.id))):
+        return
+    rng = random.Random(42)
+    doctors = list(db.scalars(select(Doctor).where(Doctor.is_active).order_by(Doctor.id)))
+    today = clinic_now().date()
+    stamp = datetime.now(ZoneInfo("UTC"))
+    used: set[tuple[int, object, object]] = set()
+
+    def add(day, status: str) -> None:
+        options = [d for d in doctors if slot_grid(d, day)]
+        if not options:
+            return
+        doctor = rng.choice(options)
+        start, end = rng.choice(slot_grid(doctor, day))
+        if (doctor.id, day, start) in used:
+            return
+        used.add((doctor.id, day, start))
+        name, phone, reason = rng.choice(SAMPLE_PATIENTS)
+        db.add(Appointment(
+            reference=new_reference(), doctor_id=doctor.id, department=doctor.department,
+            consultation_fee=doctor.consultation_fee, patient_name=name, patient_phone=phone,
+            patient_email=name.lower().replace(" ", ".") + "@patients.example",  # never emailed
+            reason=reason, appointment_date=day, start_time=start, end_time=end, status=status,
+            source=rng.choice(["website", "website", "chatbot"]),
+            confirmed_at=stamp if status in ("confirmed", "completed") else None,
+            completed_at=stamp if status == "completed" else None,
+            cancelled_at=stamp if status == "cancelled" else None,
+            cancellation_reason=rng.choice(CANCEL_REASONS) if status == "cancelled" else None,
+        ))
+
+    for offset in range(-150, 0, 2):  # history: mostly completed visits
+        add(today + timedelta(days=offset), rng.choices(["completed", "cancelled"], [0.85, 0.15])[0])
+    for offset in range(1, 15):  # the coming fortnight: some confirmed, some awaiting triage
+        for _ in range(2):
+            add(today + timedelta(days=offset), rng.choice(["pending", "confirmed"]))
 
 
 def seed_sample_messages(db: Session) -> None:
@@ -163,6 +224,7 @@ def main() -> None:
         seed_catalogue(db)
         seed_users(db)
         seed_sample_messages(db)
+        seed_sample_appointments(db)
         db.commit()
         log.info("Clinic info, %d doctors, %d services, %d articles, users ready",
                  len(data.DOCTORS), len(data.SERVICES), len(data.BLOG_POSTS))

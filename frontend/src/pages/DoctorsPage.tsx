@@ -8,7 +8,7 @@ import { PageHero } from '@/components/site/PageHero'
 import { Seo } from '@/components/site/Seo'
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback'
 import { Input } from '@/components/ui/Form'
-import { SITE_URL } from '@/content/site'
+import { SITE_URL, absoluteUrl } from '@/content/site'
 import { useDoctors } from '@/hooks/useClinic'
 import type { Department, Doctor } from '@/types'
 import { DEPARTMENT_LABELS, cn } from '@/utils/format'
@@ -46,7 +46,7 @@ export default function DoctorsPage() {
           description: doc.bio,
           knowsAbout: doc.qualifications,
           knowsLanguage: doc.languages,
-          image: doc.photo_url ? (doc.photo_url.startsWith('http') ? doc.photo_url : `${SITE_URL}${doc.photo_url}`) : undefined,
+          image: doc.photo_url ? absoluteUrl(doc.photo_url) : undefined,
           worksFor: {
             '@type': 'MedicalClinic',
             name: 'Cedarline Multispeciality Clinic',

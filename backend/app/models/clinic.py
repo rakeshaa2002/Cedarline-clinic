@@ -20,6 +20,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TimestampMixin
 
 DEPARTMENTS = ("general", "dental", "skin", "hair", "pediatrics")
+THEMES = ("cedar", "emerald", "sapphire", "slate", "plum")
 _DEPT_CHECK = "department IN ('general', 'dental', 'skin', 'hair', 'pediatrics')"
 
 
@@ -44,6 +45,8 @@ class ClinicInfo(TimestampMixin, Base):
     # [{"day": "Monday", "open": "09:00", "close": "20:00", "closed": false}, ...]
     opening_hours: Mapped[list[dict]] = mapped_column(JSONB, default=list)
     emergency_note: Mapped[str] = mapped_column(Text)
+    # Brand palette applied to the public website and admin panel (see THEMES).
+    theme: Mapped[str] = mapped_column(String(30), default="cedar", server_default="cedar")
 
 
 class Doctor(TimestampMixin, Base):
@@ -52,6 +55,7 @@ class Doctor(TimestampMixin, Base):
         CheckConstraint(_DEPT_CHECK, name="department_valid"),
         CheckConstraint("start_time < end_time", name="shift_valid"),
         CheckConstraint("slot_minutes BETWEEN 10 AND 120", name="slot_minutes_valid"),
+        CheckConstraint("consultation_fee IS NULL OR consultation_fee >= 0", name="consultation_fee_valid"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -69,6 +73,8 @@ class Doctor(TimestampMixin, Base):
     start_time: Mapped[time] = mapped_column(Time)
     end_time: Mapped[time] = mapped_column(Time)
     slot_minutes: Mapped[int] = mapped_column(Integer, default=30)
+    # Standard first-consultation fee in INR; NULL means "confirmed by the front desk".
+    consultation_fee: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
 

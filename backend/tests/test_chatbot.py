@@ -43,7 +43,7 @@ def test_answers_from_knowledge_base_with_sources(client, knowledge, question, e
 
 def test_booking_question_offers_booking_link(client, knowledge):
     body = ask(client, "How can I book an appointment with a dentist?")
-    assert {"label": "How to book", "href": "/appointments"} in body["actions"]
+    assert {"label": "Book an Appointment", "href": "/appointments"} in body["actions"]
 
 
 def test_llm_receives_retrieved_context_and_rules(client, knowledge):
@@ -78,8 +78,12 @@ def test_unrelated_question_returns_no_context(client, knowledge):
     assert llm.calls == []  # nothing relevant was retrieved, so the LLM was never asked
 
 
-def test_empty_knowledge_base_returns_no_context(client, seeded):
-    assert ask(client, "What are the opening hours?")["status"] == "no_context"
+def test_empty_knowledge_base_still_answers_from_live_directory(client, seeded):
+    # Hours, doctors and prices are read straight from the database, so they work before indexing...
+    body = ask(client, "What are the opening hours?")
+    assert body["status"] == "answered" and "Monday: 09:00 to 20:00" in body["answer"]
+    # ...while everything else still needs the knowledge base.
+    assert ask(client, "Do you accept insurance?")["status"] == "no_context"
 
 
 def test_llm_no_answer_token_becomes_no_context(client, knowledge):
@@ -123,6 +127,113 @@ def test_embedding_outage_returns_clear_503(client, knowledge):
     resp = client.post("/api/v1/chat", json={"message": "What are your opening hours?"})
     assert resp.status_code == 503
     assert "temporarily unavailable" in resp.json()["error"]["message"]
+
+
+# --- Live clinic directory ---------------------------------------------------------------------------------
+
+
+def test_doctor_list_is_complete_with_fees_and_profile_chips(client, knowledge):
+    body = ask(client, "Which doctors do you have?")
+    assert body["status"] == "answered"
+    for name in ("Dr. Ananya Rao", "Dr. Arjun Nair", "Dr. Leela Krishnan", "Dr. Daniel D'Souza", "Dr. Rohan Kapoor"):
+        assert name in body["answer"]
+    assert "Fee: ₹700" in body["answer"]
+    assert {"label": "Browse All Doctors & Profiles", "href": "/doctors"} in body["actions"]
+    assert len(body["suggestions"]) == 4
+    assert all(s["message"].startswith("Tell me about Dr.") for s in body["suggestions"])
+
+
+def test_single_doctor_gets_profile_card_and_direct_booking_link(client, knowledge):
+    body = ask(client, "Tell me about Dr. Arjun Nair")
+    assert "Orthodontist" in body["answer"] and "₹800" in body["answer"]
+    [card] = body["doctors"]
+    assert card["slug"] == "arjun-nair" and card["consultation_fee"] == 800
+    assert card["booking_href"] == "/appointments?doctor=arjun-nair"
+    assert body["actions"][0] == {"label": "Book with Dr. Arjun Nair", "href": "/appointments?doctor=arjun-nair"}
+
+
+def test_follow_up_question_keeps_the_doctor(client, knowledge):
+    history = [
+        {"role": "user", "content": "Tell me about Dr. Sara Thomas"},
+        {"role": "assistant", "content": "Dr. Sara Thomas is our Trichologist."},
+    ]
+    body = ask(client, "What is her fee?", history)
+    assert "₹1,200" in body["answer"]
+    assert [d["slug"] for d in body["doctors"]] == ["sara-thomas"]
+
+
+def test_department_question_shows_its_doctors_and_booking(client, knowledge):
+    body = ask(client, "How can I book with a skin specialist?")
+    assert {d["slug"] for d in body["doctors"]} == {"naomi-fernandes", "rohan-kapoor"}
+    assert body["actions"][0]["href"] == "/appointments"
+    assert {"label": "Browse Skin & Dermatology Doctors", "href": "/doctors?department=skin"} in body["actions"]
+
+
+def test_price_question_lists_every_department_price(client, knowledge):
+    body = ask(client, "What are the prices for dental treatments?")
+    for service in ("Root Canal Treatment", "Dental Implants", "Teeth Whitening", "Braces & Clear Aligners"):
+        assert service in body["answer"]
+    assert "₹45,000" in body["answer"]
+    assert {"label": "Dental Care Treatments & Prices", "href": "/services/dental"} in body["actions"]
+
+
+def test_directory_reflects_admin_edits_without_reindexing(client, knowledge, db):
+    from decimal import Decimal
+
+    from sqlalchemy import select
+
+    from app.models import Doctor
+
+    doctor = db.scalar(select(Doctor).where(Doctor.slug == "meera-iyer"))
+    doctor.consultation_fee = Decimal("950")
+    db.commit()
+    body = ask(client, "What is Dr. Meera Iyer's consultation fee?")
+    assert "₹950" in body["answer"] and body["doctors"][0]["consultation_fee"] == 950
+
+
+def test_llm_receives_the_full_live_directory(client, knowledge):
+    llm = FakeLLM("**👩‍⚕️ Our doctors:**\n\n- **Dr. Ananya Rao** – Family Physician (Fee: ₹700)")
+    use_llm(llm)
+    body = ask(client, "Which doctors do you have?")
+    prompt = llm.calls[0][1][-1]["content"]
+    assert 'title="Live clinic directory"' in prompt
+    assert all(name in prompt for name in ("Dr. Ananya Rao", "Dr. Leela Krishnan", "Dr. Rohan Kapoor"))
+    assert body["status"] == "answered" and body["provider"] == "fake-llm"
+
+
+@pytest.mark.parametrize(
+    ("now", "expected_today", "expected_doctor"),
+    [
+        # Sunday 11:00 — closed all day, nobody consults.
+        ((2026, 10, 25, 11, 0), "**Today (Sunday):** closed", None),
+        # Wednesday 10:30 — open, and Dr. Ananya Rao (Mon–Sat mornings) is in.
+        ((2026, 10, 21, 10, 30), "**Today (Wednesday):** 09:00 to 20:00 (open now)", "Dr. Ananya Rao"),
+    ],
+)
+def test_today_questions_use_the_clinic_date(client, knowledge, monkeypatch, now, expected_today, expected_doctor):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    from app.services.chatbot.directory import ClinicDirectory
+
+    fixed = datetime(*now, tzinfo=ZoneInfo(get_settings().clinic_timezone))
+    original = ClinicDirectory.load.__func__
+    monkeypatch.setattr(ClinicDirectory, "load", classmethod(lambda cls, db, now=None: original(cls, db, fixed)))
+
+    llm = FakeLLM(error=True)  # the formatted directory answer is the fallback
+    use_llm(llm)
+    body = ask(client, "What are the clinic timings today?")
+    assert expected_today in body["answer"]
+    if expected_doctor:
+        assert expected_doctor in body["answer"].split("Doctors consulting today:")[1]
+    prompt = llm.calls[0][1][-1]["content"]
+    assert f"Today is {fixed:%A}, {fixed:%d %B %Y}" in prompt
+
+
+def test_numbered_steps_are_not_treated_as_facts():
+    chunk = RetrievedChunk(1, 1, "Booking", "Book online at /appointments or call the front desk.", 0.9)
+    assert is_grounded("1. Open the booking form\n2. Choose a doctor\n3. Submit your details", [chunk])
+    assert not is_grounded("Call the front desk on 12345.", [chunk])
 
 
 # --- Healthcare safety ------------------------------------------------------------------------------------
@@ -174,6 +285,14 @@ def test_department_hint_for_redirect(client, knowledge):
     body = ask(client, "My tooth hurts, what should I take?")
     assert "Dental Care" in body["answer"]
     assert {"label": "Dental treatments", "href": "/services/dental"} in body["actions"]
+    # Routing without diagnosis: the recommended department's doctors, ready to book.
+    assert {d["slug"] for d in body["doctors"]} == {"arjun-nair", "meera-iyer"}
+
+
+def test_symptoms_without_a_department_go_to_general_medicine(client, knowledge):
+    body = ask(client, "Do I have an infection?")
+    assert body["status"] == "safety_redirect" and "General Medicine" in body["answer"]
+    assert {d["slug"] for d in body["doctors"]} == {"ananya-rao", "vikram-menon"}
 
 
 # --- Input validation & misc ---------------------------------------------------------------------------------

@@ -1,34 +1,17 @@
 import { ArrowLeft, CalendarCheck, Clock } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { BlogCard, DoctorPhoto } from '@/components/site/Cards'
+import { Markdown } from '@/components/site/Markdown'
 import { Seo } from '@/components/site/Seo'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState, PageLoader } from '@/components/ui/Feedback'
 import { Badge, Breadcrumbs } from '@/components/ui/Layout'
-import { SITE_URL } from '@/content/site'
+import { SITE_URL, absoluteUrl } from '@/content/site'
 import { useApi } from '@/hooks/useApi'
+import { assetUrl } from '@/services/api'
 import { clinicApi } from '@/services/endpoints'
 import { formatLongDate } from '@/utils/format'
 
-/** Renders the article body: "## " lines become headings, other blocks become paragraphs. */
-function ArticleBody({ content }: { content: string }) {
-  return (
-    <div className="prose-clinic">
-      {content.split(/\n{2,}/).map((block, i) => {
-        if (block.startsWith('## ')) {
-          const [heading, ...rest] = block.split('\n')
-          return (
-            <div key={i}>
-              <h2>{heading.slice(3)}</h2>
-              {rest.length > 0 && <p>{rest.join(' ')}</p>}
-            </div>
-          )
-        }
-        return <p key={i}>{block}</p>
-      })}
-    </div>
-  )
-}
 
 export default function BlogPostPage() {
   const { slug = '' } = useParams()
@@ -61,7 +44,7 @@ export default function BlogPostPage() {
     headline: a.title,
     description: a.excerpt,
     url: `${SITE_URL}/blog/${a.slug}`,
-    image: a.cover_image ? (a.cover_image.startsWith('http') ? a.cover_image : `${SITE_URL}${a.cover_image}`) : undefined,
+    image: a.cover_image ? absoluteUrl(a.cover_image) : undefined,
     datePublished: a.published_at,
     inLanguage: 'en-IN',
     author: a.author
@@ -85,7 +68,7 @@ export default function BlogPostPage() {
         title={a.title}
         description={a.excerpt}
         path={`/blog/${a.slug}`}
-        image={a.cover_image ?? undefined}
+        image={a.cover_image ? absoluteUrl(a.cover_image) : undefined}
         schema={articleSchema}
       />
       <article>
@@ -114,11 +97,11 @@ export default function BlogPostPage() {
         </header>
         {a.cover_image && (
           <div className="container-page -mt-2 max-w-4xl">
-            <img src={a.cover_image} alt="" width={1200} height={750} className="aspect-[16/9] w-full rounded-[2rem] object-cover" />
+            <img src={assetUrl(a.cover_image)} alt="" width={1200} height={750} className="aspect-[16/9] w-full rounded-[2rem] object-cover" />
           </div>
         )}
         <div className="container-page max-w-3xl py-12">
-          <ArticleBody content={a.content} />
+          <Markdown content={a.content} />
           <div className="mt-12 flex flex-col gap-4 rounded-3xl bg-brand-50 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div>
               <p className="font-display text-lg font-bold text-ink-900">Have a question about your own health?</p>

@@ -3,14 +3,15 @@
     question
       │ 1. safety screen ──► emergency / medical-advice → fixed safe reply (no LLM)
       │ 2. small talk     ──► greeting / thanks → fixed reply
-      │ 3. embed query    (Embedder)
-      │ 4. retrieve       (pgvector cosine search + similarity threshold)
-      │      └─ nothing relevant → "the clinic information doesn't cover that" + contact details
-      │ 5. build prompt   (system rules + retrieved context + recent turns)
-      │ 6. generate       (LLM)  ── failure ─► extractive fallback (quotes the context)
-      │ 7. validate       NO_ANSWER token → no-context reply; ungrounded numbers/names → extractive
+      │ 3. live directory (doctors, fees, services, prices, hours, booking read from the database)
+      │ 4. embed query    (Embedder)
+      │ 5. retrieve       (pgvector cosine search + similarity threshold)
+      │      └─ nothing relevant and no directory facts → "the clinic information doesn't cover that"
+      │ 6. build prompt   (system rules + live directory + retrieved context + recent turns)
+      │ 7. generate       (LLM)  ── failure ─► formatted directory answer, else extractive quote
+      │ 8. validate       NO_ANSWER token → no-context reply; ungrounded numbers/names → fallback as in 7
       ▼
-    answer + sources + suggested page links
+    answer + sources + doctor cards + booking links + follow-up suggestions
 """
 
 import logging
@@ -22,8 +23,17 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.exceptions import ServiceUnavailableError
 from app.models import ClinicInfo
-from app.schemas.chat import ChatAction, ChatRequest, ChatResponse, ChatSource
+from app.schemas.chat import ChatAction, ChatRequest, ChatResponse, ChatSource, ChatStatus
 from app.services.chatbot import safety
+from app.services.chatbot.directory import (
+    BOOK,
+    CONTACT,
+    LIVE_SOURCE_TITLE,
+    ClinicDirectory,
+    default_suggestions,
+    detect_topics,
+    redirect_suggestions,
+)
 from app.services.chatbot.grounding import extractive_answer, is_grounded
 from app.services.chatbot.llm import LLMError, LLMProvider
 from app.services.chatbot.prompt import NO_ANSWER_TOKEN, build_messages
@@ -34,18 +44,12 @@ logger = logging.getLogger(__name__)
 
 _GREETING = re.compile(r"^\s*(hi+|hello+|hey+|good (morning|afternoon|evening)|namaste|hola)\b[\s!.?]*$", re.I)
 _THANKS = re.compile(r"^\s*(thanks?|thank you|thx|ok(ay)?|great|cool|bye|goodbye)\b[\s\w!.]{0,20}$", re.I)
-_BOOKING = re.compile(r"\b(book\w*|appointment\w*|schedul\w*|reserve|consult\w*|slot\w*|visit)\b", re.I)
-_DOCTORS = re.compile(r"\b(doctors?|dr\.?|dentists?|dermatologists?|trichologists?|specialists?|paediatrician|pediatrician)\b", re.I)
-_CONTACT = re.compile(r"\b(where|located|location|address|directions?|contact|phone|call|email|reach)\b", re.I)
 
 DEPARTMENT_ACTIONS = {
     "dental": ChatAction(label="Dental treatments", href="/services/dental"),
     "skin": ChatAction(label="Skin treatments", href="/services/skin"),
     "hair": ChatAction(label="Hair treatments", href="/services/hair"),
 }
-BOOK = ChatAction(label="How to book", href="/appointments")
-DOCTORS = ChatAction(label="Meet our doctors", href="/doctors")
-CONTACT = ChatAction(label="Contact us", href="/contact")
 
 
 class ChatService:
@@ -67,19 +71,6 @@ class ChatService:
     @property
     def provider_name(self) -> str:
         return self.llm.name if self.llm else "extractive"
-
-    def _actions(self, question: str, answer: str = "") -> list[ChatAction]:
-        actions: list[ChatAction] = []
-        department = safety.department_hint(question)
-        if department in DEPARTMENT_ACTIONS:
-            actions.append(DEPARTMENT_ACTIONS[department])
-        if _DOCTORS.search(question):
-            actions.append(DOCTORS)
-        if _CONTACT.search(question):
-            actions.append(CONTACT)
-        if _BOOKING.search(question) or "/appointments" in answer:
-            actions.insert(0, BOOK)
-        return actions[:3]
 
     @staticmethod
     def _sources(chunks: list[RetrievedChunk]) -> list[ChatSource]:
@@ -105,7 +96,8 @@ class ChatService:
             answer="I'm sorry — I couldn't find that in the clinic's approved information, so I'd rather not guess."
             + contact,
             status="no_context",
-            actions=[CONTACT] + ([BOOK] if _BOOKING.search(question) else []),
+            actions=[CONTACT] + ([BOOK] if "booking" in detect_topics(question) else []),
+            suggestions=default_suggestions(),
             provider=self.provider_name,
         )
 
@@ -124,13 +116,17 @@ class ChatService:
                 provider="safety-rules",
             )
         if screen.kind == "medical_advice":
+            # No diagnosis, but route the patient: show the recommended department's doctors to book with.
+            department = screen.department or "general"
             actions = [BOOK]
-            if screen.department in DEPARTMENT_ACTIONS:
-                actions.append(DEPARTMENT_ACTIONS[screen.department])
+            if department in DEPARTMENT_ACTIONS:
+                actions.append(DEPARTMENT_ACTIONS[department])
             return ChatResponse(
                 answer=safety.medical_advice_reply(screen.department),
                 status="safety_redirect",
                 actions=actions,
+                doctors=ClinicDirectory.load(self.db).department_cards(department),
+                suggestions=redirect_suggestions(department),
                 provider="safety-rules",
             )
 
@@ -139,18 +135,25 @@ class ChatService:
             name = self.clinic.name if self.clinic else "the clinic"
             return ChatResponse(
                 answer=f"Hello! I'm the virtual assistant for {name}. Ask me about our services, doctors, "
-                "opening hours, location, or how to book an appointment.",
+                "fees, opening hours, location, or how to book an appointment.",
                 status="answered",
+                suggestions=default_suggestions(limit=4),
                 provider="rules",
             )
         if _THANKS.match(question):
             return ChatResponse(
                 answer="You're welcome! Is there anything else I can help you with?",
                 status="answered",
+                suggestions=default_suggestions(),
                 provider="rules",
             )
 
-        # 3 + 4. Embed and retrieve.
+        # 3. Live directory facts: complete lists and current values, even before a re-index.
+        directory = ClinicDirectory.load(self.db)
+        intent = directory.analyse(question, request.history)
+        live = directory.context(intent)
+
+        # 4 + 5. Embed and retrieve.
         try:
             query_vector = self.embedder.embed_query(self._retrieval_query(request))
         except EmbeddingError as exc:
@@ -167,47 +170,45 @@ class ChatService:
             threshold=self.settings.effective_similarity_threshold,
         )
         logger.info(
-            "RAG retrieval: %d chunks above threshold (best=%.3f)",
+            "RAG retrieval: %d chunks above threshold (best=%.3f); live directory: %s",
             len(chunks),
             chunks[0].similarity if chunks else 0.0,
+            "yes" if live else "no",
         )
-        if not chunks:
+        if not chunks and live is None:
             return self._no_context(question)
 
         sources = self._sources(chunks)
+        context = ([RetrievedChunk(0, 0, LIVE_SOURCE_TITLE, live, 1.0)] if live else []) + chunks
 
-        # 5-7. Generate, then validate.
-        if self.llm is None:
-            text = extractive_answer(question, chunks)
+        def reply(text: str, status: ChatStatus, provider: str) -> ChatResponse:
+            cards = directory.cards(intent, text)
             return ChatResponse(
-                answer=text, status="answered", sources=sources,
-                actions=self._actions(question, text), provider="extractive",
+                answer=text, status=status, sources=sources,
+                actions=directory.actions(intent, cards, text), doctors=cards,
+                suggestions=directory.suggestions(intent, cards), provider=provider,
             )
 
+        def offline_answer() -> str:
+            return directory.answer(intent) or extractive_answer(question, context)
+
+        # 6-8. Generate, then validate.
+        if self.llm is None:
+            return reply(offline_answer(), "answered", "extractive")
+
         clinic_name = self.clinic.name if self.clinic else "the clinic"
-        system, messages = build_messages(question, chunks, request.history, clinic_name)
+        system, messages = build_messages(question, context, request.history, clinic_name)
         try:
             text = self.llm.generate(system, messages)
         except LLMError as exc:
             logger.warning("LLM unavailable, using extractive fallback: %s", exc)
-            text = extractive_answer(question, chunks)
-            return ChatResponse(
-                answer=text, status="fallback", sources=sources,
-                actions=self._actions(question, text), provider="extractive-fallback",
-            )
+            return reply(offline_answer(), "fallback", "extractive-fallback")
 
         if NO_ANSWER_TOKEN in text:
             return self._no_context(question)
 
-        if not is_grounded(text, chunks):
+        if not is_grounded(text, context):
             logger.warning("LLM answer failed grounding check; using extractive fallback")
-            text = extractive_answer(question, chunks)
-            return ChatResponse(
-                answer=text, status="fallback", sources=sources,
-                actions=self._actions(question, text), provider="extractive-fallback",
-            )
+            return reply(offline_answer(), "fallback", "extractive-fallback")
 
-        return ChatResponse(
-            answer=text, status="answered", sources=sources,
-            actions=self._actions(question, text), provider=self.provider_name,
-        )
+        return reply(text, "answered", self.provider_name)

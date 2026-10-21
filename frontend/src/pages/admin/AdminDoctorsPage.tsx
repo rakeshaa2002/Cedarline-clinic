@@ -1,5 +1,6 @@
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
+import { ImageUpload } from '@/components/admin/ImageUpload'
 import { DoctorPhoto } from '@/components/site/Cards'
 import { Button } from '@/components/ui/Button'
 import { Alert, ErrorState, PageLoader } from '@/components/ui/Feedback'
@@ -13,7 +14,7 @@ import { AdminPageHeader } from '@/layouts/AdminLayout'
 import type { ApiError } from '@/services/api'
 import { adminApi, type DoctorInput } from '@/services/endpoints'
 import type { Department, Doctor } from '@/types'
-import { DEPARTMENT_LABELS, WEEKDAYS_SHORT, cn, consultationDaysLabel, formatTime } from '@/utils/format'
+import { DEPARTMENT_LABELS, WEEKDAYS_SHORT, cn, consultationDaysLabel, formatPrice, formatTime } from '@/utils/format'
 
 const EMPTY: DoctorInput = {
   slug: '',
@@ -29,6 +30,7 @@ const EMPTY: DoctorInput = {
   start_time: '09:00:00',
   end_time: '13:00:00',
   slot_minutes: 30,
+  consultation_fee: null,
   is_active: true,
 }
 
@@ -105,6 +107,7 @@ export default function AdminDoctorsPage() {
               </div>
               <p className="mt-2 text-xs text-ink-500">
                 {consultationDaysLabel(d.consultation_days)} · {formatTime(d.start_time)}–{formatTime(d.end_time)} · {d.slot_minutes}-min consults
+                {d.consultation_fee !== null && ` · ${formatPrice(d.consultation_fee)}`}
               </p>
             </div>
           </Card>
@@ -243,12 +246,31 @@ function DoctorForm({ id, initial, onClose, onSaved }: { id: number | null; init
         <Field label="Experience (years)" required error={errors.experience_years}>
           {(a) => <Input {...a} type="number" min={0} max={60} value={v.experience_years} onChange={(e) => set('experience_years', Number(e.target.value))} />}
         </Field>
+        <Field label="Consultation fee (₹)" error={errors.consultation_fee} hint="Leave empty if the front desk confirms it">
+          {(a) => (
+            <Input
+              {...a}
+              type="number"
+              min={0}
+              step={50}
+              value={v.consultation_fee === null ? '' : Number(v.consultation_fee)}
+              onChange={(e) => set('consultation_fee', e.target.value === '' ? null : e.target.value)}
+            />
+          )}
+        </Field>
         <Field label="Languages" required error={errors.languages} hint="Comma-separated">
           {(a) => <Input {...a} value={languages} onChange={(e) => setLanguages(e.target.value)} />}
         </Field>
-        <Field label="Photo URL" error={errors.photo_url}>
-          {(a) => <Input {...a} value={v.photo_url ?? ''} onChange={(e) => set('photo_url', e.target.value)} placeholder="/images/doctors/name.webp" />}
-        </Field>
+        <div className="sm:col-span-2">
+          <ImageUpload
+            label="Headshot"
+            value={v.photo_url}
+            onChange={(url) => set('photo_url', url)}
+            aspect="aspect-[5/6]"
+            hint="A clear, front-facing portrait works best. Shown on the website, booking engine and chat."
+          />
+          {errors.photo_url && <p className="mt-1 text-sm text-red-700">{errors.photo_url}</p>}
+        </div>
         <Field label="Biography" required error={errors.bio} className="sm:col-span-2">
           {(a) => <Textarea {...a} rows={3} value={v.bio} onChange={(e) => set('bio', e.target.value)} />}
         </Field>

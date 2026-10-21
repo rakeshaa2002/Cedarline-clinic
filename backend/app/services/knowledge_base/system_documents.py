@@ -49,6 +49,12 @@ def _days(days: list[int]) -> str:
     return ", ".join(WEEKDAYS[d] for d in sorted(days))
 
 
+def _fee(d: Doctor) -> str:
+    if d.consultation_fee is None:
+        return f"The consultation fee for {d.full_name} is confirmed by the front desk."
+    return f"Consultation fee for {d.full_name}: INR {d.consultation_fee:,.0f}."
+
+
 def build_system_documents(db: Session) -> list[GeneratedDoc]:
     docs: list[GeneratedDoc] = []
     clinic = db.scalar(select(ClinicInfo).limit(1))
@@ -89,7 +95,7 @@ def build_system_documents(db: Session) -> list[GeneratedDoc]:
     if doctors:
         listing = "\n".join(
             f"- {d.full_name} — {d.specialization} ({DEPARTMENT_LABELS[d.department]}); "
-            f"consults {_days(d.consultation_days)}, {_fmt_time(d.start_time)} to {_fmt_time(d.end_time)}."
+            f"consults {_days(d.consultation_days)}, {_fmt_time(d.start_time)} to {_fmt_time(d.end_time)}. {_fee(d)}"
             for d in doctors
         )
         docs.append(GeneratedDoc(
@@ -106,7 +112,8 @@ def build_system_documents(db: Session) -> list[GeneratedDoc]:
                 f"Qualifications: {d.qualifications}. Experience: {d.experience_years} years.\n"
                 f"Languages spoken: {', '.join(d.languages)}.\n"
                 f"Consultation days: {_days(d.consultation_days)}. Consultation hours: "
-                f"{_fmt_time(d.start_time)} to {_fmt_time(d.end_time)} (a typical consultation lasts about {d.slot_minutes} minutes).\n\n"
+                f"{_fmt_time(d.start_time)} to {_fmt_time(d.end_time)} (a typical consultation lasts about {d.slot_minutes} minutes).\n"
+                f"{_fee(d)}\n\n"
                 f"{d.bio}",
             ))
 

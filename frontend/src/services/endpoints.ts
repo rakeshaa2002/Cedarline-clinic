@@ -1,6 +1,14 @@
 import { api } from '@/services/api'
 import type {
+  AppointmentAnalytics,
+  AppointmentDetail,
+  AppointmentList,
+  AppointmentStatus,
+  Availability,
   BlogPost,
+  BlogPostAdmin,
+  BookingConfirmation,
+  BookingInput,
   BlogPostSummary,
   ChatHealth,
   ChatResponse,
@@ -15,7 +23,10 @@ import type {
   Page,
   Service,
   Testimonial,
+  Theme,
   TokenResponse,
+  Transformation,
+  TransformationAdmin,
   User,
 } from '@/types'
 
@@ -33,7 +44,16 @@ export const clinicApi = {
   contact: (data: { name: string; email: string; phone?: string; subject: string; message: string }) =>
     api.post<{ message: string }>('/contact', data).then((r) => r.data),
   testimonials: () => api.get<Testimonial[]>('/testimonials').then((r) => r.data),
+  transformations: (department?: Department) =>
+    api.get<Transformation[]>('/transformations', { params: { department } }).then((r) => r.data),
   highlights: () => api.get<ClinicHighlights>('/clinic-highlights').then((r) => r.data),
+}
+
+/* ---------- Online booking ---------- */
+export const bookingApi = {
+  availability: (params: { date: string; department?: Department; doctor?: string }) =>
+    api.get<Availability>('/appointments/availability', { params }).then((r) => r.data),
+  book: (data: BookingInput) => api.post<BookingConfirmation>('/appointments', data).then((r) => r.data),
 }
 
 /* ---------- Chat ---------- */
@@ -53,6 +73,28 @@ export const authApi = {
 /* ---------- Admin ---------- */
 export type DoctorInput = Omit<Doctor, 'id' | 'slug'> & { slug?: string }
 export type ServiceInput = Omit<Service, 'id' | 'slug'> & { slug?: string; sort_order?: number }
+export type BlogPostInput = {
+  slug?: string
+  title: string
+  excerpt: string
+  content: string
+  category: string
+  cover_image: string | null
+  reading_minutes: number | null
+  author_id: number | null
+  is_published: boolean
+  published_at: string | null
+}
+export type TransformationInput = Omit<TransformationAdmin, 'id'>
+export type AppointmentQuery = {
+  status?: AppointmentStatus
+  department?: Department
+  q?: string
+  date_from?: string
+  date_to?: string
+  page?: number
+  page_size?: number
+}
 
 export const adminApi = {
   overview: () => api.get<Overview>('/admin/overview').then((r) => r.data),
@@ -67,6 +109,42 @@ export const adminApi = {
   updateService: (id: number, data: ServiceInput) =>
     api.put<Service>(`/admin/services/${id}`, data).then((r) => r.data),
   deleteService: (id: number) => api.delete<void>(`/admin/services/${id}`).then((r) => r.data),
+
+  appointments: (params: AppointmentQuery) =>
+    api.get<AppointmentList>('/admin/appointments', { params }).then((r) => r.data),
+  appointment: (id: number) => api.get<AppointmentDetail>(`/admin/appointments/${id}`).then((r) => r.data),
+  appointmentAnalytics: () => api.get<AppointmentAnalytics>('/admin/appointments/analytics').then((r) => r.data),
+  setAppointmentStatus: (
+    id: number,
+    data: { status: 'confirmed' | 'completed' | 'cancelled'; reason?: string; notify?: boolean },
+  ) => api.patch<AppointmentDetail>(`/admin/appointments/${id}/status`, data).then((r) => r.data),
+  updateAppointment: (
+    id: number,
+    data: { admin_notes?: string | null; appointment_date?: string; start_time?: string; doctor_id?: number; notify?: boolean },
+  ) => api.put<AppointmentDetail>(`/admin/appointments/${id}`, data).then((r) => r.data),
+  resendAppointmentEmail: (id: number, kind: 'confirmation' | 'cancellation') =>
+    api.post<AppointmentDetail>(`/admin/appointments/${id}/emails`, { kind }).then((r) => r.data),
+  deleteAppointment: (id: number) => api.delete<void>(`/admin/appointments/${id}`).then((r) => r.data),
+
+  uploadImage: (file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    return api.post<{ url: string }>('/admin/media', form, { timeout: 60_000 }).then((r) => r.data.url)
+  },
+
+  posts: () => api.get<BlogPostAdmin[]>('/admin/blog').then((r) => r.data),
+  createPost: (data: BlogPostInput) => api.post<BlogPostAdmin>('/admin/blog', data).then((r) => r.data),
+  updatePost: (id: number, data: BlogPostInput) => api.put<BlogPostAdmin>(`/admin/blog/${id}`, data).then((r) => r.data),
+  deletePost: (id: number) => api.delete<void>(`/admin/blog/${id}`).then((r) => r.data),
+
+  transformations: () => api.get<TransformationAdmin[]>('/admin/transformations').then((r) => r.data),
+  createTransformation: (data: TransformationInput) =>
+    api.post<TransformationAdmin>('/admin/transformations', data).then((r) => r.data),
+  updateTransformation: (id: number, data: TransformationInput) =>
+    api.put<TransformationAdmin>(`/admin/transformations/${id}`, data).then((r) => r.data),
+  deleteTransformation: (id: number) => api.delete<void>(`/admin/transformations/${id}`).then((r) => r.data),
+
+  setTheme: (theme: Theme) => api.put<ClinicInfo>('/admin/theme', { theme }).then((r) => r.data),
 
   messages: () => api.get<ContactMessage[]>('/admin/messages').then((r) => r.data),
   markMessageRead: (id: number) => api.patch<ContactMessage>(`/admin/messages/${id}/read`).then((r) => r.data),

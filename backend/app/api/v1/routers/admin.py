@@ -134,7 +134,13 @@ def delete_doctor(doctor_id: int, db: DbSession, _: AdminUser, tasks: Background
     if not doctor:
         raise NotFoundError("Doctor not found.")
     db.delete(doctor)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise ConflictError(
+            "This doctor has appointments on record. Mark them inactive instead so the history is kept."
+        ) from None
     tasks.add_task(refresh_knowledge_base)
     return None
 

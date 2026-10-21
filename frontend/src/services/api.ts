@@ -11,6 +11,17 @@ export const api = axios.create({
   timeout: 30_000,
 })
 
+/**
+ * Images uploaded through the admin panel are served by the API ("/api/v1/media/12"). In production
+ * the API lives on its own origin, so those paths get its prefix; every other URL passes through.
+ */
+export function assetUrl(url: string): string
+export function assetUrl(url: string | null | undefined): string | undefined
+export function assetUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined
+  return url.startsWith('/api/') ? `${import.meta.env.VITE_API_URL ?? ''}${url}` : url
+}
+
 const TOKEN_KEY = 'cedarline.admin.token'
 
 export const tokenStore = {

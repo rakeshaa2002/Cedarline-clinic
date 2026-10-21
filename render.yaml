@@ -49,6 +49,24 @@ services:
         sync: false
       - key: SEED_ON_START
         value: "true"
+      - key: PUBLIC_SITE_URL
+        value: https://cedarline-clinic.onrender.com # Frontend URL used in patient emails
+      # Patient emails (optional). Without SMTP_HOST, emails are logged as "skipped" on each appointment.
+      - key: SMTP_HOST
+        sync: false # e.g. smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false # Gmail: a 16-character App Password
+      # Image uploads (optional). Without these, images are stored in PostgreSQL.
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
 
   # =========================================================================
   # 2. Frontend Web Service (Vite + React Static SPA)

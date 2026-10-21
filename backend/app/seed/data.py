@@ -7,6 +7,7 @@ Photos are royalty-free stock images (Unsplash) and do not depict the named peop
 """
 
 from datetime import time
+from decimal import Decimal
 
 CLINIC = {
     "name": "Cedarline Multispeciality Clinic",
@@ -60,6 +61,7 @@ DOCTORS = [
         "start_time": time(9, 0),
         "end_time": time(13, 0),
         "slot_minutes": 20,
+        "consultation_fee": Decimal("700"),
     },
     {
         "slug": "vikram-menon",
@@ -76,6 +78,7 @@ DOCTORS = [
         "start_time": time(14, 0),
         "end_time": time(20, 0),
         "slot_minutes": 20,
+        "consultation_fee": Decimal("900"),
     },
     {
         "slug": "arjun-nair",
@@ -92,6 +95,7 @@ DOCTORS = [
         "start_time": time(10, 0),
         "end_time": time(17, 0),
         "slot_minutes": 30,
+        "consultation_fee": Decimal("800"),
     },
     {
         "slug": "meera-iyer",
@@ -108,6 +112,7 @@ DOCTORS = [
         "start_time": time(9, 0),
         "end_time": time(16, 0),
         "slot_minutes": 30,
+        "consultation_fee": Decimal("800"),
     },
     {
         "slug": "naomi-fernandes",
@@ -124,6 +129,7 @@ DOCTORS = [
         "start_time": time(10, 0),
         "end_time": time(16, 0),
         "slot_minutes": 30,
+        "consultation_fee": Decimal("1000"),
     },
     {
         "slug": "rohan-kapoor",
@@ -140,6 +146,7 @@ DOCTORS = [
         "start_time": time(12, 0),
         "end_time": time(17, 0),
         "slot_minutes": 30,
+        "consultation_fee": Decimal("1000"),
     },
     {
         "slug": "sara-thomas",
@@ -156,6 +163,7 @@ DOCTORS = [
         "start_time": time(10, 0),
         "end_time": time(17, 0),
         "slot_minutes": 30,
+        "consultation_fee": Decimal("1200"),
     },
     {
         "slug": "daniel-dsouza",
@@ -172,6 +180,7 @@ DOCTORS = [
         "start_time": time(11, 0),
         "end_time": time(17, 0),
         "slot_minutes": 45,
+        "consultation_fee": Decimal("1500"),
     },
     {
         "slug": "leela-krishnan",
@@ -188,6 +197,7 @@ DOCTORS = [
         "start_time": time(9, 0),
         "end_time": time(14, 0),
         "slot_minutes": 20,
+        "consultation_fee": Decimal("800"),
     },
 ]
 

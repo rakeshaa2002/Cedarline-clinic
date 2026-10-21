@@ -3,7 +3,7 @@ import { ButtonLink } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { DoctorPhoto } from '@/components/site/Cards'
 import type { Doctor } from '@/types'
-import { DEPARTMENT_LABELS, WEEKDAYS, formatTime } from '@/utils/format'
+import { DEPARTMENT_LABELS, WEEKDAYS, formatPrice, formatTime } from '@/utils/format'
 
 export function DoctorProfileModal({ doctor, onClose }: { doctor: Doctor | null; onClose: () => void }) {
   return (
@@ -40,8 +40,11 @@ export function DoctorProfileModal({ doctor, onClose }: { doctor: Doctor | null;
                 <dd className="font-medium text-ink-900">{doctor.languages.join(', ')}</dd>
               </div>
               <div>
-                <dt className="text-ink-500">Typical consultation</dt>
-                <dd className="font-medium text-ink-900">{doctor.slot_minutes} minutes</dd>
+                <dt className="text-ink-500">Consultation</dt>
+                <dd className="font-medium text-ink-900">
+                  {doctor.consultation_fee !== null && `${formatPrice(doctor.consultation_fee)} · `}
+                  {doctor.slot_minutes} minutes
+                </dd>
               </div>
             </dl>
             <h3 className="mt-6 text-sm font-semibold text-ink-900">Weekly consultation schedule</h3>

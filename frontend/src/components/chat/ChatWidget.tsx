@@ -1,34 +1,127 @@
-import { AlertTriangle, ArrowUp, BookOpen, RotateCcw, ShieldCheck, Trash2, X } from 'lucide-react'
-import { useCallback, useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react'
+import {
+  AlertTriangle,
+  ArrowRight,
+  BookOpen,
+  Calendar,
+  CalendarCheck,
+  Check,
+  ChevronDown,
+  Clock,
+  Copy,
+  MapPin,
+  Mic,
+  RotateCcw,
+  Send,
+  ShieldCheck,
+  Sparkle,
+  Stethoscope,
+  UsersRound,
+  X,
+  type LucideIcon,
+} from 'lucide-react'
+import { Fragment, lazy, Suspense, useCallback, useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import type { ChatBookingStart } from '@/components/chat/ChatBooking'
+import { Spinner } from '@/components/ui/Feedback'
+import { useVoiceInput } from '@/components/chat/useVoiceInput'
+import { DoctorPhoto } from '@/components/site/Cards'
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
 import { OPEN_CHAT_EVENT } from '@/components/chat/openChat'
 import { RichText } from '@/components/chat/RichText'
 import { toApiError } from '@/services/api'
 import { chatApi } from '@/services/endpoints'
-import type { ChatResponse, ChatTurn } from '@/types'
-import { cn } from '@/utils/format'
+import type { BookingConfirmation, ChatDoctor, ChatResponse, ChatTurn } from '@/types'
+import { cn, formatDate, formatPrice, formatTime } from '@/utils/format'
 
 interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
+  createdAt: number
   status?: ChatResponse['status']
   sources?: ChatResponse['sources']
   actions?: ChatResponse['actions']
+  doctors?: ChatResponse['doctors']
+  suggestions?: ChatResponse['suggestions']
+  booking?: BookingConfirmation // set on the confirmation message after an in-chat booking
   error?: boolean
 }
 
-const STORAGE_KEY = 'cedarline.chat.v1'
+const STORAGE_KEY = 'cedarline.chat.v2'
 const MAX_CHARS = 500
-const SUGGESTIONS = [
-  '🩺 Which doctor should I consult?',
-  '⏰ Today clinic timings & walk-in?',
-  '🦷 Dental cleaning & braces cost?',
-  '🧴 Skin rash & hair fall specialist?',
+const WHATSAPP_NUMBER = '919483541927'
+
+const WELCOME = [
+  "Hi there! 👋 I'm **Cedarline AI**, your clinic concierge. I can help you with:",
+  '',
+  '- Clinic **timings & location**',
+  '- **Doctors**, departments & consultation fees',
+  '- **Dental, skin & hair** treatments',
+  '- Or **book an appointment** in under 2 minutes!',
+].join('\n')
+
+// Shown under the welcome message until the first question is asked.
+const STARTERS = [
+  { label: '🕒 Timings & Location', question: 'What are the clinic timings and where is the clinic located?' },
+  { label: '👩‍⚕️ Doctors & Fees', question: 'Which doctors are available and what are the consultation fees?' },
+  { label: '🦷 Dental Care & Braces', question: 'What dental treatments do you offer, and how much do braces cost?' },
+  { label: '✨ Skin Treatments', question: 'What skin treatments are available at the clinic?' },
+  { label: '💇 Hair & Scalp Care', question: 'What hair and scalp treatments do you offer?' },
+  { label: '📅 Book an Appointment', question: 'How do I book an appointment?' },
 ]
 
+// Always visible above the composer.
+const QUICK = [
+  { label: '📅 Book now', question: null },
+  { label: '🕒 Timings', question: 'What are the clinic timings today?' },
+  { label: '👩‍⚕️ Doctors', question: 'Which doctors are available at the clinic?' },
+  { label: '🦷 Dental', question: 'What dental treatments do you offer?' },
+  { label: '✨ Skin', question: 'What skin treatments are available at the clinic?' },
+  { label: '💇 Hair', question: 'What hair and scalp treatments do you offer?' },
+  { label: '📍 Location', question: 'Where is the clinic located?' },
+]
+
+// The booking flow pulls in form libraries, so it's only downloaded when a patient starts booking.
+const ChatBooking = lazy(() => import('@/components/chat/ChatBooking').then((m) => ({ default: m.ChatBooking })))
+
 const uid = () => Math.random().toString(36).slice(2, 10)
+const plain = (text: string) => text.replace(/\*\*/g, '')
+const whatsappUrl = (text: string) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`
+
+function scrollToBooking() {
+  setTimeout(() => {
+    document.getElementById('book')?.scrollIntoView({ behavior: 'smooth' })
+  }, 50)
+}
+
+/** Booking links land on the form itself; "/appointments?doctor=x" keeps the doctor pre-selected. */
+const linkTarget = (href: string) => (href.startsWith('/appointments') && !href.includes('#') ? `${href}#book` : href)
+
+function actionIcon(href: string): LucideIcon {
+  if (href.startsWith('/appointments')) return Calendar
+  if (href.startsWith('/doctors')) return UsersRound
+  if (href.startsWith('/contact')) return MapPin
+  return Stethoscope
+}
+
+/** Query string doctor (e.g. "/appointments?doctor=arjun-nair") of a booking link, if any. */
+const bookingDoctor = (href: string) => new URLSearchParams(href.split('?')[1]?.split('#')[0] ?? '').get('doctor')
+
+const bookingSummary = (b: BookingConfirmation) =>
+  `${b.reference} with ${b.doctor.full_name} on ${formatDate(b.appointment_date, { weekday: 'short', day: 'numeric', month: 'short' })} at ${formatTime(b.start_time)}`
+
+/** A pre-filled WhatsApp message so reception sees what the patient already asked the assistant. */
+function consultationSummary(messages: Message[]): string {
+  const booking = [...messages].reverse().find((m) => m.booking)?.booking
+  const questions = messages.filter((m) => m.role === 'user').slice(-3).map((m) => `• ${m.content}`)
+  return [
+    'Hello Cedarline Clinic, I was chatting with your website assistant.',
+    booking && `My booking: ${bookingSummary(booking)}.`,
+    questions.length ? `I'd like help with:\n${questions.join('\n')}` : 'I would like to speak with reception.',
+  ]
+    .filter(Boolean)
+    .join('\n\n')
+}
 
 function loadMessages(): Message[] {
   try {
@@ -42,6 +135,7 @@ function loadMessages(): Message[] {
 /** Floating assistant available on every public page. History lives only in this browser tab. */
 export function ChatWidget() {
   const [open, setOpen] = useState(false)
+  const [openedAt, setOpenedAt] = useState(0)
   const [messages, setMessages] = useState<Message[]>(loadMessages)
   const [input, setInput] = useState('')
   const [pending, setPending] = useState(false)
@@ -51,6 +145,8 @@ export function ChatWidget() {
   const titleId = useId()
 
   const [showTeaser, setShowTeaser] = useState(false)
+  const [booking, setBooking] = useState<(ChatBookingStart & { key: number }) | null>(null)
+  const voice = useVoiceInput(setInput)
 
   const dismissTeaser = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation()
@@ -62,6 +158,12 @@ export function ChatWidget() {
     }
   }, [])
 
+  const openPanel = useCallback(() => {
+    dismissTeaser()
+    setOpenedAt(Date.now())
+    setOpen(true)
+  }, [dismissTeaser])
+
   useEffect(() => {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-30)))
@@ -72,7 +174,7 @@ export function ChatWidget() {
 
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages, pending, open])
+  }, [messages, pending, open, booking])
 
   useEffect(() => {
     if (open) inputRef.current?.focus()
@@ -83,12 +185,19 @@ export function ChatWidget() {
     launcherRef.current?.focus()
   }, [])
 
+  const restart = () => {
+    setMessages([])
+    setInput('')
+    setOpenedAt(Date.now())
+    inputRef.current?.focus()
+  }
+
   const send = useCallback(
     async (text: string, base?: Message[]) => {
       const question = text.trim().slice(0, MAX_CHARS)
       if (!question || pending) return
       const prior = base ?? messages
-      const userMsg: Message = { id: uid(), role: 'user', content: question }
+      const userMsg: Message = { id: uid(), role: 'user', content: question, createdAt: Date.now() }
       setMessages([...prior, userMsg])
       setInput('')
       setPending(true)
@@ -101,7 +210,17 @@ export function ChatWidget() {
         const res = await chatApi.ask(question, history)
         setMessages((m) => [
           ...m,
-          { id: uid(), role: 'assistant', content: res.answer, status: res.status, sources: res.sources, actions: res.actions },
+          {
+            id: uid(),
+            role: 'assistant',
+            content: res.answer,
+            createdAt: Date.now(),
+            status: res.status,
+            sources: res.sources,
+            actions: res.actions,
+            doctors: res.doctors,
+            suggestions: res.suggestions,
+          },
         ])
       } catch (err) {
         const e = toApiError(err)
@@ -111,7 +230,7 @@ export function ChatWidget() {
             : e.status === 503
               ? e.message
               : 'Sorry, I could not reach the clinic assistant. Please check your connection and try again.'
-        setMessages((m) => [...m, { id: uid(), role: 'assistant', content, error: true }])
+        setMessages((m) => [...m, { id: uid(), role: 'assistant', content, createdAt: Date.now(), error: true }])
       } finally {
         setPending(false)
       }
@@ -126,14 +245,42 @@ export function ChatWidget() {
   }, [send])
   useEffect(() => {
     const onOpen = (e: Event) => {
-      dismissTeaser()
-      setOpen(true)
+      openPanel()
       const question = (e as CustomEvent<string | undefined>).detail
       if (question) void sendRef.current(question)
     }
     window.addEventListener(OPEN_CHAT_EVENT, onOpen)
     return () => window.removeEventListener(OPEN_CHAT_EVENT, onOpen)
-  }, [dismissTeaser])
+  }, [openPanel])
+
+  // A new key restarts the flow even if one is already open (e.g. "Book now" on another doctor).
+  const bookingRuns = useRef(0)
+  const startBooking = (start: ChatBookingStart = {}) => setBooking({ ...start, key: ++bookingRuns.current })
+
+  const finishBooking = (b: BookingConfirmation) => {
+    setBooking(null)
+    const fee = b.consultation_fee !== null ? `\n- **Consultation fee:** ${formatPrice(b.consultation_fee)} (paid at the clinic)` : ''
+    setMessages((m) => [
+      ...m,
+      {
+        id: uid(),
+        role: 'assistant',
+        createdAt: Date.now(),
+        status: 'answered',
+        booking: b,
+        content:
+          `**✅ Slot reserved · ${b.reference}**\n\n` +
+          `- **Doctor:** ${b.doctor.full_name} (${b.doctor.specialization})\n` +
+          `- **When:** ${formatDate(b.appointment_date, { weekday: 'long', day: 'numeric', month: 'long' })}, ${formatTime(b.start_time)}` +
+          fee +
+          `\n\nThe front desk will confirm by email at **${b.patient_email}** with a calendar invite. Please arrive 10 minutes early.`,
+        suggestions: [
+          { label: 'Clinic location', message: 'Where is the clinic located?' },
+          { label: 'What to bring', message: 'What should I bring to my appointment?' },
+        ],
+      },
+    ])
+  }
 
   const retry = (errorId: string) => {
     const idx = messages.findIndex((m) => m.id === errorId)
@@ -169,10 +316,7 @@ export function ChatWidget() {
           <div
             role="status"
             aria-live="polite"
-            onClick={() => {
-              dismissTeaser()
-              setOpen(true)
-            }}
+            onClick={openPanel}
             className="group mb-3 flex cursor-pointer items-center gap-2.5 rounded-2xl border border-brand-200/90 bg-white/95 px-4 py-2 text-xs font-medium text-brand-950 shadow-[0_12px_28px_rgba(13,33,57,0.15)] backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:border-brand-400 hover:shadow-[0_16px_36px_rgba(20,133,137,0.25)] sm:px-5 sm:py-2.5 sm:text-sm animate-fade-up"
           >
             <span className="relative flex size-2.5">
@@ -195,7 +339,7 @@ export function ChatWidget() {
         {/* Floating WhatsApp Quick Action Button */}
         {!open && (
           <a
-            href="https://wa.me/919483541927?text=Hello%20Cedarline%20Clinic%2C%20I%20would%20like%20to%20enquire%20about%20an%20appointment."
+            href={whatsappUrl('Hello Cedarline Clinic, I would like to enquire about an appointment.')}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Chat with reception on WhatsApp"
@@ -231,14 +375,7 @@ export function ChatWidget() {
           <button
             ref={launcherRef}
             type="button"
-            onClick={() => {
-              if (open) {
-                close()
-              } else {
-                dismissTeaser()
-                setOpen(true)
-              }
-            }}
+            onClick={() => (open ? close() : openPanel())}
             aria-expanded={open}
             aria-controls="clinic-chat"
             aria-label={open ? 'Close Cedarline AI assistant' : 'Open Cedarline AI assistant chat'}
@@ -321,108 +458,93 @@ export function ChatWidget() {
           aria-modal="false"
           aria-labelledby={titleId}
           onKeyDown={(e) => e.key === 'Escape' && close()}
-          className="fixed inset-0 z-[65] flex animate-pop flex-col bg-white shadow-2xl transition-all duration-300 sm:inset-auto sm:right-6 sm:bottom-28 sm:h-[min(640px,calc(100vh-8.5rem))] sm:w-[420px] sm:rounded-3xl sm:border sm:border-ink-100 sm:shadow-[0_20px_60px_-15px_rgba(13,33,57,0.3)]"
+          className="fixed inset-0 z-[65] flex animate-pop flex-col overflow-hidden bg-white shadow-2xl transition-all duration-300 sm:inset-auto sm:right-6 sm:bottom-28 sm:h-[min(660px,calc(100vh-8.5rem))] sm:w-[400px] sm:rounded-3xl sm:border sm:border-ink-100 sm:shadow-[0_20px_60px_-15px_rgba(13,33,57,0.3)]"
         >
           {/* Header */}
-          <div className="flex items-center gap-3 border-b border-brand-900/40 bg-gradient-to-r from-brand-950 via-brand-900 to-teal-950 px-4 py-3.5 text-white sm:rounded-t-3xl">
-            <span className="relative grid size-11 place-items-center rounded-full overflow-hidden ring-2 ring-emerald-400/80 shadow-[0_0_14px_rgba(52,211,153,0.4)]">
-              <img
-                src="/images/medical-ai-mascot.jpg"
-                alt="Medical AI Doctor Robot"
-                className="size-full object-cover"
-              />
-              <span className="absolute right-0 bottom-0 flex size-2.5">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex size-2.5 rounded-full bg-emerald-400 ring-1 ring-brand-900"></span>
+          <div className="flex items-center gap-2.5 bg-gradient-to-r from-ink-950 via-brand-900 to-brand-600 px-4 py-3 text-white">
+            <span className="relative shrink-0">
+              <span className="block size-10 overflow-hidden rounded-full bg-white ring-2 ring-white/40">
+                <img src="/images/medical-ai-logo.jpg" alt="" className="size-full object-cover" />
               </span>
+              <span className="absolute right-0 bottom-0 size-3 rounded-full bg-emerald-400 ring-2 ring-ink-950" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 id={titleId} className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                <span>Cedarline Medical AI</span>
-                <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300 border border-emerald-400/30">
-                  24/7 Doctor AI
-                </span>
+              <h2 id={titleId} className="truncate font-display text-[1.0625rem] font-extrabold leading-tight tracking-tight text-white">
+                Cedarline AI Concierge
               </h2>
-              <p className="flex items-center gap-1.5 truncate text-xs text-brand-100 font-medium">
-                <span className="flex items-center gap-1 text-emerald-300 font-semibold">
-                  <span className="inline-block size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Online
-                </span>
-                <span>·</span>
-                <span>Ask Doctors, Timings, Symptoms & Fees</span>
+              <p className="mt-0.5 flex items-center gap-1 truncate text-xs font-medium text-white/85">
+                <span className="size-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400" aria-hidden="true" />
+                <span className="font-semibold text-emerald-300">Online</span>
+                <span aria-hidden="true">•</span>
+                <span className="truncate">Cedarline Clinic Bengaluru</span>
               </p>
             </div>
-            <a
-              href="https://wa.me/919483541927?text=Hello%20Cedarline%20Clinic%2C%20I%20would%20like%20to%20speak%20with%20reception."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="grid size-9 place-items-center rounded-xl text-emerald-300 transition-colors hover:bg-white/15 hover:text-white"
-              aria-label="Chat with front desk on WhatsApp"
-              title="Chat with front desk on WhatsApp"
+            <button
+              type="button"
+              onClick={restart}
+              disabled={pending}
+              className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-white/85 transition-colors hover:bg-white/15 hover:text-white disabled:cursor-default disabled:opacity-50"
+              aria-label="Start a new conversation"
+              title="Start a new conversation"
             >
-              <WhatsAppIcon className="size-5.5 text-[#25D366]" />
-            </a>
-            {messages.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setMessages([])}
-                className="grid size-9 place-items-center rounded-xl text-brand-100 transition-colors hover:bg-white/15 hover:text-white"
-                aria-label="Clear conversation"
-                title="Clear conversation"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            )}
+              <RotateCcw className="size-4.5" />
+            </button>
             <button
               type="button"
               onClick={close}
-              className="grid size-9 place-items-center rounded-xl text-brand-100 transition-colors hover:bg-white/15 hover:text-white"
-              aria-label="Close chat"
+              className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-white/85 transition-colors hover:bg-white/15 hover:text-white"
+              aria-label="Minimise chat"
+              title="Minimise chat"
             >
-              <X className="size-5" />
+              <ChevronDown className="size-5" />
             </button>
           </div>
 
-          <p className="flex items-start gap-2 border-b border-amber-100 bg-amber-50/90 px-4 py-2 text-xs leading-5 text-amber-900">
-            <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-amber-700" aria-hidden="true" />
-            General clinic information only — not medical advice. In an emergency, call 112.
+          <p className="flex items-center gap-1.5 border-b border-amber-100 bg-amber-50/90 px-4 py-1.5 text-[0.6875rem] leading-4 text-amber-900">
+            <ShieldCheck className="size-3.5 shrink-0 text-amber-700" aria-hidden="true" />
+            Not medical advice. In an emergency, call 112.
           </p>
 
           {/* Messages */}
-          <div ref={logRef} role="log" aria-live="polite" aria-relevant="additions" className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-ink-50/80 via-ink-50/40 to-white px-4 py-5">
-            <AssistantBubble>
-              <p>
-                Hello! I can answer questions about Cedarline's <strong>services, doctors, timings, location</strong> and{' '}
-                <strong>booking</strong>. How can I help?
-              </p>
-            </AssistantBubble>
+          <div ref={logRef} role="log" aria-live="polite" aria-relevant="additions" className="flex-1 space-y-5 overflow-y-auto bg-ink-50/60 px-4 py-5">
+            <AssistantMessage at={messages[0]?.createdAt ?? openedAt} copyText={plain(WELCOME)}>
+              <RichText text={WELCOME} onNavigate={() => setOpen(false)} />
+            </AssistantMessage>
 
             {messages.length === 0 && (
-              <div className="flex flex-wrap gap-2 pl-9" aria-label="Suggested questions">
-                {SUGGESTIONS.map((s) => (
+              <div role="group" aria-label="Suggested questions" className="flex flex-wrap gap-1.5 pl-9">
+                {STARTERS.map((s) => (
                   <button
-                    key={s}
+                    key={s.label}
                     type="button"
-                    onClick={() => void send(s)}
-                    className="rounded-full border border-brand-200/80 bg-white px-3.5 py-1.5 text-left text-xs font-medium text-brand-800 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-400 hover:bg-brand-50 hover:shadow-md cursor-pointer active:scale-95"
+                    onClick={() => void send(s.question)}
+                    className="cursor-pointer rounded-full border border-ink-200 bg-white px-3 py-1.5 text-left text-[0.8125rem] font-medium text-ink-800 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-800 hover:shadow-sm active:scale-95"
                   >
-                    {s}
+                    {s.label}
                   </button>
                 ))}
               </div>
             )}
 
-            {messages.map((m) =>
+            {messages.map((m, i) =>
               m.role === 'user' ? (
-                <div key={m.id} className="flex justify-end animate-fade-up">
-                  <p className="max-w-[85%] rounded-2xl rounded-br-md bg-gradient-to-br from-brand-700 to-brand-800 px-4 py-2.5 text-sm leading-6 whitespace-pre-wrap text-white shadow-md">
+                <div key={m.id} className="flex flex-col items-end animate-fade-up">
+                  <p className="max-w-[85%] rounded-2xl rounded-br-md bg-gradient-to-br from-brand-600 to-brand-800 px-4 py-2.5 text-sm leading-6 whitespace-pre-wrap text-white shadow-md">
                     <span className="sr-only">You said: </span>
                     {m.content}
                   </p>
+                  <span className="mt-1.5 pr-1 text-[0.6875rem] font-medium text-ink-400">
+                    <MessageTime key={m.createdAt} at={m.createdAt} />
+                  </span>
                 </div>
               ) : (
-                <AssistantBubble key={m.id} tone={m.error ? 'error' : m.status === 'emergency' ? 'emergency' : m.status === 'safety_redirect' ? 'safety' : 'default'}>
-                  <RichText text={m.content} onNavigate={() => window.innerWidth < 640 && setOpen(false)} />
+                <Fragment key={m.id}>
+                <AssistantMessage
+                  at={m.createdAt}
+                  copyText={m.error ? undefined : plain(m.content)}
+                  tone={m.error ? 'error' : m.status === 'emergency' ? 'emergency' : m.status === 'safety_redirect' ? 'safety' : 'default'}
+                >
+                  <RichText text={m.content} onNavigate={() => setOpen(false)} />
                   {m.error && (
                     <button
                       type="button"
@@ -433,52 +555,138 @@ export function ChatWidget() {
                       <RotateCcw className="size-3.5" aria-hidden="true" /> Retry
                     </button>
                   )}
-                  {!!m.actions?.length && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {m.actions.map((a) => (
-                        <Link
-                          key={a.href}
-                          to={a.href}
-                          onClick={() => window.innerWidth < 640 && setOpen(false)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-brand-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-all duration-150 hover:-translate-y-0.5 hover:bg-brand-800 hover:shadow-sm active:scale-95"
-                        >
-                          {a.label}
-                        </Link>
+                  {m.booking && (
+                    <a
+                      href={whatsappUrl(`Hello Cedarline Clinic, I just booked in your website chat: ${bookingSummary(m.booking)}. Please confirm my slot.`)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#20bd5a]"
+                    >
+                      <WhatsAppIcon className="size-4.5" /> Fast-track on WhatsApp
+                    </a>
+                  )}
+                  {!!m.doctors?.length && (
+                    <div className="mt-3.5 space-y-2.5">
+                      {m.doctors.map((d) => (
+                        <DoctorCard key={d.slug} doctor={d} onBook={() => startBooking({ doctorSlug: d.slug })} />
                       ))}
                     </div>
                   )}
                   {!!m.sources?.length && (
-                    <div className="mt-3 border-t border-ink-100 pt-2.5">
-                      <p className="mb-1.5 flex items-center gap-1 text-[0.6875rem] font-semibold tracking-wide text-ink-500 uppercase">
-                        <BookOpen className="size-3" aria-hidden="true" /> Sources
-                      </p>
-                      <ul className="flex flex-wrap gap-1.5">
-                        {m.sources.map((s) => (
-                          <li key={s.document_id} className="rounded-md bg-ink-100/80 px-2 py-0.5 text-[0.6875rem] font-medium text-ink-600">
-                            {s.title}
-                          </li>
-                        ))}
-                      </ul>
+                    <p className="mt-3 flex items-start gap-1.5 text-[0.6875rem] leading-4 text-ink-400">
+                      <BookOpen className="mt-px size-3 shrink-0" aria-hidden="true" />
+                      <span>
+                        <span className="font-semibold text-ink-500">Sources:</span> {m.sources.map((s) => s.title).join(' · ')}
+                      </span>
+                    </p>
+                  )}
+                  {!!m.actions?.length && (
+                    <div className="mt-3.5 space-y-2 border-t border-ink-100 pt-3.5">
+                      {m.actions.map((a, index) => {
+                        const Icon = actionIcon(a.href)
+                        const className = cn(
+                          'group/action flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-150 active:scale-[0.98]',
+                          index === 0
+                            ? 'bg-brand-500 text-white shadow-sm hover:bg-brand-600 hover:shadow-md'
+                            : 'bg-white text-brand-800 ring-1 ring-brand-200 hover:bg-brand-50 hover:ring-brand-300',
+                        )
+                        const body = (
+                          <>
+                            <Icon className="size-4 shrink-0" aria-hidden="true" />
+                            <span className="flex-1 text-left">{a.label}</span>
+                            <ArrowRight className="size-4 shrink-0 transition-transform group-hover/action:translate-x-0.5" aria-hidden="true" />
+                          </>
+                        )
+                        // Booking happens right here in the chat; other links open their page.
+                        return a.href.startsWith('/appointments') ? (
+                          <button key={a.href} type="button" className={className} onClick={() => startBooking({ doctorSlug: bookingDoctor(a.href) })}>
+                            {body}
+                          </button>
+                        ) : (
+                          <Link key={a.href} to={linkTarget(a.href)} onClick={() => setOpen(false)} className={className}>
+                            {body}
+                          </Link>
+                        )
+                      })}
                     </div>
                   )}
-                </AssistantBubble>
+                </AssistantMessage>
+                {i === messages.length - 1 && !pending && !!m.suggestions?.length && (
+                  <div role="group" aria-label="Follow-up questions" className="-mt-2 flex flex-wrap gap-1.5 pl-9">
+                    {m.suggestions.map((s) => (
+                      <button
+                        key={s.label}
+                        type="button"
+                        onClick={() => void send(s.message)}
+                        className="cursor-pointer rounded-full border border-ink-200 bg-white px-3 py-1.5 text-xs font-medium text-ink-800 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-800 hover:shadow-sm active:scale-95"
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                </Fragment>
               ),
             )}
 
+            {booking && !pending && (
+              <Suspense fallback={<Spinner label="Opening booking" />}>
+                <ChatBooking
+                  key={booking.key}
+                  start={booking}
+                  onDone={finishBooking}
+                  onCancel={() => setBooking(null)}
+                  onLeave={() => {
+                    setBooking(null)
+                    setOpen(false)
+                    scrollToBooking()
+                  }}
+                />
+              </Suspense>
+            )}
+
             {pending && (
-              <AssistantBubble>
+              <AssistantMessage>
                 <span className="flex items-center gap-1.5 py-1" role="status" aria-label="Assistant is typing">
                   {[0, 150, 300].map((delay) => (
                     <span key={delay} className="size-2 animate-bounce rounded-full bg-brand-500" style={{ animationDelay: `${delay}ms` }} />
                   ))}
                 </span>
-              </AssistantBubble>
+              </AssistantMessage>
             )}
           </div>
 
+          {/* Quick questions */}
+          <div className="border-t border-ink-100 bg-ink-50">
+            <div role="group" aria-label="Quick questions" className="flex items-center gap-2 overflow-x-auto px-3 pt-2.5 pb-2 whitespace-nowrap">
+              <span className="flex shrink-0 items-center gap-1 text-[0.6875rem] font-bold tracking-wider text-brand-800 uppercase">
+                <span aria-hidden="true">✨</span> Quick:
+              </span>
+              {QUICK.map((q) => (
+                <button
+                  key={q.label}
+                  type="button"
+                  onClick={() => (q.question ? void send(q.question) : startBooking())}
+                  className="shrink-0 cursor-pointer rounded-full border border-ink-200 bg-white px-3 py-1 text-xs font-medium text-ink-800 transition-all duration-150 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-800 active:scale-95"
+                >
+                  {q.label}
+                </button>
+              ))}
+              <a
+                href={whatsappUrl(consultationSummary(messages))}
+                title="Continue on WhatsApp with a summary of this chat"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-medium text-emerald-700 transition-all duration-150 hover:border-emerald-300 hover:bg-emerald-50 active:scale-95"
+              >
+                <WhatsAppIcon className="size-3.5 text-[#25D366]" /> WhatsApp
+              </a>
+            </div>
+          </div>
+
           {/* Composer */}
-          <form onSubmit={onSubmit} className="border-t border-ink-100 bg-white p-3 sm:rounded-b-3xl">
-            <div className="flex items-end gap-2 rounded-2xl border border-ink-200/90 bg-white p-1.5 pl-3.5 shadow-xs transition-all duration-200 focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-500/15 focus-within:shadow-sm">
+          <form onSubmit={onSubmit} className="bg-white px-3 pt-2.5 pb-2.5">
+            <div className="flex items-end gap-2 rounded-2xl border-2 border-brand-500/60 bg-white py-1.5 pr-1.5 pl-3.5 transition-all duration-200 focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-500/15">
               <label htmlFor="chat-input" className="sr-only">
                 Ask a question about the clinic
               </label>
@@ -490,22 +698,52 @@ export function ChatWidget() {
                 maxLength={MAX_CHARS}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={onKeyDown}
-                placeholder="Ask about services, doctors, timings…"
+                placeholder={voice.listening ? 'Listening… speak now' : 'Ask about doctors, fees, treatments…'}
                 className="max-h-28 min-h-9 flex-1 resize-none bg-transparent py-1.5 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none"
               />
+              {voice.supported && (
+                <button
+                  type="button"
+                  onClick={voice.listening ? voice.stop : voice.start}
+                  aria-pressed={voice.listening}
+                  aria-label={voice.listening ? 'Stop voice input' : 'Speak your question'}
+                  title={voice.listening ? 'Stop listening' : 'Speak your question'}
+                  className={cn(
+                    'grid size-9 shrink-0 cursor-pointer place-items-center rounded-xl transition-all',
+                    voice.listening ? 'animate-pulse bg-red-500 text-white shadow-md' : 'text-ink-500 hover:bg-brand-50 hover:text-brand-700',
+                  )}
+                >
+                  <Mic className="size-4.5" />
+                </button>
+              )}
               <button
                 type="submit"
                 disabled={!input.trim() || pending}
-                className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:from-accent-600 hover:to-accent-700 active:scale-95 disabled:from-ink-200 disabled:to-ink-200 disabled:shadow-none disabled:hover:translate-y-0 cursor-pointer"
+                className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-xl bg-brand-500 text-white shadow-sm transition-all duration-200 hover:bg-brand-600 hover:shadow-md active:scale-95 disabled:cursor-default disabled:bg-ink-300 disabled:shadow-none"
                 aria-label="Send message"
               >
-                <ArrowUp className="size-4.5" />
+                <Send className="size-4" />
               </button>
             </div>
-            <p className="mt-1.5 flex justify-between px-1 text-[0.6875rem] text-ink-400">
-              <span>Enter to send · Shift+Enter for a new line</span>
-              <span aria-live="polite">{input.length > MAX_CHARS - 80 ? `${MAX_CHARS - input.length} left` : ''}</span>
-            </p>
+            <div className="mt-2 flex items-center justify-between gap-3 px-1 text-[0.6875rem]">
+              <span className="flex min-w-0 items-center gap-1 truncate font-medium text-ink-500">
+                <span aria-hidden="true">✨</span> Cedarline AI Concierge
+                {voice.error && <span className="text-red-700">· {voice.error}</span>}
+                <span aria-live="polite" className="text-amber-700">
+                  {input.length > MAX_CHARS - 80 ? `· ${MAX_CHARS - input.length} left` : ''}
+                </span>
+              </span>
+              <Link
+                to="/appointments#book"
+                onClick={() => {
+                  setOpen(false)
+                  scrollToBooking()
+                }}
+                className="inline-flex shrink-0 items-center gap-1 font-semibold text-brand-600 transition-colors hover:text-brand-800 hover:underline"
+              >
+                <CalendarCheck className="size-3.5" aria-hidden="true" /> Book Online
+              </Link>
+            </div>
           </form>
         </div>
       )}
@@ -513,43 +751,126 @@ export function ChatWidget() {
   )
 }
 
-function AssistantBubble({
+/** Compact doctor profile inside an answer: photo, specialty, schedule, fee and a direct booking link. */
+function DoctorCard({ doctor, onBook }: { doctor: ChatDoctor; onBook: () => void }) {
+  return (
+    <div className="flex gap-3 rounded-2xl bg-white p-3 shadow-[0_4px_14px_-6px_rgba(13,33,57,0.18)] ring-1 ring-ink-100">
+      <DoctorPhoto doctor={doctor} className="size-14 shrink-0 rounded-xl text-lg" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm leading-5 font-bold text-ink-900">{doctor.full_name}</p>
+        <p className="text-xs leading-4 text-ink-500">
+          {doctor.specialization} · {doctor.experience_years} yrs exp.
+        </p>
+        <p className="mt-1 flex items-start gap-1 text-[0.6875rem] leading-4 text-ink-500">
+          <Clock className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
+          {doctor.schedule}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+          <span className="rounded-md bg-brand-50 px-2 py-0.5 text-[0.6875rem] font-semibold whitespace-nowrap text-brand-800 ring-1 ring-brand-100">
+            {doctor.consultation_fee !== null ? `Consultation: ${formatPrice(doctor.consultation_fee)}` : 'Fee at front desk'}
+          </span>
+          <button
+            type="button"
+            onClick={onBook}
+            className="shrink-0 cursor-pointer text-xs font-bold text-brand-700 underline-offset-2 hover:text-brand-800 hover:underline"
+            aria-label={`Book an appointment with ${doctor.full_name}`}
+          >
+            Book now →
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** "Just now" for the first minute, then the clock time (e.g. 5:06 PM). */
+function MessageTime({ at }: { at: number }) {
+  const [fresh, setFresh] = useState(() => Date.now() - at < 60_000)
+
+  useEffect(() => {
+    if (!fresh) return
+    const t = setTimeout(() => setFresh(false), Math.max(0, at + 60_000 - Date.now()))
+    return () => clearTimeout(t)
+  }, [at, fresh])
+
+  return (
+    <time dateTime={new Date(at).toISOString()}>
+      {fresh ? 'Just now' : new Date(at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+    </time>
+  )
+}
+
+function AssistantMessage({
   children,
   tone = 'default',
+  at,
+  copyText,
 }: {
   children: ReactNode
   tone?: 'default' | 'error' | 'emergency' | 'safety'
+  at?: number
+  copyText?: string
 }) {
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (!copied) return
+    const t = setTimeout(() => setCopied(false), 1500)
+    return () => clearTimeout(t)
+  }, [copied])
+
+  const copy = async () => {
+    if (!copyText) return
+    try {
+      await navigator.clipboard.writeText(copyText)
+      setCopied(true)
+    } catch {
+      /* clipboard unavailable (e.g. insecure context) */
+    }
+  }
+
+  const alert = tone === 'emergency' || tone === 'error'
+
   return (
-    <div className="flex gap-2.5 animate-fade-up">
-      <span
-        className={cn(
-          'mt-0.5 grid size-7 shrink-0 place-items-center rounded-full overflow-hidden shadow-xs ring-1 ring-brand-200/80',
-          tone === 'emergency' || tone === 'error' ? 'bg-red-100 text-red-700' : 'bg-brand-50',
-        )}
-        aria-hidden="true"
-      >
-        {tone === 'emergency' || tone === 'error' ? (
-          <AlertTriangle className="size-3.5" />
-        ) : (
-          <img
-            src="/images/medical-ai-mascot.jpg"
-            alt="Doctor AI"
-            className="size-full object-cover"
-          />
-        )}
-      </span>
-      <div
-        className={cn(
-          'max-w-[85%] rounded-2xl rounded-tl-md px-4 py-3 text-sm leading-6 shadow-sm ring-1 transition-all',
-          tone === 'default' && 'bg-white text-ink-800 ring-ink-100/90 shadow-[0_2px_8px_-2px_rgba(13,33,57,0.06)]',
-          tone === 'safety' && 'bg-amber-50 text-amber-950 ring-amber-200/90 shadow-[0_2px_8px_-2px_rgba(245,158,11,0.08)]',
-          (tone === 'emergency' || tone === 'error') && 'bg-red-50 text-red-950 ring-red-200/90 shadow-[0_2px_8px_-2px_rgba(239,68,68,0.08)]',
-        )}
-      >
-        <span className="sr-only">Assistant: </span>
-        {children}
+    <div className="animate-fade-up">
+      <div className="flex items-end gap-2.5">
+        <span
+          className={cn(
+            'grid size-8 shrink-0 place-items-center rounded-xl shadow-sm',
+            alert ? 'bg-red-100 text-red-700' : 'bg-gradient-to-br from-brand-600 to-brand-900 text-white',
+          )}
+          aria-hidden="true"
+        >
+          {alert ? <AlertTriangle className="size-4" /> : <Sparkle className="size-4 fill-current" />}
+        </span>
+        <div
+          className={cn(
+            'max-w-[85%] min-w-0 rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-6 shadow-sm ring-1 transition-all',
+            tone === 'default' && 'bg-white text-ink-800 ring-ink-100/90 shadow-[0_2px_8px_-2px_rgba(13,33,57,0.06)]',
+            tone === 'safety' && 'bg-amber-50 text-amber-950 ring-amber-200/90 shadow-[0_2px_8px_-2px_rgba(245,158,11,0.08)]',
+            alert && 'bg-red-50 text-red-950 ring-red-200/90 shadow-[0_2px_8px_-2px_rgba(239,68,68,0.08)]',
+          )}
+        >
+          <span className="sr-only">Assistant: </span>
+          {children}
+        </div>
       </div>
+      {at !== undefined && (
+        <div className="mt-1.5 flex items-center gap-3 pl-1 text-[0.6875rem] font-medium text-ink-400">
+          <MessageTime key={at} at={at} />
+          {copyText && (
+            <button
+              type="button"
+              onClick={() => void copy()}
+              className="inline-flex cursor-pointer items-center gap-1 transition-colors hover:text-brand-700"
+              aria-label={copied ? 'Copied to clipboard' : 'Copy message'}
+            >
+              {copied ? <Check className="size-3" aria-hidden="true" /> : <Copy className="size-3" aria-hidden="true" />}
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

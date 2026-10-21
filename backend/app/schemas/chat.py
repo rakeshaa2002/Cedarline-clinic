@@ -39,6 +39,29 @@ class ChatAction(BaseModel):
     href: str
 
 
+class ChatDoctor(BaseModel):
+    """A doctor card shown under the answer, built from the live doctors table."""
+
+    slug: str
+    full_name: str
+    specialization: str
+    department: str
+    qualifications: str
+    experience_years: int
+    languages: list[str]
+    photo_url: str | None
+    consultation_fee: int | None
+    schedule: str
+    booking_href: str
+
+
+class ChatSuggestion(BaseModel):
+    """A follow-up chip: `label` is shown, `message` is sent when it is tapped."""
+
+    label: str
+    message: str
+
+
 ChatStatus = Literal["answered", "no_context", "safety_redirect", "emergency", "fallback"]
 
 
@@ -47,6 +70,8 @@ class ChatResponse(BaseModel):
     status: ChatStatus
     sources: list[ChatSource] = []
     actions: list[ChatAction] = []
+    doctors: list[ChatDoctor] = []
+    suggestions: list[ChatSuggestion] = []
     provider: str
 
 

@@ -2,6 +2,7 @@ import { AlertTriangle, ArrowRight, BookOpenText, Gauge, Inbox, MessagesSquare, 
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { BookingAnalytics } from '@/components/admin/BookingAnalytics'
 import { ErrorState, PageLoader } from '@/components/ui/Feedback'
 import { Card } from '@/components/ui/Layout'
 import { useApi } from '@/hooks/useApi'
@@ -59,7 +60,7 @@ export default function AdminDashboardPage() {
         description={
           isDoctor
             ? 'Monitor incoming patient consultation requests, clinic schedule, and AI assistant inquiries.'
-            : 'How the AI assistant is being used, and the health of its knowledge base.'
+            : 'Bookings awaiting triage, clinic performance, and how the AI assistant is being used.'
         }
       />
 
@@ -79,10 +80,10 @@ export default function AdminDashboardPage() {
             </div>
             <div className="flex flex-wrap gap-2.5">
               <Link
-                to="/admin/messages"
+                to="/admin/appointments"
                 className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-brand-900 shadow-sm hover:bg-brand-50 transition-colors"
               >
-                <span>View Patient List</span>
+                <span>View My Appointments</span>
                 <ArrowRight className="size-4" />
               </Link>
               <Link
@@ -96,6 +97,9 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      <BookingAnalytics />
+
+      <h2 className="mb-4 text-lg font-bold">AI assistant</h2>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile icon={<MessagesSquare className="size-5" />} label="Questions today" value={chat.today} highlight />
         <StatTile icon={<Sparkles className="size-5" />} label={`Questions, last ${chat.window_days} days`} value={chat.total} />

@@ -1,7 +1,8 @@
-import { Bot, Building2, CheckCircle2, Clock, Mail, MessageCircleQuestion, Phone, Siren } from 'lucide-react'
+import { Bot, Building2, Calendar, CheckCircle2, Clock, Mail, MessageCircleQuestion, Phone, Siren } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { openChat } from '@/components/chat/openChat'
+import { AppointmentBookingForm } from '@/components/site/AppointmentBookingForm'
 import { DoctorPhoto } from '@/components/site/Cards'
 import { PageHero } from '@/components/site/PageHero'
 import { Seo } from '@/components/site/Seo'
@@ -39,12 +40,33 @@ export default function AppointmentsPage() {
   const { data: clinic } = useClinicInfo()
   const doctors = useDoctors()
   const [department, setDepartment] = useState<Department | 'all'>('all')
-  // "Book" on a doctor card links here with ?doctor=<slug>: highlight that doctor's schedule.
+  const [selectedDoctorForBooking, setSelectedDoctorForBooking] = useState<Doctor | null>(null)
+
+  // "Book" on a doctor card links here with ?doctor=<slug>: highlight that doctor's schedule —
+  // unless the link targets the form (#book), as the assistant's "Book with Dr. …" does.
   const focusSlug = useSearchParams()[0].get('doctor')
   const focusLoaded = Boolean(focusSlug && doctors.data?.some((d) => d.slug === focusSlug))
   useEffect(() => {
-    if (focusLoaded) document.getElementById(`doctor-${focusSlug}`)?.scrollIntoView({ block: 'center' })
+    if (!focusLoaded) return
+    const toForm = window.location.hash === '#book' || window.location.hash === '#book-form'
+    document
+      .getElementById(toForm ? 'book' : `doctor-${focusSlug}`)
+      ?.scrollIntoView(toForm ? { behavior: 'smooth' } : { block: 'center' })
   }, [focusLoaded, focusSlug])
+
+  // Support direct hash navigation e.g. /appointments#book
+  useEffect(() => {
+    if (window.location.hash === '#book' || window.location.hash === '#book-form') {
+      setTimeout(() => {
+        document.getElementById('book')?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }, [])
+
+  const handleBookDoctor = (doc: Doctor) => {
+    setSelectedDoctorForBooking(doc)
+    document.getElementById('book')?.scrollIntoView({ behavior: 'smooth' })
+  }
   const today = clinic ? todayHours(clinic.opening_hours) : undefined
   const tel = clinic ? `tel:${clinic.phone.replace(/\s/g, '')}` : undefined
   const mailto = clinic
@@ -62,16 +84,26 @@ export default function AppointmentsPage() {
     <>
       <Seo
         title="How to Book an Appointment"
-        description="Book a consultation at Cedarline Multispeciality Clinic by phone, email or at the front desk. See every doctor's consultation days, or ask our AI assistant which specialist to see."
+        description="Book a consultation at Cedarline Multispeciality Clinic online with real-time slots, or by phone, WhatsApp or at the front desk. See every doctor's consultation days and fees."
         path="/appointments"
       />
       <PageHero
         eyebrow="Appointments"
         title="Book an appointment"
-        description="Call, email or visit our front desk and the team will find a time with the right doctor. Not sure who to see? Our AI assistant can help you choose a department and check consultation days."
+        description="Schedule your outpatient consultation online, or connect with our front desk by phone or WhatsApp. Our medical team is ready to provide dedicated, unhurried care."
         crumbs={[{ label: 'Appointments' }]}
         image="/images/clinic-reception.webp"
       >
+        <a
+          href="#book"
+          onClick={(e) => {
+            e.preventDefault()
+            document.getElementById('book')?.scrollIntoView({ behavior: 'smooth' })
+          }}
+          className={buttonClasses('primary', 'lg')}
+        >
+          <Calendar className="size-5" aria-hidden="true" /> Book Online Now
+        </a>
         {clinic && (
           <>
             <a href={tel} className={buttonClasses('accent', 'lg')}>
@@ -83,14 +115,25 @@ export default function AppointmentsPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-base font-semibold text-white shadow-sm transition-all hover:bg-emerald-700 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
             >
-              <WhatsAppIcon className="size-5" aria-hidden="true" /> Chat on WhatsApp
+              <WhatsAppIcon className="size-5" aria-hidden="true" /> WhatsApp
             </a>
           </>
         )}
         <Button variant="white" size="lg" icon={<Bot className="size-5" aria-hidden="true" />} onClick={() => openChat()}>
-          Ask the AI assistant
+          Ask AI Assistant
         </Button>
       </PageHero>
+
+      {/* Online Appointment Booking Form Section */}
+      <section className="section bg-ink-50/50 py-10 sm:py-14">
+        <div className="container-page">
+          <AppointmentBookingForm
+            initialDoctorSlug={focusSlug}
+            selectedDoctor={selectedDoctorForBooking}
+            onClearDoctor={() => setSelectedDoctorForBooking(null)}
+          />
+        </div>
+      </section>
 
       {/* Ways to book */}
       <section className="section">
@@ -207,7 +250,14 @@ export default function AppointmentsPage() {
                         <Skeleton className="h-14" />
                       </li>
                     ))
-                  : listed.map((doctor) => <ScheduleRow key={doctor.id} doctor={doctor} highlighted={doctor.slug === focusSlug} />)}
+                  : listed.map((doctor) => (
+                      <ScheduleRow
+                        key={doctor.id}
+                        doctor={doctor}
+                        highlighted={doctor.slug === focusSlug}
+                        onBook={handleBookDoctor}
+                      />
+                    ))}
               </ul>
             </Card>
           )}
@@ -298,13 +348,21 @@ function WayToBook({ icon, title, text, children }: { icon: ReactNode; title: st
   )
 }
 
-function ScheduleRow({ doctor, highlighted }: { doctor: Doctor; highlighted?: boolean }) {
+function ScheduleRow({
+  doctor,
+  highlighted,
+  onBook,
+}: {
+  doctor: Doctor
+  highlighted?: boolean
+  onBook: (doctor: Doctor) => void
+}) {
   const days = doctor.consultation_days.map((d) => WEEKDAYS[d]).join(', ')
   return (
     <li
       id={`doctor-${doctor.slug}`}
       className={cn(
-        'grid scroll-mt-48 gap-4 p-5 transition-all duration-200 hover:bg-brand-50/40 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center lg:grid-cols-[minmax(0,1.2fr)_auto_minmax(9rem,auto)]',
+        'grid scroll-mt-48 gap-4 p-5 transition-all duration-200 hover:bg-brand-50/40 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center lg:grid-cols-[minmax(0,1.2fr)_auto_auto_auto]',
         highlighted && 'bg-brand-50 ring-2 ring-brand-300 ring-inset',
       )}
     >
@@ -336,6 +394,16 @@ function ScheduleRow({ doctor, highlighted }: { doctor: Doctor; highlighted?: bo
       <p className="text-sm text-ink-600 tabular-nums sm:col-span-2 lg:col-span-1 lg:text-right">
         {formatTime(doctor.start_time)} – {formatTime(doctor.end_time)}
       </p>
+      <div className="sm:col-span-2 lg:col-span-1 lg:text-right">
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => onBook(doctor)}
+          className="w-full sm:w-auto shadow-xs"
+        >
+          Book Appointment
+        </Button>
+      </div>
     </li>
   )
 }

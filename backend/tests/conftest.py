@@ -71,6 +71,7 @@ def database():
 
 
 TABLES = (
+    "appointment_emails, appointments, media_files, transformation_cases, "
     "blog_posts, chat_events, contact_messages, knowledge_chunks, knowledge_documents, "
     "services, doctors, clinic_info, users"
 )

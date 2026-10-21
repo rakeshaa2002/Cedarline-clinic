@@ -21,7 +21,10 @@ export interface ClinicInfo {
   map_embed_url: string | null
   opening_hours: OpeningHour[]
   emergency_note: string
+  theme: Theme
 }
+
+export type Theme = 'cedar' | 'emerald' | 'sapphire' | 'slate' | 'plum'
 
 export interface Doctor {
   id: number
@@ -38,6 +41,7 @@ export interface Doctor {
   start_time: string
   end_time: string
   slot_minutes: number
+  consultation_fee: string | null
   is_active: boolean
 }
 
@@ -76,6 +80,11 @@ export interface BlogPostSummary {
 
 export interface BlogPost extends BlogPostSummary {
   content: string
+}
+
+export interface BlogPostAdmin extends BlogPost {
+  is_published: boolean
+  author_id: number | null
 }
 
 export interface Page<T> {
@@ -131,11 +140,33 @@ export interface ChatTurn {
 
 export type ChatStatus = 'answered' | 'no_context' | 'safety_redirect' | 'emergency' | 'fallback'
 
+/** Doctor card attached to an answer, built from the live doctors table. */
+export interface ChatDoctor {
+  slug: string
+  full_name: string
+  specialization: string
+  department: string
+  qualifications: string
+  experience_years: number
+  languages: string[]
+  photo_url: string | null
+  consultation_fee: number | null
+  schedule: string
+  booking_href: string
+}
+
+export interface ChatSuggestion {
+  label: string
+  message: string
+}
+
 export interface ChatResponse {
   answer: string
   status: ChatStatus
   sources: { document_id: number; title: string; similarity: number }[]
   actions: { label: string; href: string }[]
+  doctors: ChatDoctor[]
+  suggestions: ChatSuggestion[]
   provider: string
 }
 
@@ -184,3 +215,130 @@ export interface ClinicHighlights {
   why_choose: HighlightItem[]
 }
 
+
+/* ---------- Online booking ---------- */
+
+export type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled'
+export type AppointmentSource = 'website' | 'chatbot' | 'admin'
+
+export interface Slot {
+  start_time: string
+  end_time: string
+  available: boolean
+}
+
+export interface DoctorAvailability {
+  doctor_id: number
+  slug: string
+  full_name: string
+  specialization: string
+  photo_url: string | null
+  consultation_fee: string | null
+  slots: Slot[]
+}
+
+export interface Availability {
+  date: string
+  clinic_open: boolean
+  doctors: DoctorAvailability[]
+}
+
+export interface BookingInput {
+  department: Department
+  doctor_slug: string | null
+  appointment_date: string
+  start_time: string
+  patient_name: string
+  patient_email: string
+  patient_phone: string
+  reason: string
+  source?: 'website' | 'chatbot'
+}
+
+export interface AppointmentDoctor {
+  id: number
+  slug: string
+  full_name: string
+  specialization: string
+  department: Department
+  photo_url: string | null
+}
+
+export interface BookingConfirmation {
+  reference: string
+  status: AppointmentStatus
+  department: Department
+  appointment_date: string
+  start_time: string
+  end_time: string
+  consultation_fee: string | null
+  patient_name: string
+  patient_email: string
+  doctor: AppointmentDoctor
+}
+
+export interface AppointmentEmail {
+  id: number
+  kind: 'received' | 'confirmation' | 'cancellation'
+  status: 'sent' | 'failed' | 'skipped'
+  recipient: string
+  subject: string
+  message_id: string | null
+  error: string | null
+  created_at: string
+}
+
+export interface Appointment extends BookingConfirmation {
+  id: number
+  source: AppointmentSource
+  patient_phone: string
+  reason: string
+  cancellation_reason: string | null
+  admin_notes: string | null
+  confirmed_at: string | null
+  completed_at: string | null
+  cancelled_at: string | null
+  created_at: string
+  updated_at: string
+  last_email: AppointmentEmail | null
+}
+
+export interface AppointmentDetail extends Appointment {
+  emails: AppointmentEmail[]
+}
+
+export interface AppointmentList extends Page<Appointment> {
+  counts: Record<AppointmentStatus, number>
+}
+
+export interface AppointmentAnalytics {
+  total: number
+  this_month: number
+  pending: number
+  today: number
+  upcoming_7_days: number
+  conversion_rate: number | null
+  cancellation_rate: number | null
+  revenue_this_month: string
+  revenue_total: string
+  by_month: { month: string; total: number; pending: number; confirmed: number; completed: number; cancelled: number }[]
+  by_department: { department: Department; total: number; revenue: string }[]
+  by_source: Partial<Record<AppointmentSource, number>>
+}
+
+/* ---------- Before / after gallery ---------- */
+
+export interface Transformation {
+  id: number
+  department: Department
+  title: string
+  description: string
+  before_image: string
+  after_image: string
+}
+
+export interface TransformationAdmin extends Transformation {
+  patient_consent: boolean
+  is_published: boolean
+  sort_order: number
+}

@@ -21,17 +21,48 @@ The platform includes an **AI Medical Assistant** that uses Retrieval-Augmented 
 
 ## Table of Contents
 
-1. [Tech Stack](#tech-stack)
-2. [System Architecture](#system-architecture)
-3. [AI Chatbot & RAG Pipeline](#ai-chatbot--rag-pipeline)
-4. [SEO & Search Engine Indexing](#seo--search-engine-indexing)
-5. [Local Development Setup](#local-development-setup)
-6. [Codebase Tour](#codebase-tour)
-7. [Common Developer Workflows](#common-developer-workflows)
-8. [Automated Testing](#automated-testing)
-9. [Configuration Reference](#configuration-reference)
-10. [Production Deployment](#production-deployment)
-11. [Troubleshooting Guide](#troubleshooting-guide)
+1. [Key Features](#key-features)
+2. [Tech Stack](#tech-stack)
+3. [System Architecture](#system-architecture)
+4. [AI Chatbot & RAG Pipeline](#ai-chatbot--rag-pipeline)
+5. [SEO & Search Engine Indexing](#seo--search-engine-indexing)
+6. [Local Development Setup](#local-development-setup)
+7. [Codebase Tour](#codebase-tour)
+8. [Common Developer Workflows](#common-developer-workflows)
+9. [Automated Testing](#automated-testing)
+10. [Configuration Reference](#configuration-reference)
+11. [Production Deployment](#production-deployment)
+12. [Troubleshooting Guide](#troubleshooting-guide)
+
+---
+
+## Key Features
+
+### Patient website
+- **Department showcases** for Dental, Skin and Hair with treatments, indicative prices, doctors and FAQs.
+- **Before & after sliders** (drag, touch or keyboard) on each department page. Cases are added by the clinic in the admin panel and can only be published with the patient's written consent; the section stays hidden until one is published.
+- **Real-time booking engine** (`/appointments`): specialty → doctor (or *first available*) → date → live time slot → details & symptoms → review. Slots come from each doctor's consultation days, hours and slot length; taken or too-soon slots are disabled. The slot is held instantly with a reference such as `CED-7K3QX9`; a PostgreSQL partial unique index makes double booking impossible even under simultaneous requests.
+- **Doctor fees** on profiles, booking cards and in the chatbot.
+
+### AI concierge (chat widget)
+- **Answers from live data**: doctors, fees, timings ("open now?", "who's in today?"), services and prices come straight from the database on every question, alongside RAG over the knowledge base.
+- **Book without leaving the chat**: the same live-slot booking flow runs inside the conversation; doctor cards and "Book with Dr. …" buttons start it pre-filled.
+- **Department routing for symptoms**: symptom questions are still never diagnosed, but the patient is pointed to the right department and shown its doctors to book with (General Medicine when unclear).
+- **WhatsApp hand-off** pre-filled with a summary of the conversation (or the booking reference).
+- **Voice input** (speech-to-text, Chrome/Edge/Safari) into the composer for the patient to review before sending.
+- Rich replies: doctor cards, booking/page buttons and follow-up suggestion chips.
+
+### Admin panel (`/admin`)
+- **Appointments triage queue** with Pending / Confirmed / Completed / Cancelled tabs, search and department filters.
+- **One-click workflow**: *Confirm* emails the patient an HTML confirmation with an **.ics calendar invite** (2-hour reminder); *Cancel* asks for a preset or custom reason and emails an apology with a one-click **reschedule link**; *Reschedule* picks a new live slot; *Resend* re-sends the latest notice; staff notes per booking.
+- **Email audit trail** on every appointment: sent / failed / skipped, Message-ID and the exact SMTP error.
+- **Booking analytics** on the dashboard: awaiting triage, today, next 7 days, conversion and cancellation rates, consultation fees this month, monthly consultations and demand by department.
+- **Doctor management** with consultation fees and headshot uploads; **blog CMS** with Markdown editor + preview, drafts, authors and cover uploads; **before & after gallery**; **live brand theme** (Cedar Teal, Clinical Emerald, Sapphire Blue, Modern Slate, Royal Plum) applied to the website and panel.
+- Doctor logins see only their own patients.
+
+### Backend services
+- **Email engine**: table-based HTML templates (consistent in Gmail, Apple Mail and Outlook), plain-text alternative, RFC 5545 invites (REQUEST / CANCEL), any SMTP provider. Without `SMTP_HOST` nothing is sent and each email is logged as *skipped*.
+- **Media storage**: uploads go to **Cloudinary** (CDN, automatic WebP/quality) when configured, otherwise into PostgreSQL (served with immutable caching). File types are checked from the file's bytes, not the browser's claim.
 
 ---
 
@@ -56,7 +87,7 @@ The platform includes an **AI Medical Assistant** that uses Retrieval-Augmented 
 ### Infrastructure & Operations
 - **Hosting**: Render (Static Site for frontend, Docker Web Service for FastAPI backend)
 - **Cloud Database**: Neon Serverless PostgreSQL with native `pgvector` extension
-- **CI/CD**: GitHub Actions (Oxlint, TypeScript checks, Docker builds, 89 unit/integration tests)
+- **CI/CD**: GitHub Actions (Oxlint, TypeScript checks, Docker builds, 128 unit/integration tests)
 
 ---
 
@@ -218,10 +249,10 @@ npm run dev
 
 ```
 healthcare-platform/
-├── .github/workflows/ci-cd.yml      # CI/CD: Oxlint, TypeScript, Docker, 89 Pytest suites
+├── .github/workflows/ci-cd.yml      # CI/CD: Oxlint, TypeScript, Docker, 128 Pytest tests
 ├── render.yaml                      # Infrastructure-as-code blueprint for Render
 ├── backend/
-│   ├── alembic/                     # Database migrations (0001: init, 0002: telemetry, 0003: doctor role)
+│   ├── alembic/                     # Migrations (0001 init · 0002 telemetry · 0003 doctor role · 0004 doctor fees · 0005 bookings, emails, media, gallery, theme)
 │   ├── app/
 │   │   ├── main.py                  # App factory, CORS regex, GZip, exception handlers
 │   │   ├── api/                     # REST routers (health, clinic, chat, auth, admin, knowledge)
@@ -233,7 +264,7 @@ healthcare-platform/
 │   │   │   ├── chatbot/             # Safety, vector retrieval, prompt building, LLM execution, grounding
 │   │   │   └── knowledge_base/      # Document parsing, chunking, embeddings, re-indexing
 │   │   └── seed/                    # Idempotent database seeder (data.py, run.py, markdown knowledge)
-│   └── tests/                       # 89 automated tests exercising API, RAG, and safety layers
+│   └── tests/                       # 128 automated tests: API, booking engine, emails, RAG and safety layers
 └── frontend/
     ├── public/                      # Static assets, Google verification token, fallback robots & sitemap
     ├── src/
@@ -283,7 +314,7 @@ alembic upgrade head
 
 ## Automated Testing
 
-The backend includes **89 automated tests** covering security, database constraints, vector retrieval, and AI safety:
+The backend includes **128 automated tests** covering security, the booking engine (slots, double-booking, triage workflow, emails and .ics), content tools, vector retrieval, and AI safety:
 
 ```bash
 cd backend
@@ -327,6 +358,13 @@ Validated at startup using Pydantic BaseSettings ([`backend/app/core/config.py`]
 | `LLM_MODEL` | `gemini-2.5-flash` | Primary reasoning and generation LLM. |
 | `LLM_FALLBACK_MODELS` | `gemini-flash-lite-latest` | Comma-separated list of fallback models tried on HTTP 429/5xx errors. |
 | `GEMINI_API_KEY` | `""` | Google AI Studio API key (kept strictly backend-side). |
+| `PUBLIC_SITE_URL` | `http://localhost:5173` | Website origin used for links in patient emails (reschedule, directions). |
+| `BOOKING_WINDOW_DAYS` | `60` | How far ahead patients can book. |
+| `BOOKING_MIN_NOTICE_MINUTES` | `60` | Same-day slots must start at least this far ahead. |
+| `SMTP_HOST` / `SMTP_PORT` | — / `587` | Outgoing mail server. Empty host = emails are logged as *skipped*, not sent. |
+| `SMTP_USERNAME` / `SMTP_PASSWORD` | — | SMTP login. Gmail App Passwords may be pasted with spaces or quotes. |
+| `SMTP_FROM_EMAIL` / `SMTP_FROM_NAME` | username / clinic name | Sender shown to patients. `SMTP_USE_SSL=true` for port 465. |
+| `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | — | Optional: store uploads on Cloudinary's CDN instead of PostgreSQL. |
 
 ### Frontend Configuration (`frontend/.env`)
 | Variable | Default | Description |
@@ -343,7 +381,7 @@ The project is continuously deployed to production using **Render** and **Neon**
 ```
 git push origin main
       │
-      ├──► GitHub Actions: Oxlint + TypeScript + 89 Pytest Suites
+      ├──► GitHub Actions: Oxlint + TypeScript + 128 Pytest tests
       │
       └──► Render Webhooks:
              ├── cedarline-api (Docker Web Service) ➔ Auto-runs migrations & seed

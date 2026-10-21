@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ButtonLink } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Layout'
 import { ServiceIcon } from '@/components/site/ServiceIcon'
+import { assetUrl } from '@/services/api'
 import type { BlogPostSummary, Doctor, Service } from '@/types'
 import {
   DEPARTMENT_LABELS,
@@ -24,7 +25,7 @@ export function DoctorPhoto({ doctor, className }: { doctor: Pick<Doctor, 'full_
   }
   return (
     <img
-      src={doctor.photo_url}
+      src={assetUrl(doctor.photo_url)}
       alt={`Portrait of ${doctor.full_name}`}
       loading="lazy"
       decoding="async"
@@ -120,7 +121,7 @@ export function BlogCard({ post }: { post: BlogPostSummary }) {
       <Link to={`/blog/${post.slug}`} className="block aspect-[16/10] overflow-hidden bg-ink-50" tabIndex={-1} aria-hidden="true">
         {post.cover_image && (
           <img
-            src={post.cover_image}
+            src={assetUrl(post.cover_image)}
             alt=""
             loading="lazy"
             decoding="async"

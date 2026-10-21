@@ -14,6 +14,7 @@ from app.services.chatbot.retrieval import RetrievedChunk
 from app.services.knowledge_base.embeddings import lexical_terms
 
 _NUMBER_RE = re.compile(r"\d+(?:[.,:]\d+)*")
+_LIST_MARKER_RE = re.compile(r"^\s*\d{1,2}[.)]\s+", re.M)
 _DOCTOR_RE = re.compile(r"\bDr\.?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)")
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])(?<!Dr\.)\s+|\n+")
 
@@ -27,7 +28,8 @@ def is_grounded(answer: str, chunks: list[RetrievedChunk]) -> bool:
     context_numbers = {_normalise_number(n) for n in _NUMBER_RE.findall(context)}
     # Also accept every individual numeric component (e.g. "9" from "9:00").
     context_numbers |= {_normalise_number(p) for n in _NUMBER_RE.findall(context) for p in re.split(r"[.,:]", n)}
-    for number in _NUMBER_RE.findall(answer):
+    # Step numbers ("1. Open the form") are formatting, not facts.
+    for number in _NUMBER_RE.findall(_LIST_MARKER_RE.sub("", answer)):
         if _normalise_number(number) not in context_numbers:
             return False
     for name in _DOCTOR_RE.findall(answer):
