@@ -82,11 +82,18 @@ const QUICK = [
 
 // The booking flow pulls in form libraries, so it's only downloaded when a patient starts booking.
 /** Medical chat emblem: a speech bubble with a medical cross, so the launcher reads as "ask a clinic assistant". */
+/** The assistant's mark: a friendly robot head wearing a stethoscope. */
 function MedicalChatIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.8L3 20.5l1.4-4.4A8.2 8.2 0 0 1 3 11.5 8.6 8.6 0 0 1 12 3a8.6 8.6 0 0 1 9 8.5Z" />
-      <path d="M12 8v7M8.5 11.5h7" strokeWidth={2.4} />
+      <path d="M9 5.5V3.5" />
+      <circle cx="9" cy="2.6" r="1" fill="currentColor" stroke="none" />
+      <rect x="2.5" y="5.5" width="13" height="10" rx="3" />
+      <circle cx="6.6" cy="10" r="1.3" fill="currentColor" stroke="none" />
+      <circle cx="11.4" cy="10" r="1.3" fill="currentColor" stroke="none" />
+      <path d="M7.5 12.9h3" strokeWidth={1.6} />
+      <path d="M9 15.5v1.5a4.75 4.75 0 0 0 9.5 0v-3.5" strokeWidth={1.8} />
+      <circle cx="18.5" cy="11.5" r="2.1" strokeWidth={1.8} />
     </svg>
   )
 }
@@ -398,9 +405,9 @@ export function ChatWidget() {
                 </div>
               ) : (
                 <div className="relative flex items-center justify-center">
-                  {/* Medical chat emblem on RUA gold: clearly different from the green WhatsApp button above it */}
+                  {/* Robot-doctor emblem on RUA gold: clearly different from the green WhatsApp button above it */}
                   <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-accent-200 via-accent-400 to-accent-600 text-brand-950 ring-2 ring-accent-200/70 shadow-[0_0_12px_rgba(212,169,79,0.55)] transition-transform duration-300 group-hover:scale-105">
-                    <MedicalChatIcon className="size-5" />
+                    <MedicalChatIcon className="size-[1.6rem]" />
                   </div>
                   {/* Pulsing Emerald Live Indicator */}
                   <span className="absolute -top-0.5 -right-0.5 flex size-3">
@@ -439,7 +446,7 @@ export function ChatWidget() {
           <div className="flex items-center gap-2.5 bg-gradient-to-r from-ink-950 via-brand-900 to-brand-600 px-4 py-3 text-white">
             <span className="relative shrink-0">
               <span className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-accent-200 via-accent-400 to-accent-600 text-brand-950 ring-2 ring-white/40" aria-hidden="true">
-                <MedicalChatIcon className="size-[1.375rem]" />
+                <MedicalChatIcon className="size-7" />
               </span>
               <span className="absolute right-0 bottom-0 size-3 rounded-full bg-emerald-400 ring-2 ring-ink-950" aria-hidden="true" />
             </span>
