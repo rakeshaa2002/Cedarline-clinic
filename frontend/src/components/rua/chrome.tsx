@@ -512,12 +512,10 @@ export function WhatsAppFloat() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with RUA on WhatsApp"
-      className="group fixed right-6 bottom-[5.25rem] z-40 hidden h-12 items-center gap-2 rounded-full bg-[#25D366] pr-4 pl-1.5 font-semibold text-white shadow-[0_10px_26px_-8px_rgba(37,211,102,0.6)] transition hover:-translate-y-0.5 md:inline-flex"
+      title="Chat on WhatsApp"
+      className="fixed right-6 bottom-[5.25rem] z-40 hidden size-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_26px_-8px_rgba(37,211,102,0.6)] transition hover:-translate-y-0.5 hover:scale-105 md:inline-flex"
     >
-      <span className="grid size-9 place-items-center rounded-full bg-white/20">
-        <WhatsAppIcon className="size-5" aria-hidden="true" />
-      </span>
-      <span className="text-sm">Chat on WhatsApp</span>
+      <WhatsAppIcon className="size-7" aria-hidden="true" />
     </a>
   )
 }
