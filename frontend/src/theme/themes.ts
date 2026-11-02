@@ -60,8 +60,13 @@ const STORAGE_KEY = 'rua.theme'
 
 const isTheme = (value: unknown): value is Theme => typeof value === 'string' && value in THEMES
 
-/** Point Tailwind's --color-brand-* variables at the chosen palette (cedar = the stylesheet defaults). */
-export function applyTheme(theme: Theme) {
+/**
+ * Point Tailwind's --color-brand-* variables at the chosen palette (cedar = the stylesheet defaults).
+ * An unknown name (e.g. a retired palette still stored by an older API) falls back to the RUA default
+ * instead of breaking the page.
+ */
+export function applyTheme(requested: Theme | string) {
+  const theme: Theme = isTheme(requested) ? requested : 'cedar'
   const root = document.documentElement
   for (const [shade, color] of Object.entries(THEMES[theme].brand)) {
     if (theme === 'cedar') root.style.removeProperty(`--color-brand-${shade}`)
