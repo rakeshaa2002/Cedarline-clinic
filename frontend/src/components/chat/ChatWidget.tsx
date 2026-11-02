@@ -47,41 +47,50 @@ interface Message {
   error?: boolean
 }
 
-const STORAGE_KEY = 'cedarline.chat.v2'
+const STORAGE_KEY = 'rua.chat.v2'
 const MAX_CHARS = 500
-const WHATSAPP_NUMBER = '919483541927'
+const WHATSAPP_NUMBER = '917019976689'
 
 const WELCOME = [
-  "Hi there! 👋 I'm **Cedarline AI**, your clinic concierge. I can help you with:",
+  "Hi there! 👋 I'm **RUA AI**, your clinic assistant for RUA Skin & Hair Center. I can help you with:",
   '',
-  '- Clinic **timings & location**',
-  '- **Doctors**, departments & consultation fees',
-  '- **Dental, skin & hair** treatments',
-  '- Or **book an appointment** in under 2 minutes!',
+  '- Clinic **centres & timings** in Bengaluru (Indiranagar & Ramamurthy Nagar)',
+  '- **Doctors** & consultation details',
+  '- **Skin, hair, laser & hair transplant** treatments',
+  '- Or **book an appointment** with our dermatologists!',
 ].join('\n')
 
 // Shown under the welcome message until the first question is asked.
 const STARTERS = [
-  { label: '🕒 Timings & Location', question: 'What are the clinic timings and where is the clinic located?' },
-  { label: '👩‍⚕️ Doctors & Fees', question: 'Which doctors are available and what are the consultation fees?' },
-  { label: '🦷 Dental Care & Braces', question: 'What dental treatments do you offer, and how much do braces cost?' },
-  { label: '✨ Skin Treatments', question: 'What skin treatments are available at the clinic?' },
-  { label: '💇 Hair & Scalp Care', question: 'What hair and scalp treatments do you offer?' },
+  { label: '🕒 Centres & Timings', question: 'Where are RUA centres located and what are the clinic hours?' },
+  { label: '👩‍⚕️ Doctors & Dermatologists', question: 'Which doctors are available at RUA?' },
+  { label: '✨ Skin & Laser Treatments', question: 'What skin, laser and aesthetic treatments do you offer?' },
+  { label: '💇 Hair Loss & Transplant', question: 'What treatments do you offer for hair loss and hair transplant?' },
+  { label: '💳 Pricing & EMI', question: 'Do you offer EMI or flexible payment plans for treatment packages?' },
   { label: '📅 Book an Appointment', question: 'How do I book an appointment?' },
 ]
 
 // Always visible above the composer.
 const QUICK = [
   { label: '📅 Book now', question: null },
-  { label: '🕒 Timings', question: 'What are the clinic timings today?' },
-  { label: '👩‍⚕️ Doctors', question: 'Which doctors are available at the clinic?' },
-  { label: '🦷 Dental', question: 'What dental treatments do you offer?' },
-  { label: '✨ Skin', question: 'What skin treatments are available at the clinic?' },
-  { label: '💇 Hair', question: 'What hair and scalp treatments do you offer?' },
-  { label: '📍 Location', question: 'Where is the clinic located?' },
+  { label: '🕒 Centres & Hours', question: 'What are your clinic timings and centre locations?' },
+  { label: '👩‍⚕️ Dermatologists', question: 'Tell me about the doctors at RUA.' },
+  { label: '✨ Skin & Laser', question: 'What skin and laser treatments do you offer?' },
+  { label: '💇 Hair & Transplant', question: 'What hair loss and transplant treatments are available?' },
+  { label: '💳 Payment & EMI', question: 'Do you offer EMI or flexible payment options?' },
 ]
 
 // The booking flow pulls in form libraries, so it's only downloaded when a patient starts booking.
+/** Medical chat emblem: a speech bubble with a medical cross, so the launcher reads as "ask a clinic assistant". */
+function MedicalChatIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.8L3 20.5l1.4-4.4A8.2 8.2 0 0 1 3 11.5 8.6 8.6 0 0 1 12 3a8.6 8.6 0 0 1 9 8.5Z" />
+      <path d="M12 8v7M8.5 11.5h7" strokeWidth={2.4} />
+    </svg>
+  )
+}
+
 const ChatBooking = lazy(() => import('@/components/chat/ChatBooking').then((m) => ({ default: m.ChatBooking })))
 
 const uid = () => Math.random().toString(36).slice(2, 10)
@@ -94,13 +103,16 @@ function scrollToBooking() {
   }, 50)
 }
 
-/** Booking links land on the form itself; "/appointments?doctor=x" keeps the doctor pre-selected. */
-const linkTarget = (href: string) => (href.startsWith('/appointments') && !href.includes('#') ? `${href}#book` : href)
+/** Booking links land on the form itself. */
+const linkTarget = (href: string) => {
+  if (href.startsWith('/appointments')) return '/book-appointment'
+  return href
+}
 
 function actionIcon(href: string): LucideIcon {
-  if (href.startsWith('/appointments')) return Calendar
+  if (href.startsWith('/appointments') || href.startsWith('/book-appointment')) return Calendar
   if (href.startsWith('/doctors')) return UsersRound
-  if (href.startsWith('/contact')) return MapPin
+  if (href.startsWith('/contact') || href.startsWith('/centers')) return MapPin
   return Stethoscope
 }
 
@@ -115,7 +127,7 @@ function consultationSummary(messages: Message[]): string {
   const booking = [...messages].reverse().find((m) => m.booking)?.booking
   const questions = messages.filter((m) => m.role === 'user').slice(-3).map((m) => `• ${m.content}`)
   return [
-    'Hello Cedarline Clinic, I was chatting with your website assistant.',
+    'Hello RUA Skin & Hair Center, I was chatting with your website assistant.',
     booking && `My booking: ${bookingSummary(booking)}.`,
     questions.length ? `I'd like help with:\n${questions.join('\n')}` : 'I would like to speak with reception.',
   ]
@@ -152,7 +164,7 @@ export function ChatWidget() {
     e?.stopPropagation()
     setShowTeaser(false)
     try {
-      sessionStorage.setItem('cedarline.chat.teaser_dismissed', 'true')
+      sessionStorage.setItem('rua.chat.teaser_dismissed', 'true')
     } catch {
       /* storage unavailable */
     }
@@ -307,24 +319,25 @@ export function ChatWidget() {
       {/* Floating Launcher Container */}
       <div
         className={cn(
-          'fixed right-4 bottom-4 z-[60] flex flex-col items-end select-none sm:right-6 sm:bottom-6',
+          'fixed right-4 bottom-20 z-[60] flex flex-col items-end select-none sm:right-6 sm:bottom-6',
           open && 'max-sm:hidden',
         )}
       >
-        {/* Floating AI Teaser / Callout Highlight */}
+        {/* Floating AI Teaser / Callout Highlight — beside the launcher (the WhatsApp button sits above it) */}
         {!open && showTeaser && (
+          <div className="absolute top-1/2 right-full mr-3 -translate-y-1/2 max-sm:hidden">
           <div
             role="status"
             aria-live="polite"
             onClick={openPanel}
-            className="group mb-3 flex cursor-pointer items-center gap-2.5 rounded-2xl border border-brand-200/90 bg-white/95 px-4 py-2 text-xs font-medium text-brand-950 shadow-[0_12px_28px_rgba(13,33,57,0.15)] backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:border-brand-400 hover:shadow-[0_16px_36px_rgba(20,133,137,0.25)] sm:px-5 sm:py-2.5 sm:text-sm animate-fade-up"
+            className="group flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-2xl border border-brand-200/90 bg-white/95 px-3.5 py-2 text-xs font-medium text-brand-950 shadow-[0_12px_28px_rgba(13,33,57,0.15)] backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:border-brand-400 animate-fade-up"
           >
             <span className="relative flex size-2.5">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
             </span>
             <span className="font-bold text-brand-900">Questions?</span>
-            <span className="text-ink-600 font-medium">Ask Cedarline AI 24/7</span>
+            <span className="text-ink-600 font-medium">Ask RUA AI 24/7</span>
             <button
               type="button"
               onClick={dismissTeaser}
@@ -334,23 +347,7 @@ export function ChatWidget() {
               <X className="size-3.5" />
             </button>
           </div>
-        )}
-
-        {/* Floating WhatsApp Quick Action Button */}
-        {!open && (
-          <a
-            href={whatsappUrl('Hello Cedarline Clinic, I would like to enquire about an appointment.')}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Chat with reception on WhatsApp"
-            title="Chat with reception on WhatsApp"
-            className="group/wa relative mb-3 flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_28px_rgba(37,211,102,0.48)] transition-all duration-300 hover:scale-110 hover:shadow-[0_14px_36px_rgba(37,211,102,0.7)] active:scale-95 cursor-pointer sm:size-15"
-          >
-            <WhatsAppIcon className="size-9 text-white drop-shadow-xs sm:size-10" />
-            <span className="pointer-events-none absolute right-16 whitespace-nowrap rounded-full bg-ink-950/90 border border-emerald-500/30 px-3.5 py-1 text-xs font-semibold text-white shadow-lg opacity-0 backdrop-blur-md transition-all duration-200 group-hover/wa:opacity-100 group-hover/wa:-translate-x-1 sm:right-17">
-              WhatsApp Reception
-            </span>
-          </a>
+          </div>
         )}
 
         {/* Animated Wrapper with Levitation Float & Ambient Halo */}
@@ -378,11 +375,11 @@ export function ChatWidget() {
             onClick={() => (open ? close() : openPanel())}
             aria-expanded={open}
             aria-controls="clinic-chat"
-            aria-label={open ? 'Close Cedarline AI assistant' : 'Open Cedarline AI assistant chat'}
+            aria-label={open ? 'Close RUA AI assistant' : 'Open RUA AI assistant chat'}
             className={cn(
-              'group relative inline-flex h-16 items-center gap-3 overflow-hidden rounded-full border border-emerald-400/40 bg-gradient-to-r from-brand-950 via-brand-900 to-teal-950 pl-2.5 pr-5 font-bold text-white cursor-pointer select-none sm:h-[4.5rem] sm:gap-3.5 sm:pl-3 sm:pr-6',
-              'shadow-[0_14px_40px_rgba(20,133,137,0.55)] transition-all duration-300 ease-out',
-              'hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_22px_56px_rgba(20,133,137,0.75)] hover:border-emerald-300/70 active:scale-95',
+              'group relative inline-flex h-12 items-center gap-2 overflow-hidden rounded-full border border-emerald-400/40 bg-gradient-to-r from-brand-950 via-brand-900 to-teal-950 pl-1.5 pr-4 font-bold text-white cursor-pointer select-none',
+              'shadow-[0_10px_28px_rgba(20,133,137,0.45)] transition-all duration-300 ease-out',
+              'hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(20,133,137,0.6)] hover:border-emerald-300/70 active:scale-95',
             )}
           >
             {/* Specular Light Sweep Shimmer */}
@@ -396,25 +393,19 @@ export function ChatWidget() {
             {/* Medical AI Logo Emblem with glowing live status */}
             <span className="relative flex items-center justify-center shrink-0">
               {open ? (
-                <div className="grid size-11 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/20 sm:size-12">
-                  <X className="size-6 transition-transform duration-300 group-hover:rotate-90 sm:size-7" aria-hidden="true" />
+                <div className="grid size-9 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/20">
+                  <X className="size-5 transition-transform duration-300 group-hover:rotate-90" aria-hidden="true" />
                 </div>
               ) : (
                 <div className="relative flex items-center justify-center">
-                  {/* Glowing 3D Medical Stethoscope + Cross Emblem */}
-                  <div className="relative size-11 overflow-hidden rounded-full ring-2 ring-emerald-400/90 shadow-[0_0_16px_rgba(52,211,153,0.55)] transition-transform duration-300 group-hover:scale-105 sm:size-12">
-                    <img
-                      src="/images/medical-ai-logo.jpg"
-                      alt="Medical AI Stethoscope and Cross Emblem"
-                      width={48}
-                      height={48}
-                      className="size-full object-cover"
-                    />
+                  {/* Medical chat emblem on RUA gold: clearly different from the green WhatsApp button above it */}
+                  <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-accent-200 via-accent-400 to-accent-600 text-brand-950 ring-2 ring-accent-200/70 shadow-[0_0_12px_rgba(212,169,79,0.55)] transition-transform duration-300 group-hover:scale-105">
+                    <MedicalChatIcon className="size-5" />
                   </div>
                   {/* Pulsing Emerald Live Indicator */}
-                  <span className="absolute -top-0.5 -right-0.5 flex size-3.5">
+                  <span className="absolute -top-0.5 -right-0.5 flex size-3">
                     <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-90" />
-                    <span className="relative inline-flex size-3.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399] ring-2 ring-brand-900" />
+                    <span className="relative inline-flex size-3 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] ring-2 ring-brand-900" />
                   </span>
                 </div>
               )}
@@ -422,31 +413,15 @@ export function ChatWidget() {
 
             {/* Intuitive Label for Non-Technical Users */}
             <div className="flex flex-col text-left">
-              <span className="font-display text-[0.9375rem] font-extrabold tracking-tight text-white leading-tight flex items-center gap-1.5 sm:text-[1.0625rem]">
-                {open ? 'Close' : 'Ask Cedarline AI'}
+              <span className="font-display text-sm font-extrabold tracking-tight text-white leading-tight flex items-center gap-1.5">
+                {open ? 'Close' : 'Ask RUA AI'}
                 {!open && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/25 text-emerald-300 border border-emerald-400/40 uppercase tracking-wider">
+                  <span className="inline-flex items-center px-1.5 py-px rounded-full text-[9px] font-bold bg-emerald-400/25 text-emerald-300 border border-emerald-400/40 uppercase tracking-wider">
                     24/7
                   </span>
                 )}
               </span>
-              {!open && (
-                <span className="text-[11px] font-medium text-emerald-100/90 leading-tight mt-0.5 flex items-center gap-1">
-                  <span>Doctor & Clinic Help</span>
-                  <span className="inline-block size-1 rounded-full bg-emerald-400" />
-                  <span className="text-emerald-300 font-semibold">Instant</span>
-                </span>
-              )}
             </div>
-
-            {/* Glowing Heartbeat / ECG Pulse Wave */}
-            {!open && (
-              <span className="hidden lg:flex items-center ml-1 text-emerald-300/85 transition-all duration-300 group-hover:text-emerald-200 group-hover:scale-110">
-                <svg className="size-6 text-emerald-300 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
-              </span>
-            )}
           </button>
         </div>
       </div>
@@ -458,25 +433,25 @@ export function ChatWidget() {
           aria-modal="false"
           aria-labelledby={titleId}
           onKeyDown={(e) => e.key === 'Escape' && close()}
-          className="fixed inset-0 z-[65] flex animate-pop flex-col overflow-hidden bg-white shadow-2xl transition-all duration-300 sm:inset-auto sm:right-6 sm:bottom-28 sm:h-[min(660px,calc(100vh-8.5rem))] sm:w-[400px] sm:rounded-3xl sm:border sm:border-ink-100 sm:shadow-[0_20px_60px_-15px_rgba(13,33,57,0.3)]"
+          className="fixed inset-0 z-[65] flex animate-pop flex-col overflow-hidden bg-white shadow-2xl transition-all duration-300 sm:inset-auto sm:right-6 sm:bottom-22 sm:h-[min(660px,calc(100vh-7rem))] sm:w-[400px] sm:rounded-3xl sm:border sm:border-ink-100 sm:shadow-[0_20px_60px_-15px_rgba(13,33,57,0.3)]"
         >
           {/* Header */}
           <div className="flex items-center gap-2.5 bg-gradient-to-r from-ink-950 via-brand-900 to-brand-600 px-4 py-3 text-white">
             <span className="relative shrink-0">
-              <span className="block size-10 overflow-hidden rounded-full bg-white ring-2 ring-white/40">
-                <img src="/images/medical-ai-logo.jpg" alt="" className="size-full object-cover" />
+              <span className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-accent-200 via-accent-400 to-accent-600 text-brand-950 ring-2 ring-white/40" aria-hidden="true">
+                <MedicalChatIcon className="size-[1.375rem]" />
               </span>
               <span className="absolute right-0 bottom-0 size-3 rounded-full bg-emerald-400 ring-2 ring-ink-950" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
               <h2 id={titleId} className="truncate font-display text-[1.0625rem] font-extrabold leading-tight tracking-tight text-white">
-                Cedarline AI Concierge
+                RUA AI Assistant
               </h2>
               <p className="mt-0.5 flex items-center gap-1 truncate text-xs font-medium text-white/85">
                 <span className="size-1.5 shrink-0 animate-pulse rounded-full bg-emerald-400" aria-hidden="true" />
                 <span className="font-semibold text-emerald-300">Online</span>
                 <span aria-hidden="true">•</span>
-                <span className="truncate">Cedarline Clinic Bengaluru</span>
+                <span className="truncate">RUA Skin &amp; Hair Center</span>
               </p>
             </div>
             <button
@@ -557,7 +532,7 @@ export function ChatWidget() {
                   )}
                   {m.booking && (
                     <a
-                      href={whatsappUrl(`Hello Cedarline Clinic, I just booked in your website chat: ${bookingSummary(m.booking)}. Please confirm my slot.`)}
+                      href={whatsappUrl(`Hello RUA Skin & Hair Center, I just booked in your website chat: ${bookingSummary(m.booking)}. Please confirm my slot.`)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#20bd5a]"
@@ -598,7 +573,7 @@ export function ChatWidget() {
                           </>
                         )
                         // Booking happens right here in the chat; other links open their page.
-                        return a.href.startsWith('/appointments') ? (
+                        return a.href.startsWith('/appointments') || a.href.startsWith('/book-appointment') ? (
                           <button key={a.href} type="button" className={className} onClick={() => startBooking({ doctorSlug: bookingDoctor(a.href) })}>
                             {body}
                           </button>
@@ -727,17 +702,16 @@ export function ChatWidget() {
             </div>
             <div className="mt-2 flex items-center justify-between gap-3 px-1 text-[0.6875rem]">
               <span className="flex min-w-0 items-center gap-1 truncate font-medium text-ink-500">
-                <span aria-hidden="true">✨</span> Cedarline AI Concierge
+                <span aria-hidden="true">✨</span> RUA AI Assistant
                 {voice.error && <span className="text-red-700">· {voice.error}</span>}
                 <span aria-live="polite" className="text-amber-700">
                   {input.length > MAX_CHARS - 80 ? `· ${MAX_CHARS - input.length} left` : ''}
                 </span>
               </span>
               <Link
-                to="/appointments#book"
+                to="/book-appointment"
                 onClick={() => {
                   setOpen(false)
-                  scrollToBooking()
                 }}
                 className="inline-flex shrink-0 items-center gap-1 font-semibold text-brand-600 transition-colors hover:text-brand-800 hover:underline"
               >

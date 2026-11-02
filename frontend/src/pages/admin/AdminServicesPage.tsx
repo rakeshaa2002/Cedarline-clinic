@@ -17,7 +17,7 @@ import { DEPARTMENT_LABELS, formatPrice } from '@/utils/format'
 const EMPTY: ServiceInput = {
   slug: '',
   name: '',
-  department: 'general',
+  department: 'medical-dermatology',
   short_description: '',
   description: '',
   duration_minutes: 30,

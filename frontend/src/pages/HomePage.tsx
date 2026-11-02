@@ -1,332 +1,385 @@
-import { ArrowRight, Bot, CalendarCheck, CheckCircle2, Clock, MapPin, Phone, Quote } from 'lucide-react'
+import { ArrowRight, BadgeCheck, CalendarCheck, Clock, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { openChat } from '@/components/chat/openChat'
-import { BlogCard, DoctorCard } from '@/components/site/Cards'
-import { CtaBanner } from '@/components/site/CtaBanner'
+import {
+  CategoryCard,
+  CentreCard,
+  ConcernFinder,
+  CtaBand,
+  DoctorCard,
+  EquipmentGrid,
+  InstagramGrid,
+  ProofStrip,
+  ResearchList,
+  TestimonialGrid,
+  TreatmentCard,
+} from '@/components/rua/cards'
+import { BrandIcon, OpenStatus, Reveal, SectionHeader } from '@/components/rua/ui'
 import { Seo } from '@/components/site/Seo'
-import { Button, ButtonLink } from '@/components/ui/Button'
-import { ErrorState, Skeleton } from '@/components/ui/Feedback'
-import { SectionHeading } from '@/components/ui/Layout'
-import { BOOKING_STEPS, DEPARTMENTS, TESTIMONIALS, WHY_CHOOSE } from '@/content/site'
-import { useApi } from '@/hooks/useApi'
-import { hoursSummary, todayHours, useClinicInfo, useDoctors, useServices } from '@/hooks/useClinic'
-import { clinicApi } from '@/services/endpoints'
+import { ButtonLink } from '@/components/ui/Button'
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
+import {
+  BRAND,
+  CATEGORIES,
+  CENTRES,
+  DOCTORS,
+  PHILOSOPHY,
+  STORY,
+  WHY_RUA,
+  getCategory,
+  getDoctor,
+  treatmentsBySlugs,
+} from '@/content/rua'
+import { homeMeta } from '@/content/rua/seo'
+import { SITE_URL } from '@/content/site'
+import { whatsappLink } from '@/utils/rua'
+
+const FEATURED = [
+  'fue-hair-transplant',
+  'laser-hair-reduction',
+  'hydrafacial',
+  'prp-hair-treatment',
+  'acne-scar-treatment',
+  'pigmentation-melasma-treatment',
+]
+
+function HeroDoctors() {
+  const [eshritha, jeevith, jatin] = [getDoctor('dr-eshritha-c')!, getDoctor('dr-jeevith-c-reddy')!, getDoctor('dr-jatin-k-reddy')!]
+  return (
+    <div className="relative mx-auto h-[26rem] w-full max-w-[36rem] sm:h-[32rem] lg:h-[37rem]">
+      {/* Arch from the RUA mark, with a brushed-gold outline. */}
+      <div className="arch absolute inset-x-[6%] top-[4%] bottom-0 bg-gradient-to-b from-brand-600/70 via-brand-700/60 to-brand-900/40" aria-hidden="true" />
+      <div className="arch absolute inset-x-[2%] top-0 bottom-0 border border-accent-300/45" aria-hidden="true" />
+      <img src="/images/rua/brand/rua-mark-gold.png" alt="" aria-hidden="true" className="absolute top-[9%] left-1/2 w-24 -translate-x-1/2 opacity-80" />
+      <img
+        src={eshritha.photo}
+        alt={`${eshritha.name}, consultant dermatologist`}
+        className="absolute bottom-0 -left-[7%] h-[68%] w-auto max-w-none drop-shadow-[0_24px_30px_rgba(0,0,0,0.35)]"
+        fetchPriority="high"
+      />
+      <img
+        src={jatin.photo}
+        alt={`${jatin.name}, hair transplant surgeon`}
+        className="absolute -right-[6%] bottom-0 h-[70%] w-auto max-w-none drop-shadow-[0_24px_30px_rgba(0,0,0,0.35)]"
+        fetchPriority="high"
+      />
+      <img
+        src={jeevith.photo}
+        alt={`${jeevith.name}, senior consultant dermatologist`}
+        className="absolute bottom-0 left-1/2 h-[78%] w-auto max-w-none -translate-x-1/2 drop-shadow-[0_28px_36px_rgba(0,0,0,0.4)]"
+        fetchPriority="high"
+      />
+      <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-brand-900 via-brand-900/70 to-transparent" aria-hidden="true" />
+
+      <div className="animate-float absolute top-[22%] -left-2 hidden rounded-2xl bg-cream/95 px-4 py-3 text-brand-900 shadow-lift backdrop-blur sm:block lg:-left-10">
+        <p className="flex items-center gap-2 text-sm font-semibold">
+          <BadgeCheck className="size-4 text-accent-600" aria-hidden="true" /> 3 MD (DVL) dermatologists
+        </p>
+        <p className="mt-0.5 text-xs text-ink-600">Fellowship-trained founders</p>
+      </div>
+      <div className="animate-float absolute top-[46%] -right-2 hidden rounded-2xl bg-cream/95 px-4 py-3 text-brand-900 shadow-lift backdrop-blur [animation-delay:1.2s] sm:block lg:-right-8">
+        <p className="flex items-center gap-2 text-sm font-semibold">
+          <Clock className="size-4 text-accent-600" aria-hidden="true" /> Open 7 days
+        </p>
+        <p className="mt-0.5 text-xs text-ink-600">10am – 8pm · 2 centres</p>
+      </div>
+    </div>
+  )
+}
 
 export default function HomePage() {
-  const { data: clinic } = useClinicInfo()
-  const doctors = useDoctors()
-  const services = useServices()
-  const testimonials = useApi('testimonials', clinicApi.testimonials)
-  const blog = useApi('blog:home', () => clinicApi.blog({ page: 1, page_size: 3 }))
-  const today = clinic ? todayHours(clinic.opening_hours) : undefined
-  const featuredDoctors = (doctors.data ?? []).slice(0, 4)
-  const items = testimonials.data && testimonials.data.length > 0 ? testimonials.data : TESTIMONIALS
+  const meta = homeMeta(SITE_URL)
+  const clinical = CATEGORIES.filter((c) => c.slug !== 'premium-packages')
+  const packages = getCategory('premium-packages')!
 
   return (
     <>
-      <Seo
-        title="Dental, Skin, Hair & Family Care in Bengaluru"
-        description="Specialist dental, dermatology, hair & scalp, general medicine and paediatric care in Indiranagar, Bengaluru. Meet our doctors, ask our AI assistant and book an appointment."
-        path="/"
-      />
+      <Seo meta={meta} />
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        {/* Meaningful Architectural Clinic Background Image */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <img
-            src="/images/hero-bg.jpg?v=3"
-            alt="Cedarline Multispeciality Clinic modern biophilic interior in Bengaluru"
-            fetchPriority="high"
-            className="size-full object-cover object-[center_35%] transition-all duration-700"
-          />
-          {/* Readability scrim: balanced white gradient ensuring text legibility while keeping architectural clinic banner visible */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/50 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-white/80 to-transparent" />
-        </div>
-
-        <div className="container-page relative z-10 grid items-center gap-10 py-12 sm:py-16 lg:min-h-[calc(100svh-6.75rem)] lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-12 xl:gap-20">
-          <div className="animate-fade-up">
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1.5 text-xs font-semibold text-brand-700 shadow-xs ring-1 ring-brand-200/80">
-              <MapPin className="size-3.5 text-brand-600" aria-hidden="true" /> Multispeciality clinic · Indiranagar, Bengaluru
-            </p>
-            <h1 className="mt-6 text-[2.1rem] leading-[1.08] font-extrabold tracking-tight min-[400px]:text-4xl sm:text-5xl lg:text-[3.4rem] xl:text-[3.9rem] 2xl:text-[4.4rem] text-ink-950">
-              Specialist care for your <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-700 via-brand-600 to-teal-600">smile, skin and hair</span> — and the whole family.
+      <section className="surface-cocoa relative isolate overflow-hidden text-cream">
+        <div className="slats absolute inset-0 -z-10 opacity-70" aria-hidden="true" />
+        <img
+          src="/images/rua/brand/texture-linen.webp"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-[0.07] mix-blend-screen"
+        />
+        <div className="container-page grid items-end gap-10 pt-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:pt-16">
+          <div className="animate-fade-up pb-6 lg:pb-24">
+            <OpenStatus tone="light" className="mb-7 md:hidden" />
+            <p className="font-display text-2xl text-accent-200 display-italic sm:text-3xl">{BRAND.tagline}</p>
+            <h1 className="mt-4 text-[2.6rem] leading-[1.04] text-cream sm:text-6xl xl:text-7xl">
+              Doctor-led skin <span className="text-gold-gradient">&amp;</span> hair care in Bangalore
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-ink-800 2xl:max-w-2xl 2xl:text-xl font-medium">
-              Dentists, dermatologists, a trichologist, family physicians and a paediatrician working together in one calm,
-              modern clinic. Have a question? Our AI assistant answers from the clinic’s own information, any time.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink to="/appointments" variant="accent" size="lg" icon={<CalendarCheck className="size-5" aria-hidden="true" />}>
-                Book an appointment
+            <p className="mt-6 max-w-xl text-lg leading-8 text-cream/80">{BRAND.promise}</p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <ButtonLink to="/book-appointment" size="lg" variant="accent" icon={<CalendarCheck className="size-5" aria-hidden="true" />}>
+                Book a consultation
               </ButtonLink>
-              <Button variant="white" size="lg" icon={<Bot className="size-5 text-brand-600" aria-hidden="true" />} onClick={() => openChat()}>
-                Ask AI Assistant
-              </Button>
-              <ButtonLink to="/services" variant="outline" size="lg" className="bg-white/90 backdrop-blur-xs hover:bg-white shadow-xs">
-                Explore services <ArrowRight className="size-4" aria-hidden="true" />
-              </ButtonLink>
-            </div>
-            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-ink-200/80 pt-8 sm:gap-6">
-              {[
-                [doctors.data ? String(doctors.data.length) : '9', 'Specialist doctors'],
-                [services.data ? `${services.data.length}+` : '20+', 'Treatments offered'],
-                [clinic ? `${clinic.opening_hours.filter((h) => !h.closed).length} days` : '6 days', 'Open every week'],
-              ].map(([value, label]) => (
-                <div key={label} className="group">
-                  <dt className="text-sm text-ink-700 font-semibold">{label}</dt>
-                  <dd className="order-first font-display text-2xl font-bold text-ink-950 sm:text-3xl tracking-tight transition-transform duration-300 group-hover:scale-105 group-hover:text-brand-700">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-
-          <div className="relative w-full pb-4 lg:pb-0">
-            <div className="relative overflow-hidden rounded-[2.25rem] shadow-lift ring-1 ring-ink-100">
-              <img
-                src="/images/hero-consultation.jpg"
-                alt="A Cedarline doctor talking with a patient during a consultation"
-                width={1600}
-                height={1200}
-                fetchPriority="high"
-                className="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out hover:scale-[1.02] lg:max-h-[calc(100svh-12rem)]"
-              />
-
-              {/* Clinic hours badge - cleanly anchored inside the bottom-left */}
-              <div className="absolute bottom-4 left-4 sm:bottom-5 sm:left-5 flex items-center gap-3 rounded-2xl bg-white/95 backdrop-blur-md p-3.5 pr-5 shadow-lg ring-1 ring-black/5">
-                <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-700 shadow-xs">
-                  <Clock className="size-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="text-xs text-ink-500 font-medium">Clinic hours today</p>
-                  <p className="font-bold text-ink-900 text-sm">
-                    {today ? (today.closed ? 'Closed today' : `${today.open} – ${today.close}`) : '09:00 – 20:00'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick info strip */}
-      <section aria-label="Clinic quick information" className="border-y border-ink-100 bg-white">
-        <div className="container-page grid divide-ink-100 sm:grid-cols-2 lg:grid-cols-4 lg:divide-x">
-          {[
-            { icon: Clock, title: 'Opening hours', text: clinic ? hoursSummary(clinic.opening_hours) : '—', to: '/contact' },
-            { icon: MapPin, title: 'Location', text: clinic ? `${clinic.address_line.split(',').slice(-1)[0].trim()}, ${clinic.city}` : 'Indiranagar, Bengaluru', to: '/contact' },
-            { icon: Phone, title: 'Call the front desk', text: clinic?.phone ?? '—', href: clinic ? `tel:${clinic.phone.replace(/\s/g, '')}` : undefined },
-            { icon: CalendarCheck, title: 'Book an appointment', text: 'By phone, email or at reception', to: '/appointments' },
-          ].map(({ icon: Icon, title, text, to, href }) => {
-            const inner = (
-              <>
-                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700 shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-brand-700 group-hover:text-white group-hover:shadow-md">
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <span className="block text-sm font-bold text-ink-900 transition-colors group-hover:text-brand-700">{title}</span>
-                  <span className="block text-sm text-ink-500 font-medium">{text}</span>
-                </div>
-              </>
-            )
-            const cls = 'group flex items-center gap-4 px-3 py-6 transition-all duration-200 hover:bg-brand-50/40 lg:px-6 cursor-pointer'
-            return href ? (
-              <a key={title} href={href} className={cls}>
-                {inner}
+              <a
+                href={whatsappLink('Hello RUA Skin & Hair Center, I would like to book a consultation.')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-13 items-center gap-2.5 rounded-full border border-cream/35 px-8 font-semibold text-cream transition hover:border-cream/60 hover:bg-cream/10"
+              >
+                <WhatsAppIcon className="size-5" aria-hidden="true" /> WhatsApp us
               </a>
-            ) : (
-              <Link key={title} to={to!} className={cls}>
-                {inner}
-              </Link>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* Introduction */}
-      <section className="section">
-        <div className="container-page grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-          <div className="grid grid-cols-2 gap-4">
-            <img src="/images/clinic-reception.webp" alt="Bright reception area of the clinic" loading="lazy" width={1200} height={900} className="aspect-[4/5] w-full rounded-3xl object-cover shadow-sm" />
-            <img src="/images/care-team.jpg" alt="Cedarline specialist doctor in modern outpatient clinic" loading="lazy" width={1200} height={900} className="mt-10 aspect-[4/5] w-full rounded-3xl object-cover shadow-lift hover:scale-[1.02] transition-transform duration-500" />
-          </div>
-          <div>
-            <p className="eyebrow mb-3">Welcome to Cedarline</p>
-            <h2 className="text-3xl font-bold sm:text-4xl">One clinic for the specialists your family sees most</h2>
-            <p className="mt-5 text-lg leading-8 text-ink-600">
-              Cedarline brings dental care, dermatology, hair & scalp care, family medicine and paediatrics together on
-              one floor. Your doctors share notes and refer to each other, so care stays joined-up and you spend less
-              time travelling between appointments.
-            </p>
-            <ul className="mt-7 space-y-3">
-              {['Consultants with 8–18 years of experience', 'Published starting prices for every service', 'Evening and Saturday appointments'].map((item) => (
-                <li key={item} className="flex items-center gap-3 text-ink-700">
-                  <CheckCircle2 className="size-5 text-brand-600" aria-hidden="true" /> {item}
-                </li>
+            </div>
+            <p className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-cream/65">
+              {BRAND.specialities.map((s, i) => (
+                <span key={s} className="flex items-center gap-4">
+                  {i > 0 && <span className="size-1 rounded-full bg-accent-300" aria-hidden="true" />}
+                  {s}
+                </span>
               ))}
-            </ul>
-            <ButtonLink to="/about" variant="outline" className="mt-9">
-              About the clinic <ArrowRight className="size-4" aria-hidden="true" />
-            </ButtonLink>
+            </p>
           </div>
+          <div className="animate-fade-up [animation-delay:150ms]">
+            <HeroDoctors />
+          </div>
+        </div>
+        <div className="container-page relative pb-14">
+          <ProofStrip />
         </div>
       </section>
 
-      {/* Featured services */}
-      <section className="section bg-ink-50/70">
+      {/* Concern finder */}
+      <section className="container-page relative -mt-px py-14 sm:py-16">
+        <Reveal>
+          <div className="grid gap-8 rounded-[2rem] bg-white p-7 shadow-card ring-1 ring-ink-100 sm:p-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+            <div>
+              <p className="eyebrow">Start here</p>
+              <h2 className="mt-3 text-3xl sm:text-4xl">What would you like help with?</h2>
+              <p className="mt-3 leading-7 text-ink-600">
+                Choose a concern to see how RUA’s dermatologists treat it — or{' '}
+                <Link to="/book-appointment" className="font-semibold text-brand-700 underline underline-offset-4">
+                  book a consultation
+                </Link>{' '}
+                and we’ll guide you.
+              </p>
+            </div>
+            <ConcernFinder />
+          </div>
+        </Reveal>
+      </section>
+
+      {/* Services */}
+      <section className="section pt-4">
         <div className="container-page">
-          <SectionHeading
-            eyebrow="Our specialities"
-            title="Care across five departments"
-            description="From routine check-ups to specialist procedures, every treatment starts with an unhurried consultation."
+          <SectionHeader
+            eyebrow="Our expertise. Your confidence."
+            title={
+              <>
+                Advanced skin, hair &amp; aesthetic care — <span className="display-italic text-brand-700">under one roof</span>
+              </>
+            }
+            lead="Six specialities, one team of dermatologists. Every plan starts with a diagnosis and is tailored to you."
             action={
-              <ButtonLink to="/services" variant="outline">
-                View all services <ArrowRight className="size-4" aria-hidden="true" />
+              <ButtonLink to="/services" variant="outline" icon={<ArrowRight className="size-4" aria-hidden="true" />}>
+                All services
               </ButtonLink>
             }
           />
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {DEPARTMENTS.map((d) => (
-              <Link
-                key={d.key}
-                to={d.to}
-                className="group flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-ink-100 bg-white shadow-card transition-shadow hover:shadow-lift"
-              >
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img src={d.image} alt="" loading="lazy" width={1000} height={800} className="size-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <h3 className="text-lg font-bold">{d.title}</h3>
-                  <p className="mt-2 flex-1 text-sm leading-6 text-ink-600">{d.summary}</p>
-                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
-                    Learn more <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-                  </span>
-                </div>
-              </Link>
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {clinical.map((c, i) => (
+              <CategoryCard key={c.slug} category={c} index={i} />
             ))}
           </div>
+          <Reveal className="mt-6">
+            <Link
+              to={`/services/${packages.slug}`}
+              className="group relative isolate grid overflow-hidden rounded-[2rem] text-cream shadow-card md:grid-cols-[1.1fr_0.9fr]"
+            >
+              <div className="surface-cocoa relative p-8 sm:p-10">
+                <div className="slats absolute inset-0 -z-10 opacity-60" aria-hidden="true" />
+                <p className="eyebrow-light flex items-center gap-2">
+                  <Sparkles className="size-3.5" aria-hidden="true" /> {packages.name}
+                </p>
+                <h3 className="mt-3 text-3xl text-cream sm:text-4xl">Bridal glow, RUA Signature Glow Therapy &amp; lifetime laser packages</h3>
+                <p className="mt-4 max-w-xl leading-7 text-cream/75">{packages.tagline} Flexible payment and EMI options.</p>
+                <span className="mt-7 inline-flex items-center gap-2 font-semibold text-accent-200 transition-all group-hover:gap-3">
+                  Explore packages <ArrowRight className="size-4" aria-hidden="true" />
+                </span>
+              </div>
+              <div className="relative hidden min-h-64 overflow-hidden md:block">
+                <img src={packages.image} alt={packages.imageAlt} loading="lazy" className="h-full w-full object-cover transition-transform duration-[1.4s] group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-r from-brand-800 to-transparent" />
+              </div>
+            </Link>
+          </Reveal>
         </div>
       </section>
 
       {/* Doctors */}
-      <section className="section">
-        <div className="container-page">
-          <SectionHeading
-            eyebrow="Meet the team"
-            title="Experienced doctors who take time to explain"
+      <section className="section relative bg-cream">
+        <div className="slats-soft absolute inset-0" aria-hidden="true" />
+        <div className="container-page relative">
+          <SectionHeader
+            eyebrow="Meet the dream team"
+            title={
+              <>
+                Three dermatologists. <span className="display-italic text-brand-700">One circle of care.</span>
+              </>
+            }
+            lead={STORY.paragraphs[1]}
             action={
-              <ButtonLink to="/doctors" variant="outline">
-                All doctors <ArrowRight className="size-4" aria-hidden="true" />
+              <ButtonLink to="/doctors" variant="outline" icon={<ArrowRight className="size-4" aria-hidden="true" />}>
+                About our doctors
               </ButtonLink>
             }
           />
-          {doctors.error ? (
-            <ErrorState message={doctors.error.message} onRetry={doctors.reload} />
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {doctors.loading
-                ? Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[30rem]" />)
-                : featuredDoctors.map((d) => <DoctorCard key={d.id} doctor={d} />)}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Why choose us */}
-      <section className="section bg-brand-900 text-white">
-        <div className="container-page">
-          <div className="mb-12 max-w-2xl">
-            <p className="mb-3 text-xs font-semibold tracking-[0.14em] text-brand-200 uppercase">Why Cedarline</p>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">Thoughtful care, from booking to follow-up</h2>
-          </div>
-          <div className="grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-            {WHY_CHOOSE.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="flex gap-4">
-                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-brand-200 ring-1 ring-white/10">
-                  <Icon className="size-6" aria-hidden="true" />
-                </span>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">{title}</h3>
-                  <p className="mt-1.5 text-sm leading-6 text-brand-100/80">{text}</p>
-                </div>
-              </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {DOCTORS.map((d, i) => (
+              <Reveal key={d.slug} delay={i * 110} className="h-full">
+                <DoctorCard doctor={d} />
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How booking works */}
+      {/* Why RUA */}
+      <section className="section">
+        <div className="container-page grid gap-12 lg:grid-cols-2 lg:items-center">
+          <Reveal>
+            <div className="relative">
+              <div className="arch overflow-hidden bg-brand-800 shadow-lift">
+                <img
+                  src="/images/rua/team/rua-founders.webp"
+                  alt="Dr. Jatin K Reddy, Dr. Eshritha C and Dr. Jeevith C Reddy, founders of RUA Skin & Hair Center"
+                  loading="lazy"
+                  className="h-[34rem] w-full object-cover object-top"
+                />
+              </div>
+              <figure className="absolute -bottom-8 left-6 right-6 rounded-3xl bg-white p-6 shadow-lift ring-1 ring-ink-100 sm:left-auto sm:max-w-sm">
+                <blockquote className="font-display text-lg leading-snug text-ink-900 italic">“{PHILOSOPHY.lead}”</blockquote>
+                <figcaption className="mt-3 text-sm text-ink-500">The RUA founders</figcaption>
+              </figure>
+            </div>
+          </Reveal>
+          <div className="pt-6 lg:pt-0">
+            <SectionHeader
+              eyebrow="Why choose RUA"
+              title="Expert skincare, made effective and accessible"
+              lead={PHILOSOPHY.paragraphs[0]}
+              className="mb-8 sm:mb-10"
+            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              {WHY_RUA.map((w, i) => (
+                <Reveal key={w.title} delay={i * 90} className="h-full">
+                  <div className="h-full rounded-3xl bg-white p-6 shadow-card ring-1 ring-ink-100">
+                    <span className="grid size-11 place-items-center rounded-full bg-brand-800 text-accent-200">
+                      <BrandIcon name={w.icon} className="size-5" />
+                    </span>
+                    <h3 className="mt-4 text-xl">{w.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-ink-600">{w.text}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured treatments */}
+      <section className="section bg-sand/50">
+        <div className="container-page">
+          <SectionHeader
+            eyebrow="Most-requested treatments"
+            title="What Bangalore comes to RUA for"
+            lead="From hair restoration to lasers and medi-facials — each treatment has its own page with who it suits, how it works, recovery and FAQs."
+          />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {treatmentsBySlugs(FEATURED).map((t, i) => (
+              <Reveal key={t.slug} delay={(i % 3) * 90} className="h-full">
+                <TreatmentCard treatment={t} />
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Technology */}
       <section className="section">
         <div className="container-page">
-          <SectionHeading eyebrow="Booking made simple" title="Book an appointment in three steps" align="center" />
-          <ol className="grid gap-6 md:grid-cols-3">
-            {BOOKING_STEPS.map((step, i) => (
-              <li key={step.title} className="relative rounded-[var(--radius-card)] border border-ink-100 bg-white p-7 shadow-card">
-                <span className="font-display text-5xl font-extrabold text-brand-100" aria-hidden="true">
-                  0{i + 1}
-                </span>
-                <h3 className="mt-3 text-lg font-bold">{step.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-ink-600">{step.text}</p>
-              </li>
-            ))}
-          </ol>
-          <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-            <ButtonLink to="/appointments" variant="accent" size="lg">
-              How to book
-            </ButtonLink>
-            <Button variant="outline" size="lg" icon={<Bot className="size-5" aria-hidden="true" />} onClick={() => openChat()}>
-              Ask the AI assistant
-            </Button>
-          </div>
+          <SectionHeader
+            eyebrow="Specialised machines used at RUA"
+            title="Medical-grade technology, in expert hands"
+            lead="Every device is chosen for evidence, safety and Indian skin — and operated under dermatologist supervision."
+          />
+          <EquipmentGrid />
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="section bg-ink-50/70" aria-labelledby="testimonials-title">
-        <div className="container-page">
-          <SectionHeading eyebrow="Patient stories" title={<span id="testimonials-title">What our patients say</span>} align="center" />
-          <div className="grid gap-6 md:grid-cols-3">
-            {items.map((t) => (
-              <figure key={t.name} className="flex flex-col rounded-[var(--radius-card)] border border-ink-100 bg-white p-7 shadow-card">
-                <Quote className="size-8 text-accent-400" aria-hidden="true" />
-                <blockquote className="mt-4 flex-1 leading-7 text-ink-700">“{t.quote}”</blockquote>
-                <figcaption className="mt-6 border-t border-ink-100 pt-4 text-sm">
-                  <span className="font-semibold text-ink-900">{t.name}</span>
-                  <span className="text-ink-500"> · {t.detail}</span>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-          <p className="mt-6 text-center text-xs text-ink-500 font-medium">Verified patient feedback from Cedarline Multispeciality Clinic consultations.</p>
+      <section className="section relative bg-cream">
+        <div className="slats-soft absolute inset-0" aria-hidden="true" />
+        <div className="container-page relative">
+          <SectionHeader eyebrow="What our clients say" title="Care that patients talk about" align="center" />
+          <TestimonialGrid />
         </div>
       </section>
 
-      {/* Blog */}
+      {/* Centres */}
       <section className="section">
         <div className="container-page">
-          <SectionHeading
-            eyebrow="Patient education"
-            title="Helpful reading from our doctors"
+          <SectionHeader
+            eyebrow="Our centres"
+            title={
+              <>
+                Your neighbourhood, <span className="display-italic text-brand-700">your RUA.</span>
+              </>
+            }
+            lead={`Two centres in Bengaluru, open ${BRAND.hours.days}, ${BRAND.hours.label}.`}
             action={
-              <ButtonLink to="/blog" variant="outline">
-                All articles <ArrowRight className="size-4" aria-hidden="true" />
+              <ButtonLink to="/centers" variant="outline" icon={<ArrowRight className="size-4" aria-hidden="true" />}>
+                Compare centres
               </ButtonLink>
             }
           />
-          {blog.error ? (
-            <ErrorState message={blog.error.message} onRetry={blog.reload} />
-          ) : (
-            <div className="grid gap-6 md:grid-cols-3">
-              {blog.loading || !blog.data
-                ? Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="h-96" />)
-                : blog.data.items.map((post) => <BlogCard key={post.id} post={post} />)}
-            </div>
-          )}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {CENTRES.map((c, i) => (
+              <Reveal key={c.slug} delay={i * 120} className="h-full">
+                <CentreCard centre={c} />
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
-      <CtaBanner />
+      {/* Research + Instagram */}
+      <section className="section bg-sand/50">
+        <div className="container-page grid gap-14 xl:grid-cols-[1fr_1fr]">
+          <div>
+            <SectionHeader
+              eyebrow="Research papers"
+              title="Dermatologists who publish"
+              lead="Our doctors contribute to peer-reviewed dermatology research — the same evidence-first thinking goes into every treatment plan."
+              className="mb-8"
+            />
+            <ResearchList />
+          </div>
+          <div>
+            <SectionHeader
+              eyebrow="Skin & Hair, Unfiltered"
+              title="Doctor-led education on Instagram"
+              lead={
+                <>
+                  Follow{' '}
+                  <a href={BRAND.social[0].url} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand-700 underline underline-offset-4">
+                    {BRAND.social[0].handle}
+                  </a>{' '}
+                  for myth-busting, procedures and skincare explained by our dermatologists.
+                </>
+              }
+              className="mb-8"
+            />
+            <InstagramGrid />
+          </div>
+        </div>
+      </section>
+
+      <CtaBand />
     </>
   )
 }

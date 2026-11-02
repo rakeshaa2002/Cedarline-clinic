@@ -102,7 +102,10 @@ export const adminApi = {
   doctors: () => api.get<Doctor[]>('/admin/doctors').then((r) => r.data),
   createDoctor: (data: DoctorInput) => api.post<Doctor>('/admin/doctors', data).then((r) => r.data),
   updateDoctor: (id: number, data: DoctorInput) => api.put<Doctor>(`/admin/doctors/${id}`, data).then((r) => r.data),
-  deleteDoctor: (id: number) => api.delete<void>(`/admin/doctors/${id}`).then((r) => r.data),
+  deleteDoctor: (id: number, opts?: { deleteAppointments?: boolean }) =>
+    api
+      .delete<void>(`/admin/doctors/${id}`, { params: opts?.deleteAppointments ? { delete_appointments: true } : undefined })
+      .then((r) => r.data),
 
   services: () => api.get<Service[]>('/admin/services').then((r) => r.data),
   createService: (data: ServiceInput) => api.post<Service>('/admin/services', data).then((r) => r.data),

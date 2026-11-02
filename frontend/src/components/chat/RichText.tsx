@@ -4,29 +4,26 @@ import { cn } from '@/utils/format'
 
 /**
  * Renders the small Markdown subset the assistant uses (**bold**, "- " bullets,
- * paragraphs) and turns internal paths like /appointments into router links.
+ * paragraphs) and turns the RUA site's internal paths (/book-appointment, /doctors/…,
+ * /services/…, /centers/…) into router links. A path inside a URL is left alone.
  * No HTML is ever injected, so model output cannot run scripts.
  */
-const INLINE = /(\*\*[^*]+\*\*|\/(?:appointments|contact|doctors|about|services(?:\/(?:dental|skin|hair))?|blog(?:\/[a-z0-9-]+)?)\b)/g
+const INLINE =
+  /(\*\*[^*]+\*\*|(?<![\w/.:])\/(?:book-appointment|appointments|contact|about-us|about|doctors(?:\/[a-z0-9-]+)?|centers(?:\/[a-z0-9-]+)?|services(?:\/[a-z0-9-]+){0,2})\b)/g
+
+// Older paths the assistant may still mention, mapped to the current pages.
+const ALIASES: Record<string, string> = { '/appointments': '/book-appointment', '/about': '/about-us' }
 
 function inline(text: string, onNavigate?: () => void): ReactNode[] {
   return text.split(INLINE).map((part, i) => {
     if (!part) return null
     if (part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>
     if (part.startsWith('/')) {
-      const target = part === '/appointments' ? '/appointments#book' : part
       return (
         <Link
           key={i}
-          to={target}
-          onClick={() => {
-            onNavigate?.()
-            if (part === '/appointments') {
-              setTimeout(() => {
-                document.getElementById('book')?.scrollIntoView({ behavior: 'smooth' })
-              }, 50)
-            }
-          }}
+          to={ALIASES[part] ?? part}
+          onClick={() => onNavigate?.()}
           className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800"
         >
           {part}

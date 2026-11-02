@@ -1,4 +1,12 @@
-export type Department = 'general' | 'dental' | 'skin' | 'hair' | 'pediatrics'
+/** RUA's seven specialities (mirrors backend app/models/clinic.py DEPARTMENTS). */
+export type Department =
+  | 'medical-dermatology'
+  | 'dermatosurgery'
+  | 'aesthetic-dermatology'
+  | 'laser-treatments'
+  | 'hair-treatments'
+  | 'hair-transplant'
+  | 'premium-packages'
 export interface OpeningHour {
   day: string
   open: string | null
@@ -24,16 +32,19 @@ export interface ClinicInfo {
   theme: Theme
 }
 
-export type Theme = 'cedar' | 'emerald' | 'sapphire' | 'slate' | 'plum'
+/** RUA brand palettes; 'cedar' is the signature cocoa (the stylesheet defaults). */
+export type Theme = 'cedar' | 'walnut' | 'rosewood' | 'espresso' | 'sage'
 
 export interface Doctor {
   id: number
   slug: string
   full_name: string
   department: Department
+  departments: Department[]
   specialization: string
   qualifications: string
-  experience_years: number
+  fellowship: string | null
+  experience_years: number | null
   bio: string
   languages: string[]
   photo_url: string | null
@@ -56,6 +67,17 @@ export interface Service {
   price_from: string | null
   icon: string
   is_active: boolean
+}
+
+export interface Branch {
+  id: number
+  slug: string
+  name: string
+  area: string
+  address: string
+  phone: string
+  whatsapp: string | null
+  map_url: string | null
 }
 
 export interface BlogAuthor {
@@ -147,7 +169,7 @@ export interface ChatDoctor {
   specialization: string
   department: string
   qualifications: string
-  experience_years: number
+  experience_years: number | null
   languages: string[]
   photo_url: string | null
   consultation_fee: number | null
@@ -246,6 +268,7 @@ export interface Availability {
 export interface BookingInput {
   department: Department
   doctor_slug: string | null
+  branch_slug?: string | null
   appointment_date: string
   start_time: string
   patient_name: string
@@ -264,6 +287,16 @@ export interface AppointmentDoctor {
   photo_url: string | null
 }
 
+export interface AppointmentBranch {
+  id: number
+  slug: string
+  name: string
+  area: string
+  address: string
+  phone: string
+  map_url: string | null
+}
+
 export interface BookingConfirmation {
   reference: string
   status: AppointmentStatus
@@ -273,8 +306,24 @@ export interface BookingConfirmation {
   end_time: string
   consultation_fee: string | null
   patient_name: string
-  patient_email: string
+  patient_email: string | null
+  patient_phone: string
   doctor: AppointmentDoctor
+  branch: AppointmentBranch | null
+}
+
+export type WhatsAppKind = 'received' | 'confirmation' | 'cancellation' | 'reschedule' | 'reminder' | 'otp' | 'manual'
+
+export interface WhatsAppMessage {
+  id: number
+  appointment_id: number | null
+  to_phone: string
+  kind: WhatsAppKind
+  body: string
+  status: 'sent' | 'failed' | 'skipped'
+  provider_message_id: string | null
+  error: string | null
+  created_at: string
 }
 
 export interface AppointmentEmail {
@@ -291,7 +340,7 @@ export interface AppointmentEmail {
 export interface Appointment extends BookingConfirmation {
   id: number
   source: AppointmentSource
-  patient_phone: string
+  patient_id: number | null
   reason: string
   cancellation_reason: string | null
   admin_notes: string | null
@@ -301,10 +350,14 @@ export interface Appointment extends BookingConfirmation {
   created_at: string
   updated_at: string
   last_email: AppointmentEmail | null
+  last_whatsapp: WhatsAppMessage | null
 }
 
 export interface AppointmentDetail extends Appointment {
   emails: AppointmentEmail[]
+  whatsapp_messages: WhatsAppMessage[]
+  reminder_24h_sent_at: string | null
+  reminder_2h_sent_at: string | null
 }
 
 export interface AppointmentList extends Page<Appointment> {
@@ -323,7 +376,131 @@ export interface AppointmentAnalytics {
   revenue_total: string
   by_month: { month: string; total: number; pending: number; confirmed: number; completed: number; cancelled: number }[]
   by_department: { department: Department; total: number; revenue: string }[]
+  by_branch: { branch: string; total: number }[]
   by_source: Partial<Record<AppointmentSource, number>>
+  whatsapp_sent: number
+  whatsapp_pending: number
+}
+
+/* ---------- Doctor availability ---------- */
+
+export interface DayAvailability {
+  date: string
+  free: number
+  total: number
+}
+
+export interface DoctorAvailabilitySummary {
+  doctor_id: number
+  slug: string
+  full_name: string
+  specialization: string
+  photo_url: string | null
+  consultation_days: number[]
+  start_time: string
+  end_time: string
+  next_available: { date: string; start_time: string } | null
+  days: DayAvailability[]
+}
+
+export interface AvailabilitySummary {
+  days: number
+  doctors: DoctorAvailabilitySummary[]
+}
+
+export interface BoardSlot {
+  start_time: string
+  end_time: string
+  state: 'free' | 'booked' | 'past'
+  appointment_id: number | null
+  reference: string | null
+  patient_name: string | null
+  status: AppointmentStatus | null
+}
+
+export interface BoardDoctor {
+  doctor_id: number
+  slug: string
+  full_name: string
+  specialization: string
+  photo_url: string | null
+  consulting: boolean
+  hours: string | null
+  free: number
+  booked: number
+  slots: BoardSlot[]
+}
+
+export interface AvailabilityBoard {
+  date: string
+  clinic_open: boolean
+  doctors: BoardDoctor[]
+}
+
+/* ---------- Patient CRM ---------- */
+
+export type PatientSource = 'website' | 'chatbot' | 'admin' | 'walk-in' | 'portal'
+
+export interface Patient {
+  id: number
+  full_name: string
+  phone: string
+  email: string | null
+  notes: string | null
+  tags: string[]
+  source: PatientSource
+  whatsapp_opt_in: boolean
+  created_at: string
+}
+
+export interface PatientListItem extends Patient {
+  visits: number
+  upcoming: number
+  last_visit: string | null
+  next_visit: string | null
+  last_doctor: string | null
+}
+
+export interface PatientList extends Page<PatientListItem> {
+  stats: { total: number; upcoming: number; new_this_month: number }
+}
+
+export interface PatientDetail extends Patient {
+  appointments: Appointment[]
+  whatsapp_messages: WhatsAppMessage[]
+}
+
+export type PatientSegment = 'upcoming' | 'new' | 'returning' | 'inactive'
+
+/* ---------- Patient portal ---------- */
+
+export interface OtpRequested {
+  message: string
+  phone: string
+  /** Only outside production when WhatsApp isn't configured, so the portal can be demonstrated. */
+  dev_code: string | null
+}
+
+export interface PatientToken {
+  access_token: string
+  token_type: string
+  expires_in: number
+  patient: Patient
+}
+
+export interface PortalAppointment {
+  id: number
+  reference: string
+  status: AppointmentStatus
+  department: Department
+  appointment_date: string
+  start_time: string
+  end_time: string
+  reason: string
+  cancellation_reason: string | null
+  created_at: string
+  doctor: AppointmentDoctor
+  branch: AppointmentBranch | null
 }
 
 /* ---------- Before / after gallery ---------- */

@@ -3,27 +3,29 @@ import { Link, type LinkProps } from 'react-router-dom'
 import { Spinner } from '@/components/ui/Feedback'
 import { cn } from '@/utils/format'
 
-type Variant = 'primary' | 'accent' | 'outline' | 'ghost' | 'danger' | 'white'
+type Variant = 'primary' | 'accent' | 'outline' | 'ghost' | 'danger' | 'white' | 'outlineLight'
 type Size = 'sm' | 'md' | 'lg'
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-brand-700 text-white hover:bg-brand-800 shadow-sm hover:shadow-md hover:shadow-brand-700/20',
-  accent: 'bg-accent-500 text-white hover:bg-accent-600 shadow-sm shadow-accent-500/20 hover:shadow-lg hover:shadow-accent-500/30',
+  primary: 'bg-brand-800 text-cream hover:bg-brand-700 shadow-sm hover:shadow-lg hover:shadow-brand-800/25',
+  // Gold needs dark text: white on gold fails WCAG contrast.
+  accent: 'bg-accent-400 text-brand-950 hover:bg-accent-300 shadow-sm shadow-accent-600/20 hover:shadow-glow-accent',
   outline: 'border border-ink-200 bg-white text-ink-800 hover:border-brand-300 hover:bg-brand-50 hover:shadow-sm',
   ghost: 'text-ink-700 hover:bg-ink-100 hover:text-brand-700',
   danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md hover:shadow-red-600/20',
-  white: 'bg-white text-brand-800 hover:bg-brand-50 shadow-sm hover:shadow-md',
+  white: 'bg-cream text-brand-800 hover:bg-white shadow-sm hover:shadow-md',
+  outlineLight: 'border border-cream/35 text-cream hover:bg-cream/10 hover:border-cream/60',
 }
 
 const SIZES: Record<Size, string> = {
-  sm: 'h-9 px-3.5 text-sm gap-1.5',
-  md: 'h-11 px-5 text-[0.9375rem] gap-2',
-  lg: 'h-13 px-7 text-base gap-2.5',
+  sm: 'h-9 px-4 text-sm gap-1.5',
+  md: 'h-11 px-6 text-[0.9375rem] gap-2',
+  lg: 'h-13 px-8 text-base gap-2.5',
 }
 
 export function buttonClasses(variant: Variant = 'primary', size: Size = 'md', extra?: string) {
   return cn(
-    'inline-flex items-center justify-center rounded-xl font-semibold whitespace-nowrap cursor-pointer transition-all duration-200 ease-out',
+    'inline-flex items-center justify-center rounded-full font-semibold whitespace-nowrap cursor-pointer transition-all duration-200 ease-out',
     'hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
     'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2',
     VARIANTS[variant],

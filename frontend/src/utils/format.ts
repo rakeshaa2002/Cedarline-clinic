@@ -4,11 +4,13 @@ export const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
 export const WEEKDAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 export const DEPARTMENT_LABELS: Record<Department, string> = {
-  general: 'General Medicine',
-  dental: 'Dental Care',
-  skin: 'Skin & Dermatology',
-  hair: 'Hair & Trichology',
-  pediatrics: 'Paediatrics',
+  'medical-dermatology': 'Medical Dermatology',
+  'dermatosurgery': 'Dermatosurgery',
+  'aesthetic-dermatology': 'Cosmetic & Aesthetic',
+  'laser-treatments': 'Laser Treatments',
+  'hair-treatments': 'Hair Treatments',
+  'hair-transplant': 'Hair Transplant',
+  'premium-packages': 'Premium Packages',
 }
 
 /** "14:30:00" | "14:30" -> "2:30 PM" */

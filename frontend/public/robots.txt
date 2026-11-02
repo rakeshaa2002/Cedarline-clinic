@@ -1,9 +1,0 @@
-# Robots.txt for Cedarline Multispeciality Clinic
-User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /doctor
-Disallow: /api/
-
-# Sitemap location
-Sitemap: https://cedarline-clinic.onrender.com/sitemap.xml

@@ -2,22 +2,21 @@ import { lazy } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { SiteLayout } from '@/layouts/SiteLayout'
-import HomePage from '@/pages/HomePage'
+import AboutPage from '@/pages/AboutPage'
+import BookAppointmentPage from '@/pages/BookAppointmentPage'
+import CentrePage from '@/pages/CentrePage'
+import CentresPage from '@/pages/CentresPage'
+import ContactPage from '@/pages/ContactPage'
+import DoctorPage from '@/pages/DoctorPage'
+import DoctorsPage from '@/pages/DoctorsPage'
+// import HomePage from '@/pages/HomePage'
+import NotFoundPage from '@/pages/NotFoundPage'
 import RouteErrorPage from '@/pages/RouteErrorPage'
+import ServiceCategoryPage from '@/pages/ServiceCategoryPage'
+import ServicesPage from '@/pages/ServicesPage'
+import TreatmentPage from '@/pages/TreatmentPage'
 
-// Every page except Home is code-split so the first load stays small.
-const AboutPage = lazy(() => import('@/pages/AboutPage'))
-const DoctorsPage = lazy(() => import('@/pages/DoctorsPage'))
-const ServicesPage = lazy(() => import('@/pages/ServicesPage'))
-const DentalPage = lazy(() => import('@/pages/departments/DentalPage'))
-const SkinPage = lazy(() => import('@/pages/departments/SkinPage'))
-const HairPage = lazy(() => import('@/pages/departments/HairPage'))
-const AppointmentsPage = lazy(() => import('@/pages/AppointmentsPage'))
-const BlogPage = lazy(() => import('@/pages/BlogPage'))
-const BlogPostPage = lazy(() => import('@/pages/BlogPostPage'))
-const ContactPage = lazy(() => import('@/pages/ContactPage'))
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
-
+// The public RUA site loads eagerly (instant navigation); the admin panel is code-split.
 const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'))
 const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'))
 const AdminDoctorsPage = lazy(() => import('@/pages/admin/AdminDoctorsPage'))
@@ -34,17 +33,24 @@ export const router = createBrowserRouter([
     element: <SiteLayout />,
     errorElement: <RouteErrorPage />,
     children: [
-      { path: '/', element: <HomePage /> },
-      { path: '/about', element: <AboutPage /> },
-      { path: '/doctors', element: <DoctorsPage /> },
+      // Home page is hidden for now; redirect visitors to /about-us
+      { path: '/', element: <Navigate to="/about-us" replace /> },
+      { path: '/home', element: <Navigate to="/about-us" replace /> },
       { path: '/services', element: <ServicesPage /> },
-      { path: '/services/dental', element: <DentalPage /> },
-      { path: '/services/skin', element: <SkinPage /> },
-      { path: '/services/hair', element: <HairPage /> },
-      { path: '/appointments', element: <AppointmentsPage /> },
-      { path: '/blog', element: <BlogPage /> },
-      { path: '/blog/:slug', element: <BlogPostPage /> },
+      { path: '/services/:category', element: <ServiceCategoryPage /> },
+      { path: '/services/:category/:treatment', element: <TreatmentPage /> },
+      { path: '/doctors', element: <DoctorsPage /> },
+      { path: '/doctors/:slug', element: <DoctorPage /> },
+      { path: '/centers', element: <CentresPage /> },
+      { path: '/centers/:slug', element: <CentrePage /> },
+      { path: '/about-us', element: <AboutPage /> },
       { path: '/contact', element: <ContactPage /> },
+      { path: '/book-appointment', element: <BookAppointmentPage /> },
+      // Old and alternative URLs
+      { path: '/about', element: <Navigate to="/about-us" replace /> },
+      { path: '/appointments', element: <Navigate to="/book-appointment" replace /> },
+      { path: '/centres', element: <Navigate to="/centers" replace /> },
+      { path: '/blog/*', element: <Navigate to="/services" replace /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

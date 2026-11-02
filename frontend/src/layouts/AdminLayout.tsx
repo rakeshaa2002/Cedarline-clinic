@@ -91,7 +91,7 @@ export function AdminLayout() {
         <p className="truncate text-sm font-semibold text-white">{user.full_name}</p>
         <p className="truncate text-xs text-ink-400">{user.email}</p>
         <div className="mt-3 flex gap-2">
-          <Link to="/" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/8 py-2 text-xs font-semibold text-ink-200 hover:bg-white/12">
+          <Link to="/services" className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/8 py-2 text-xs font-semibold text-ink-200 hover:bg-white/12">
             <ExternalLink className="size-3.5" aria-hidden="true" /> Website
           </Link>
           <button
@@ -108,7 +108,7 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-ink-50">
-      <title>{isDoctor ? 'Doctor Portal' : 'Admin'} | Cedarline Clinic</title>
+      <title>{isDoctor ? 'Doctor Portal' : 'Admin'} | RUA Skin &amp; Hair Center</title>
       <meta name="robots" content="noindex, nofollow" />
       <aside className="fixed inset-y-0 left-0 hidden w-64 bg-ink-950 lg:block">{sidebar}</aside>
 

@@ -403,7 +403,7 @@ function AppointmentModal({ id, onClose, onChanged }: { id: number; onClose: () 
                   <Phone className="size-3.5" aria-hidden="true" /> {a.patient_phone}
                 </a>
                 <a
-                  href={`https://wa.me/${a.patient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hello ${a.patient_name.split(' ')[0]}, this is Cedarline Clinic about your appointment ${a.reference}.`)}`}
+                  href={`https://wa.me/${a.patient_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hello ${a.patient_name.split(' ')[0]}, this is RUA Skin & Hair Center about your appointment ${a.reference}.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 font-medium text-emerald-800 hover:bg-emerald-100"

@@ -9,53 +9,54 @@ export interface ThemeDefinition {
 }
 
 /**
- * Brand palettes the admin can switch between. Each keeps the same lightness steps as the original
- * teal, so white text on brand-500+ and brand-700 text on white stay readable (WCAG AA).
+ * RUA brand palettes the admin can switch between, all from the clinic's wood-and-cream identity so
+ * they sit with the cream surfaces and gold accent. Each keeps the signature palette's lightness
+ * steps, so white text on brand-500+ and brand-700 text on white stay at least as readable.
  */
 export const THEMES: Record<Theme, ThemeDefinition> = {
   cedar: {
-    label: 'Cedar Teal',
-    description: 'The original Cedarline teal: calm and clinical.',
+    label: 'RUA Cocoa',
+    description: 'The signature RUA identity: cocoa and walnut wood with cream.',
     brand: {
-      50: '#eef8f8', 100: '#d4eeee', 200: '#a9dbdc', 300: '#74c0c2', 400: '#3f9fa3', 500: '#208589',
-      600: '#176d72', 700: '#135a5f', 800: '#10494d', 900: '#0d3b3e', 950: '#082a2c',
+      50: '#fdf6ef', 100: '#f8e9dc', 200: '#efd3bb', 300: '#e0b48f', 400: '#c98e63', 500: '#a96c42',
+      600: '#8e5430', 700: '#713f27', 800: '#592f23', 900: '#44241b', 950: '#2b1711',
     },
   },
-  emerald: {
-    label: 'Clinical Emerald',
-    description: 'Fresh green that signals health and growth.',
+  walnut: {
+    label: 'Walnut & Honey',
+    description: 'Golden walnut tones, warmer and lighter than the signature cocoa.',
     brand: {
-      50: '#eef9f4', 100: '#d5efe4', 200: '#aadcc6', 300: '#75c4a5', 400: '#3aa37f', 500: '#12875f',
-      600: '#0d6e4e', 700: '#0b5a41', 800: '#094a36', 900: '#083d2d', 950: '#04241a',
+      50: '#fbf6ee', 100: '#f4e7d2', 200: '#e8cfa8', 300: '#d8b07a', 400: '#c08b4f', 500: '#9a6434',
+      600: '#80512a', 700: '#674224', 800: '#54361f', 900: '#452d1b', 950: '#29190e',
     },
   },
-  sapphire: {
-    label: 'Sapphire Blue',
-    description: 'Trustworthy hospital blue.',
+  rosewood: {
+    label: 'Rosewood',
+    description: 'Dusky rose-brown with a soft, skin-care feel.',
     brand: {
-      50: '#eff5ff', 100: '#dbe7fe', 200: '#b9d0fb', 300: '#8bb0f5', 400: '#5a8bec', 500: '#2f6bd8',
-      600: '#2457b8', 700: '#1f4794', 800: '#1c3b78', 900: '#192f5f', 950: '#0f1c3a',
+      50: '#fbf4f3', 100: '#f4e3e1', 200: '#e8c6c2', 300: '#d6a19b', 400: '#bf776f', 500: '#a3564f',
+      600: '#874440', 700: '#6e3735', 800: '#5a2e2e', 900: '#4a2828', 950: '#2b1515',
     },
   },
-  slate: {
-    label: 'Modern Slate',
-    description: 'Understated grey-blue for a premium, minimal look.',
+  espresso: {
+    label: 'Espresso',
+    description: 'Deep, understated coffee brown for a quiet premium look.',
     brand: {
-      50: '#f4f6f9', 100: '#e6eaf0', 200: '#cbd3de', 300: '#a6b3c4', 400: '#7a8aa1', 500: '#566781',
-      600: '#46556c', 700: '#3a4659', 800: '#313b4b', 900: '#29313e', 950: '#191e27',
+      50: '#f6f4f2', 100: '#e9e4df', 200: '#d4c9bf', 300: '#b6a597', 400: '#937e6d', 500: '#76604f',
+      600: '#5e4c3f', 700: '#4b3d33', 800: '#3d322b', 900: '#322a25', 950: '#1c1714',
     },
   },
-  plum: {
-    label: 'Royal Plum',
-    description: 'Warm violet suited to aesthetic and skin care.',
+  sage: {
+    label: 'Botanical Sage',
+    description: 'Muted leaf green that pairs with RUA’s cream and gold.',
     brand: {
-      50: '#f8f3fb', 100: '#efe3f6', 200: '#dcc5ec', 300: '#c29fdc', 400: '#a374c7', 500: '#8653ad',
-      600: '#6f4290', 700: '#5b3676', 800: '#4b2e61', 900: '#3e2750', 950: '#261631',
+      50: '#f3f6f1', 100: '#e3eadf', 200: '#c8d6c1', 300: '#a3b99a', 400: '#7d9872', 500: '#5d7a52',
+      600: '#4a6242', 700: '#3c4f36', 800: '#32412e', 900: '#2a3627', 950: '#161d14',
     },
   },
 }
 
-const STORAGE_KEY = 'cedarline.theme'
+const STORAGE_KEY = 'rua.theme'
 
 const isTheme = (value: unknown): value is Theme => typeof value === 'string' && value in THEMES
 

@@ -1,4 +1,4 @@
-import { Check, CheckCircle2, Clock, Filter, Inbox, Mail, Phone, Search, User, X } from 'lucide-react'
+import { Check, CheckCircle2, Clock, Filter, Inbox, Mail, Phone, Search, Stethoscope, User, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { EmptyState, ErrorState, PageLoader } from '@/components/ui/Feedback'
@@ -7,32 +7,46 @@ import { useToast } from '@/components/ui/Toast'
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
 import { useApi } from '@/hooks/useApi'
 import { useAuth } from '@/hooks/useAuth'
+import { useDoctors } from '@/hooks/useClinic'
 import { AdminPageHeader } from '@/layouts/AdminLayout'
 import type { ApiError } from '@/services/api'
 import { adminApi } from '@/services/endpoints'
-import { formatDateTime } from '@/utils/format'
+import type { Department } from '@/types'
+import { DEPARTMENT_LABELS, formatDateTime } from '@/utils/format'
 
-const DEPARTMENTS = [
-  { id: 'all', label: 'All Specialties' },
-  { id: 'general', label: 'General Medicine / Family Care' },
-  { id: 'dental', label: 'Dental & Orthodontics' },
-  { id: 'skin', label: 'Dermatology & Skin' },
-  { id: 'hair', label: 'Hair & Scalp (Trichology)' },
-  { id: 'pediatrics', label: 'Paediatrics & Child Health' },
-]
+// RUA's specialities. Enquiries are free text, so each is matched on the words patients use.
+const SPECIALITY_TERMS: Record<Department, RegExp> = {
+  'medical-dermatology': /medical dermatology|acne|pimple|pigment|melasma|eczema|psoria|rash|itch|vitiligo|fungal|infection|allerg|dermatitis|urticaria/i,
+  dermatosurgery: /dermatosurg|skin tags?|moles?|cysts?|warts?|scar revision|excision|biops|ingrown|keloid/i,
+  'aesthetic-dermatology': /cosmetic|aesthetic|hydra ?facial|peel|botox|filler|skin booster|pdrn|nctf|mnrf|microneedl|glow|ageing|aging|wrinkle|dull/i,
+  'laser-treatments': /laser|tattoo|co2|toning|hair reduction/i,
+  'hair-treatments': /hair ?fall|hair loss|thinning|dandruff|scalp|prp|gfc|exosome|qr ?678|alopecia|tricho/i,
+  'hair-transplant': /transplant|fue|dhi|sapphire|hairline|beard|eyebrow|grafts?/i,
+  'premium-packages': /bridal|groom|wedding|package/i,
+}
+const SPECIALITIES = Object.keys(SPECIALITY_TERMS) as Department[]
+
+/** "Dr. Jatin K Reddy" -> matches "Dr Jatin", "Jatin K Reddy" or "Dr. Jatin K Reddy" in an enquiry. */
+const mentionsDoctor = (text: string, fullName: string) => {
+  const first = fullName.replace(/^dr\.?\s+/i, '').split(' ')[0]
+  return first.length >= 3 && new RegExp(`\\b${first}\\b`, 'i').test(text)
+}
 
 export default function AdminMessagesPage() {
   const { user } = useAuth()
   const messages = useApi('admin:messages', adminApi.messages, { cache: false })
+  const doctors = useDoctors()
   const toast = useToast()
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'unread' | 'read'>('all')
-  const [deptFilter, setDeptFilter] = useState('all')
+  const [deptFilter, setDeptFilter] = useState<Department | 'all'>('all')
+  const [doctorFilter, setDoctorFilter] = useState('all')
   const [updatingId, setUpdatingId] = useState<number | null>(null)
 
   const isDoctor = user?.role === 'doctor'
-  const doctorName = user?.full_name || 'Cedarline Clinic Doctor'
+  const doctorName = user?.full_name || 'RUA Skin & Hair Center'
+  const doctorList = doctors.data ?? []
 
   const markRead = async (id: number) => {
     setUpdatingId(id)
@@ -55,15 +69,10 @@ export default function AdminMessagesPage() {
       if (statusFilter === 'unread' && m.is_read) return false
       if (statusFilter === 'read' && !m.is_read) return false
 
-      // Department filter based on subject and message content
-      if (deptFilter !== 'all') {
-        const text = `${m.subject} ${m.message}`.toLowerCase()
-        if (deptFilter === 'general' && !/general|ananya|vikram|physician|medicine|health|fever/i.test(text)) return false
-        if (deptFilter === 'dental' && !/dental|teeth|tooth|arjun|meera|braces|aligner|scaling/i.test(text)) return false
-        if (deptFilter === 'skin' && !/skin|derma|naomi|rohan|acne|rash|eczema/i.test(text)) return false
-        if (deptFilter === 'hair' && !/hair|scalp|sara|daniel|tricho|fall|loss|dandruff/i.test(text)) return false
-        if (deptFilter === 'pediatrics' && !/pediatric|paediatric|child|baby|leela|vaccin/i.test(text)) return false
-      }
+      // Speciality and doctor filters read the subject and message text
+      const text = `${m.subject} ${m.message}`
+      if (deptFilter !== 'all' && !SPECIALITY_TERMS[deptFilter].test(text)) return false
+      if (doctorFilter !== 'all' && !mentionsDoctor(text, doctorFilter)) return false
 
       // Search query
       if (search.trim()) {
@@ -79,7 +88,8 @@ export default function AdminMessagesPage() {
 
       return true
     })
-  }, [allItems, statusFilter, deptFilter, search])
+  }, [allItems, statusFilter, deptFilter, doctorFilter, search])
+  const filtering = search !== '' || deptFilter !== 'all' || doctorFilter !== 'all' || statusFilter !== 'all'
 
   if (messages.loading && !messages.data) return <PageLoader />
   if (messages.error) return <ErrorState message={messages.error.message} onRetry={messages.reload} />
@@ -186,46 +196,69 @@ export default function AdminMessagesPage() {
           </div>
         </div>
 
-        {/* Department specialty filter pills */}
+        {/* Speciality filter pills (RUA's seven specialities) */}
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-ink-100 text-xs">
           <span className="inline-flex items-center gap-1 font-semibold text-ink-500 mr-1">
-            <Filter className="size-3.5" /> Filter by:
+            <Filter className="size-3.5" /> Speciality:
           </span>
-          {DEPARTMENTS.map((dept) => (
+          {(['all', ...SPECIALITIES] as const).map((id) => (
             <button
-              key={dept.id}
+              key={id}
               type="button"
-              onClick={() => setDeptFilter(dept.id)}
+              onClick={() => setDeptFilter(id)}
               className={`rounded-lg px-3 py-1 font-medium transition-all cursor-pointer ${
-                deptFilter === dept.id
-                  ? 'bg-brand-600 text-white shadow-xs'
-                  : 'bg-ink-100/80 text-ink-700 hover:bg-ink-200/70'
+                deptFilter === id ? 'bg-brand-600 text-white shadow-xs' : 'bg-ink-100/80 text-ink-700 hover:bg-ink-200/70'
               }`}
             >
-              {dept.label}
+              {id === 'all' ? 'All specialities' : DEPARTMENT_LABELS[id]}
             </button>
           ))}
         </div>
+
+        {/* Doctor filter pills (live doctor list) */}
+        {doctorList.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1 font-semibold text-ink-500 mr-1">
+              <Stethoscope className="size-3.5" /> Doctor:
+            </span>
+            {[{ slug: 'all', full_name: 'All doctors' }, ...doctorList].map((d) => {
+              const value = d.slug === 'all' ? 'all' : d.full_name
+              return (
+                <button
+                  key={d.slug}
+                  type="button"
+                  onClick={() => setDoctorFilter(value)}
+                  className={`rounded-lg px-3 py-1 font-medium transition-all cursor-pointer ${
+                    doctorFilter === value ? 'bg-brand-600 text-white shadow-xs' : 'bg-ink-100/80 text-ink-700 hover:bg-ink-200/70'
+                  }`}
+                >
+                  {d.full_name}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Patient Messages List */}
       {filteredItems.length === 0 ? (
         <EmptyState
           icon={<Inbox className="size-6" aria-hidden="true" />}
-          title={search || deptFilter !== 'all' || statusFilter !== 'all' ? 'No matching patient records' : 'No inquiries yet'}
+          title={filtering ? 'No matching patient records' : 'No inquiries yet'}
           description={
-            search || deptFilter !== 'all' || statusFilter !== 'all'
+            filtering
               ? 'Try adjusting your search keywords or clearing active filters.'
               : 'Patient appointment requests submitted via the website or WhatsApp will appear here.'
           }
           action={
-            (search || deptFilter !== 'all' || statusFilter !== 'all') ? (
+            filtering ? (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   setSearch('')
                   setDeptFilter('all')
+                  setDoctorFilter('all')
                   setStatusFilter('all')
                 }}
               >
@@ -239,7 +272,7 @@ export default function AdminMessagesPage() {
           {filteredItems.map((m) => {
             const cleanPhone = m.phone ? m.phone.replace(/\D/g, '') : null
             const whatsappText = encodeURIComponent(
-              `Hello ${m.name}, this is ${doctorName} from Cedarline Multispeciality Clinic regarding your inquiry: "${m.subject}". How can we assist you with your appointment?`
+              `Hello ${m.name}, this is ${isDoctor ? doctorName : 'the front desk'} from RUA Skin & Hair Center about your enquiry: "${m.subject}". How can we help you with your appointment?`
             )
             const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone}?text=${whatsappText}` : null
             const initials = m.name

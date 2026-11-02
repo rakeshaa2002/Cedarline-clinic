@@ -145,7 +145,7 @@ export function BlogCard({ post }: { post: BlogPostSummary }) {
         <div className="mt-5 flex items-center gap-3 border-t border-ink-100 pt-4">
           {post.author && <DoctorPhoto doctor={post.author} className="size-9 rounded-full ring-2 ring-brand-100 shadow-xs" />}
           <div className="text-xs">
-            <p className="font-semibold text-ink-800">{post.author?.full_name ?? 'Cedarline team'}</p>
+            <p className="font-semibold text-ink-800">{post.author?.full_name ?? 'RUA team'}</p>
             <p className="text-ink-500">
               <time dateTime={post.published_at}>{formatDate(post.published_at)}</time>
             </p>

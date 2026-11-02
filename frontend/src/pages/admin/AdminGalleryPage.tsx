@@ -16,7 +16,7 @@ import type { Department, TransformationAdmin } from '@/types'
 import { DEPARTMENT_LABELS } from '@/utils/format'
 
 const EMPTY: TransformationInput = {
-  department: 'dental',
+  department: 'medical-dermatology',
   title: '',
   description: '',
   before_image: '',
@@ -50,7 +50,7 @@ export default function AdminGalleryPage() {
     <>
       <AdminPageHeader
         title="Before & after"
-        description="Treatment results shown on the Dental, Skin and Hair pages. Publish only with the patient's written consent."
+        description="Before-and-after results from RUA's skin, hair and laser treatments. Publish only with the patient's written consent."
         action={<Button icon={<Plus className="size-4" aria-hidden="true" />} onClick={() => setEditing({ id: null, values: EMPTY })}>Add case</Button>}
       />
       {cases.data?.length === 0 ? (

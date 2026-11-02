@@ -71,9 +71,9 @@ export default function AdminDashboardPage() {
               <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur-xs">
                 <span>🩺 Outpatient Consultant</span>
                 <span>•</span>
-                <span>Cedarline Multispeciality</span>
+                <span>RUA Skin &amp; Hair Center</span>
               </div>
-              <h2 className="mt-2 text-xl font-bold sm:text-2xl">{user?.full_name}</h2>
+              <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">{user?.full_name}</h2>
               <p className="mt-1 text-sm text-brand-100 max-w-xl">
                 You have <strong className="text-white underline">{unread_messages} patient appointment request{unread_messages === 1 ? '' : 's'}</strong> awaiting your review or front-desk confirmation.
               </p>

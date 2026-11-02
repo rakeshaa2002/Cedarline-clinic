@@ -1,47 +1,69 @@
 @import 'tailwindcss';
 
-/* Design tokens: deep teal primary, navy ink, a restrained orange accent for key actions. */
+/*
+ * RUA Skin & Hair Center design tokens, taken from the clinic itself: the cocoa wood-slat facade
+ * and logo (#592F23), walnut signage (#8E5430), cream walls and logo lettering (#FFEFE2), and the
+ * brushed-gold logo wall. Ink is a warm brown-black for text.
+ */
 @theme {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --font-label: 'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 
-  --color-ink-950: #08172a;
-  --color-ink-900: #0d2139;
-  --color-ink-800: #15304f;
-  --color-ink-700: #23436a;
-  --color-ink-600: #3b5a80;
-  --color-ink-500: #5a7598;
-  --color-ink-400: #8399b4;
-  --color-ink-300: #b2c0d1;
-  --color-ink-200: #d6dee8;
-  --color-ink-100: #ebf0f5;
-  --color-ink-50: #f5f8fb;
+  --color-ink-950: #1b120e;
+  --color-ink-900: #2b1f1a;
+  --color-ink-800: #3d2e27;
+  --color-ink-700: #55433a;
+  --color-ink-600: #6b5649;
+  --color-ink-500: #8b7355;
+  --color-ink-400: #ab977f;
+  --color-ink-300: #cbbba8;
+  --color-ink-200: #e3d8cb;
+  --color-ink-100: #f1e9df;
+  --color-ink-50: #f8f3ec;
 
-  --color-brand-50: #eef8f8;
-  --color-brand-100: #d4eeee;
-  --color-brand-200: #a9dbdc;
-  --color-brand-300: #74c0c2;
-  --color-brand-400: #3f9fa3;
-  --color-brand-500: #208589;
-  --color-brand-600: #176d72;
-  --color-brand-700: #135a5f;
-  --color-brand-800: #10494d;
-  --color-brand-900: #0d3b3e;
-  --color-brand-950: #082a2c;
+  --color-brand-50: #fdf6ef;
+  --color-brand-100: #f8e9dc;
+  --color-brand-200: #efd3bb;
+  --color-brand-300: #e0b48f;
+  --color-brand-400: #c98e63;
+  --color-brand-500: #a96c42;
+  --color-brand-600: #8e5430;
+  --color-brand-700: #713f27;
+  --color-brand-800: #592f23;
+  --color-brand-900: #44241b;
+  --color-brand-950: #2b1711;
 
-  --color-accent-50: #fff4ec;
-  --color-accent-100: #ffe4d1;
-  --color-accent-200: #ffc7a1;
-  --color-accent-400: #f5894b;
-  --color-accent-500: #ee6c2a;
-  --color-accent-600: #d6561b;
-  --color-accent-700: #b04312;
+  --color-accent-50: #fbf6ea;
+  --color-accent-100: #f5e9c9;
+  --color-accent-200: #ecd59a;
+  --color-accent-300: #e0bd6b;
+  --color-accent-400: #d4a94f;
+  --color-accent-500: #c4943b;
+  --color-accent-600: #a5782c;
+  --color-accent-700: #835c22;
 
-  --radius-card: 1.25rem;
-  --shadow-card: 0 1px 3px rgb(13 33 57 / 0.05), 0 10px 28px -12px rgb(13 33 57 / 0.12);
-  --shadow-lift: 0 4px 6px rgb(13 33 57 / 0.05), 0 20px 48px -16px rgb(13 33 57 / 0.22);
-  --shadow-glow: 0 0 35px -5px rgba(32, 133, 137, 0.25);
-  --shadow-glow-accent: 0 0 35px -5px rgba(238, 108, 42, 0.3);
+  --color-cream: #ffefe2;
+  --color-ivory: #fcf8f3;
+  --color-sand: #f4e6d7;
+  --color-greige: #8f7f72;
+
+  --radius-card: 1.5rem;
+  --shadow-card: 0 1px 3px rgb(43 23 17 / 0.05), 0 12px 32px -14px rgb(43 23 17 / 0.16);
+  --shadow-lift: 0 6px 10px rgb(43 23 17 / 0.05), 0 28px 60px -20px rgb(43 23 17 / 0.3);
+  --shadow-glow: 0 0 40px -6px rgba(142, 84, 48, 0.35);
+  --shadow-glow-accent: 0 0 40px -6px rgba(212, 169, 79, 0.45);
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-slow-zoom: slow-zoom 18s ease-out both;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes slow-zoom {
+    from { transform: scale(1.08); }
+    to { transform: scale(1); }
+  }
 
   --animate-fade-up: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-pop: pop 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -149,11 +171,13 @@
     -webkit-text-size-adjust: 100%;
   }
   body {
-    @apply bg-white font-sans text-ink-800 antialiased;
+    @apply bg-ivory font-sans text-ink-800 antialiased;
   }
   h1, h2, h3, h4 {
     @apply font-display text-ink-900;
-    letter-spacing: -0.02em;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    font-variation-settings: 'SOFT' 50, 'opsz' 72;
     text-wrap: balance;
   }
   p {
@@ -177,7 +201,84 @@
     @apply py-16 sm:py-20 lg:py-24;
   }
   .eyebrow {
-    @apply text-xs font-semibold tracking-[0.14em] text-brand-600 uppercase;
+    @apply font-label text-xs font-semibold tracking-[0.22em] text-accent-600 uppercase;
+  }
+  .eyebrow-light {
+    @apply font-label text-xs font-semibold tracking-[0.22em] text-accent-300 uppercase;
+  }
+
+  /* --- RUA brand devices ------------------------------------------------------------------ */
+
+  /* The vertical wood slats of RUA's facade, as a texture over cocoa surfaces. */
+  .slats {
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.045) 0 2px,
+      transparent 2px 14px,
+      rgb(0 0 0 / 0.08) 14px 16px,
+      transparent 16px 22px
+    );
+  }
+  .slats-soft {
+    background-image: repeating-linear-gradient(90deg, rgb(89 47 35 / 0.05) 0 1px, transparent 1px 18px);
+  }
+  /* Cocoa surface with a warm walnut glow (header, heroes, CTA bands). */
+  .surface-cocoa {
+    background-color: var(--color-brand-800);
+    background-image:
+      radial-gradient(60rem 30rem at 85% 10%, rgb(142 84 48 / 0.55), transparent 60%),
+      radial-gradient(40rem 24rem at 0% 100%, rgb(43 23 17 / 0.7), transparent 70%);
+  }
+  /* Gold hairline, like the brushed-gold logo wall. */
+  .hairline-gold {
+    background-image: linear-gradient(90deg, transparent, var(--color-accent-400), transparent);
+  }
+  /* An arch, echoing the arcs of the RUA mark. */
+  .arch {
+    border-radius: 999px 999px 1.5rem 1.5rem;
+  }
+  .text-gold-gradient {
+    background-image: linear-gradient(100deg, #e9cf8f 0%, #d4a94f 45%, #b98a3a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .display-italic {
+    font-style: italic;
+    font-variation-settings: 'SOFT' 100, 'opsz' 96;
+  }
+
+  /* Scroll-reveal (see components/rua/Reveal). */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Long-form treatment content */
+  .prose-rua p {
+    @apply mb-4 text-[1.0625rem] leading-8 text-ink-700;
+  }
+
+  /* Text shown by pre-rendered HTML before the app loads (and to crawlers without JavaScript). */
+  .prerender {
+    @apply mx-auto max-w-3xl px-6 py-16 font-sans text-ink-700;
+  }
+  .prerender h1 {
+    @apply mb-4 text-4xl;
+  }
+  .prerender h2 {
+    @apply mt-8 mb-2 text-xl;
+  }
+  .prerender ul {
+    @apply list-disc space-y-1 pl-6;
+  }
+  .prerender a {
+    @apply text-brand-700 underline;
   }
   /* Typography for long-form article and markdown-lite content */
   .prose-clinic h2 {
@@ -223,15 +324,15 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f4e6d7;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #a96c42;
   border-radius: 9999px;
-  border: 2px solid #f1f5f9;
+  border: 2px solid #f4e6d7;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #208589;
+  background: #592f23;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -240,5 +341,9 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
   }
 }

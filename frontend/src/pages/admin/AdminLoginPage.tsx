@@ -50,11 +50,11 @@ export default function AdminLoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-ink-50 px-4 py-12">
-      <title>Portal Sign In | Cedarline Clinic</title>
+      <title>Portal Sign In | RUA Skin &amp; Hair Center</title>
       <meta name="robots" content="noindex, nofollow" />
       <main className="w-full max-w-md">
         <div className="mb-8 flex justify-center">
-          <Link to="/" aria-label="Back to the clinic website">
+          <Link to="/services" aria-label="Back to the clinic website">
             <Logo />
           </Link>
         </div>
@@ -71,16 +71,16 @@ export default function AdminLoginPage() {
             <div className="grid grid-cols-3 gap-1.5">
               <button
                 type="button"
-                onClick={() => fillCredentials('doctor@cedarline.example', 'Cedarline-Doctor-2026')}
+                onClick={() => fillCredentials('doctor@ruaskinandhair.example', 'Cedarline-Doctor-2026')}
                 className="flex flex-col items-center justify-center rounded-xl bg-white p-2 text-center text-xs font-semibold text-brand-700 shadow-xs border border-brand-200/80 hover:bg-brand-50 hover:border-brand-300 transition-colors"
               >
                 <span className="text-sm">🩺</span>
                 <span className="mt-0.5 font-bold">Doctor</span>
-                <span className="text-[10px] text-ink-500 truncate max-w-full">Dr. Ananya</span>
+                <span className="text-[10px] text-ink-500 truncate max-w-full">Dr. Jatin K Reddy</span>
               </button>
               <button
                 type="button"
-                onClick={() => fillCredentials('staff@cedarline.example', 'Cedarline-Staff-2026')}
+                onClick={() => fillCredentials('staff@ruaskinandhair.example', 'Cedarline-Staff-2026')}
                 className="flex flex-col items-center justify-center rounded-xl bg-white p-2 text-center text-xs font-semibold text-ink-700 shadow-xs border border-ink-200 hover:bg-ink-50 transition-colors"
               >
                 <span className="text-sm">🏢</span>
@@ -89,7 +89,7 @@ export default function AdminLoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => fillCredentials('admin@cedarline.example', 'Cedarline-Admin-2026')}
+                onClick={() => fillCredentials('admin@ruaskinandhair.example', 'Cedarline-Admin-2026')}
                 className="flex flex-col items-center justify-center rounded-xl bg-white p-2 text-center text-xs font-semibold text-ink-700 shadow-xs border border-ink-200 hover:bg-ink-50 transition-colors"
               >
                 <span className="text-sm">🛡️</span>
@@ -117,7 +117,7 @@ export default function AdminLoginPage() {
           </form>
         </div>
         <p className="mt-6 text-center text-sm text-ink-500">
-          <Link to="/" className="font-medium text-brand-700 hover:underline">
+          <Link to="/services" className="font-medium text-brand-700 hover:underline">
             ← Back to website
           </Link>
         </p>

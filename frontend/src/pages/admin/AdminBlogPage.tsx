@@ -206,7 +206,7 @@ function PostEditor({ id, initial, onClose, onSaved }: { id: number | null; init
             )}
           </Field>
         )}
-        <Field label="Category" required error={errors.category} hint="e.g. Dental, Skin, Hair, Family health">
+        <Field label="Category" required error={errors.category} hint="e.g. Acne, Hair loss, Lasers, Skin care">
           {(a) => <Input {...a} value={v.category} onChange={(e) => set('category', e.target.value)} />}
         </Field>
         <Field label="Author" error={errors.author_id}>

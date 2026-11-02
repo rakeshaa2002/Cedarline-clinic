@@ -1,37 +1,31 @@
-import { SITE_NAME, SITE_URL } from '@/content/site'
+import { jsonLdDocument, type PageMeta } from '@/content/rua/seo'
+import { SITE_NAME, SITE_URL, absoluteUrl } from '@/content/site'
 
-interface SeoProps {
-  title: string
-  description: string
-  path: string
-  image?: string
-  noindex?: boolean
-  schema?: Record<string, unknown> | Array<Record<string, unknown>>
-}
+const SHARE_IMAGE = '/images/rua/og/rua-share.jpg'
 
 /**
- * Per-page SEO tags. React 19 hoists <title>, <meta> and <link> rendered anywhere
- * in the tree into <head>, so no helmet library is needed.
+ * Per-page SEO tags from the shared page metadata (content/rua/seo.ts). React 19 hoists <title>,
+ * <meta> and <link> into <head>. The same metadata is written into pre-rendered HTML at build time.
  */
-export function Seo({ title, description, path, image = '/images/hero-consultation.jpg', noindex, schema }: SeoProps) {
-  const fullTitle = path === '/' ? `${SITE_NAME} | ${title}` : `${title} | ${SITE_NAME}`
-  const url = `${SITE_URL}${path}`
+export function Seo({ meta, noindex }: { meta: PageMeta; noindex?: boolean }) {
+  const url = `${SITE_URL}${meta.path}`
+  // Link previews (WhatsApp, Facebook) are most reliable with JPEG/PNG images.
+  const image = absoluteUrl(/\.(jpe?g|png)$/i.test(meta.image) ? meta.image : SHARE_IMAGE)
   return (
     <>
-      <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      {SITE_URL && <link rel="canonical" href={url} />}
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
+      <title>{meta.title}</title>
+      <meta name="description" content={meta.description} />
+      <link rel="canonical" href={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:locale" content="en_IN" />
+      <meta property="og:title" content={meta.title} />
+      <meta property="og:description" content={meta.description} />
       <meta property="og:url" content={url} />
-      <meta property="og:image" content={/^https?:/.test(image) ? image : `${SITE_URL}${image}`} />
+      <meta property="og:image" content={image} />
       <meta name="twitter:card" content="summary_large_image" />
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
-      {schema && (
-        <script type="application/ld+json">
-          {JSON.stringify(schema)}
-        </script>
-      )}
+      {(noindex || meta.noindex) && <meta name="robots" content="noindex, follow" />}
+      <script type="application/ld+json">{JSON.stringify(jsonLdDocument(meta.graph))}</script>
     </>
   )
 }

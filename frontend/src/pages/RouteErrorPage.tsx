@@ -8,8 +8,8 @@ export default function RouteErrorPage() {
   if (import.meta.env.DEV) console.error(error)
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-ink-50 px-4 py-16 text-center">
-      <title>Something went wrong | Cedarline Clinic</title>
+    <main className="flex min-h-screen items-center justify-center bg-ivory px-4 py-16 text-center">
+      <title>Something went wrong | RUA Skin & Hair Center</title>
       <div className="max-w-md">
         <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-200">
           <AlertTriangle className="size-7" aria-hidden="true" />
@@ -24,12 +24,12 @@ export default function RouteErrorPage() {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-brand-700 px-5 font-semibold text-white hover:bg-brand-800"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-brand-800 px-5 font-semibold text-cream hover:bg-brand-700"
           >
             <RotateCcw className="size-4" aria-hidden="true" /> Reload
           </button>
-          <Link to="/" className="inline-flex h-11 items-center rounded-xl border border-ink-200 bg-white px-5 font-semibold text-ink-800 hover:bg-brand-50">
-            Home
+          <Link to="/services" className="inline-flex h-11 items-center rounded-full border border-ink-200 bg-white px-5 font-semibold text-ink-800 hover:bg-brand-50">
+            View services
           </Link>
         </div>
       </div>

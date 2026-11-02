@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, CalendarCheck, ExternalLink, UsersRound, X } from 'lucide-react'
+import { ArrowLeft, CalendarCheck, ExternalLink, MapPin, UsersRound, X } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { SlotPicker } from '@/components/site/AppointmentBookingForm'
 import { DoctorPhoto } from '@/components/site/Cards'
 import { Spinner } from '@/components/ui/Feedback'
+import { CENTRES, getCentre } from '@/content/rua/centres'
 import {
   bookingDetailsSchema,
   consultationDates,
@@ -16,15 +17,19 @@ import {
 import { useDoctors } from '@/hooks/useClinic'
 import { toApiError } from '@/services/api'
 import { bookingApi } from '@/services/endpoints'
-import type { BookingConfirmation, Department } from '@/types'
+import type { BookingConfirmation, Department, Doctor } from '@/types'
 import { DEPARTMENT_LABELS, cn, formatDate, formatLongDate, formatPrice, formatTime } from '@/utils/format'
 
 export interface ChatBookingStart {
+  centre?: string | null
   department?: Department | null
   doctorSlug?: string | null
 }
 
-const STAGES = ['department', 'doctor', 'date', 'time', 'details', 'review'] as const
+const STAGES = ['centre', 'department', 'doctor', 'date', 'time', 'details', 'review'] as const
+
+/** Every speciality a doctor takes bookings for, not only their primary one. */
+const specialities = (d: Doctor): Department[] => (d.departments?.length ? d.departments : [d.department])
 
 const chip =
   'cursor-pointer rounded-full border border-ink-200 bg-white px-3 py-1.5 text-xs font-medium text-ink-800 transition-all hover:border-brand-400 hover:bg-brand-50 hover:text-brand-800 active:scale-95'
@@ -47,6 +52,7 @@ export function ChatBooking({
   onLeave: () => void
 }) {
   const doctors = useDoctors()
+  const [centre, setCentre] = useState<string | null>(start.centre ?? (CENTRES.length === 1 ? CENTRES[0].slug : null))
   const [chosenDepartment, setDepartment] = useState<Department | null>(start.department ?? null)
   const [doctorSlug, setDoctorSlug] = useState<string | null | undefined>(start.doctorSlug ?? undefined) // null = any
   const [date, setDate] = useState<string | null>(null)
@@ -58,13 +64,16 @@ export function ChatBooking({
   const all = useMemo(() => doctors.data ?? [], [doctors.data])
   const doctor = doctorSlug ? all.find((d) => d.slug === doctorSlug) ?? null : null
   const department = chosenDepartment ?? doctor?.department ?? null
-  const deptDoctors = useMemo(() => all.filter((d) => d.department === department), [all, department])
+  const deptDoctors = useMemo(() => all.filter((d) => department !== null && specialities(d).includes(department)), [all, department])
   const dates = useMemo(() => consultationDates(doctor ? [doctor] : deptDoctors, 9), [doctor, deptDoctors])
   const availability = useAvailability(date, department, doctorSlug ?? null)
+  const centreInfo = getCentre(centre ?? undefined)
 
-  const stage = !department
-    ? 'department'
-    : doctorSlug === undefined
+  const stage = !centre
+    ? 'centre'
+    : !department
+      ? 'department'
+      : doctorSlug === undefined
       ? 'doctor'
       : !date
         ? 'date'
@@ -84,7 +93,16 @@ export function ChatBooking({
     else if (stage === 'time') setDate(null)
     else if (stage === 'date') setDoctorSlug(undefined)
     else if (stage === 'doctor') setDepartment(null)
+    else if (stage === 'department') setCentre(null)
   }
+
+  // Hand everything chosen so far to the full booking page.
+  const fullPageParams = new URLSearchParams()
+  if (centre) fullPageParams.set('centre', centre)
+  if (department) fullPageParams.set('category', department)
+  if (doctorSlug) fullPageParams.set('doctor', doctorSlug)
+  const fullPageQuery = fullPageParams.toString()
+  const fullPageHref = `/book-appointment${fullPageQuery ? `?${fullPageQuery}` : ''}`
 
   const confirm = async () => {
     if (!department || !date || !slot || !details) return
@@ -95,6 +113,7 @@ export function ChatBooking({
         await bookingApi.book({
           department,
           doctor_slug: doctorSlug ?? null,
+          branch_slug: centre,
           appointment_date: date,
           start_time: slot.start.slice(0, 5),
           patient_name: details.name,
@@ -116,7 +135,7 @@ export function ChatBooking({
     }
   }
 
-  const departments = (Object.keys(DEPARTMENT_LABELS) as Department[]).filter((d) => all.some((doc) => doc.department === d))
+  const departments = (Object.keys(DEPARTMENT_LABELS) as Department[]).filter((d) => all.some((doc) => specialities(doc).includes(d)))
 
   return (
     <div className="animate-fade-up rounded-2xl bg-white p-4 shadow-sm ring-1 ring-brand-200" role="group" aria-label="Book an appointment">
@@ -140,8 +159,18 @@ export function ChatBooking({
 
       {doctors.loading && !doctors.data ? (
         <Spinner label="Loading doctors" />
+      ) : stage === 'centre' ? (
+        <Prompt text="Which centre would you like to visit?">
+          {CENTRES.map((c) => (
+            <button key={c.slug} type="button" className={cn(chip, 'inline-flex items-center gap-1.5')} onClick={() => setCentre(c.slug)}>
+              <MapPin className="size-3.5 text-brand-600" aria-hidden="true" />
+              {c.area}
+              {c.isNew && <span className="rounded-full bg-accent-100 px-1.5 text-[0.625rem] font-bold text-accent-700">New</span>}
+            </button>
+          ))}
+        </Prompt>
       ) : stage === 'department' ? (
-        <Prompt text="Which specialty do you need?">
+        <Prompt text="What would you like help with?">
           {departments.map((d) => (
             <button key={d} type="button" className={chip} onClick={() => setDepartment(d)}>
               {DEPARTMENT_LABELS[d]}
@@ -208,7 +237,10 @@ export function ChatBooking({
             )}
             <div className="min-w-0 text-xs text-ink-600">
               <p className="truncate text-sm font-semibold text-ink-900">{doctor?.full_name ?? 'First available doctor'}</p>
-              <p>{DEPARTMENT_LABELS[department!]}</p>
+              <p>
+                {DEPARTMENT_LABELS[department!]}
+                {centreInfo && ` · ${centreInfo.area}`}
+              </p>
               <p className="font-semibold text-brand-800">
                 {formatDate(date!, { weekday: 'short', day: 'numeric', month: 'short' })} · {formatTime(slot!.start)}
               </p>
@@ -239,7 +271,7 @@ export function ChatBooking({
           <span />
         )}
         <Link
-          to={doctorSlug ? `/appointments?doctor=${doctorSlug}#book` : '/appointments#book'}
+          to={fullPageHref}
           onClick={onLeave}
           className="inline-flex items-center gap-1 font-semibold text-brand-700 hover:underline"
         >

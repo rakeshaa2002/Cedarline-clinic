@@ -221,7 +221,7 @@ export function AppointmentBookingForm({ initialDoctorSlug, selectedDoctor, onCl
               {clinic && (
                 <a
                   href={`https://wa.me/${(clinic.whatsapp || clinic.phone).replace(/\D/g, '')}?text=${encodeURIComponent(
-                    `Hello Cedarline Clinic, I just booked online (Ref: ${confirmed.reference}) with ${confirmed.doctor.full_name} on ${formatDate(confirmed.appointment_date)} at ${formatTime(confirmed.start_time)}. Please confirm my slot.`,
+                    `Hello RUA Skin & Hair Center, I just booked online (Ref: ${confirmed.reference}) with ${confirmed.doctor.full_name} on ${formatDate(confirmed.appointment_date)} at ${formatTime(confirmed.start_time)}. Please confirm my slot.`,
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -231,7 +231,7 @@ export function AppointmentBookingForm({ initialDoctorSlug, selectedDoctor, onCl
                 </a>
               )}
               <a
-                href={googleCalendarUrl(confirmed, clinic?.name ?? 'Cedarline Clinic', address)}
+                href={googleCalendarUrl(confirmed, clinic?.name ?? 'RUA Skin & Hair Center', address)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-ink-200 bg-white px-6 py-3 text-sm font-semibold text-ink-800 transition-all hover:border-brand-300 hover:bg-brand-50 sm:w-auto"
@@ -454,7 +454,7 @@ export function AppointmentBookingForm({ initialDoctorSlug, selectedDoctor, onCl
                     {...p}
                     {...form.register('reason')}
                     rows={3}
-                    placeholder="e.g. Routine dental cleaning, itchy rash for two weeks, hair thinning at the crown…"
+                    placeholder="e.g. Acne flare-up for three weeks, hair thinning at the crown, pigmentation on cheeks…"
                   />
                 )}
               </Field>

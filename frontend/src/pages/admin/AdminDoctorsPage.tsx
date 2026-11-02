@@ -19,9 +19,11 @@ import { DEPARTMENT_LABELS, WEEKDAYS_SHORT, cn, consultationDaysLabel, formatPri
 const EMPTY: DoctorInput = {
   slug: '',
   full_name: '',
-  department: 'general',
+  department: 'medical-dermatology',
+  departments: ['medical-dermatology'],
   specialization: '',
   qualifications: '',
+  fellowship: null,
   experience_years: 0,
   bio: '',
   languages: ['English'],
@@ -41,6 +43,41 @@ export default function AdminDoctorsPage() {
   const [editing, setEditing] = useState<{ id: number | null; values: DoctorInput } | null>(null)
   const [deleting, setDeleting] = useState<Doctor | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  // Set when the server reports the doctor still has appointments: the dialog then asks to delete those too.
+  const [appointmentsWarning, setAppointmentsWarning] = useState<{ message: string; count: number } | null>(null)
+
+  const closeDelete = () => {
+    if (isDeleting) return
+    setDeleting(null)
+    setAppointmentsWarning(null)
+  }
+
+  const confirmDelete = async (doctor: Doctor, deleteAppointments: boolean) => {
+    setIsDeleting(true)
+    try {
+      await adminApi.deleteDoctor(doctor.id, { deleteAppointments })
+      toast.success(
+        'Doctor deleted',
+        deleteAppointments && appointmentsWarning
+          ? `${doctor.full_name} and ${appointmentsWarning.count} appointment${appointmentsWarning.count === 1 ? '' : 's'} were deleted.`
+          : `${doctor.full_name} was removed from the clinic directory and AI knowledge base.`,
+      )
+      invalidate('doctors:')
+      invalidate('admin:appointments')
+      setDeleting(null)
+      setAppointmentsWarning(null)
+      doctors.reload()
+    } catch (err) {
+      const apiErr = err as ApiError
+      if (apiErr.code === 'doctor_has_appointments') {
+        setAppointmentsWarning({ message: apiErr.message, count: Number(apiErr.fieldErrors.appointments) || 0 })
+      } else {
+        toast.error('Could not delete doctor', apiErr.message)
+      }
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const isAdmin = user?.role === 'admin'
 
@@ -128,45 +165,47 @@ export default function AdminDoctorsPage() {
       {deleting && (
         <Modal
           open
-          onClose={() => !isDeleting && setDeleting(null)}
+          onClose={closeDelete}
           title="Delete Doctor"
           size="md"
           footer={
             <>
-              <Button variant="outline" onClick={() => setDeleting(null)} disabled={isDeleting}>
+              <Button variant="outline" onClick={closeDelete} disabled={isDeleting}>
                 Cancel
               </Button>
-              <Button
-                variant="danger"
-                loading={isDeleting}
-                onClick={async () => {
-                  setIsDeleting(true)
-                  try {
-                    await adminApi.deleteDoctor(deleting.id)
-                    toast.success('Doctor removed', `${deleting.full_name} was removed from the clinic directory and AI knowledge base.`)
-                    invalidate('doctors:')
-                    setDeleting(null)
-                    doctors.reload()
-                  } catch (err) {
-                    toast.error('Could not delete doctor', (err as ApiError).message)
-                  } finally {
-                    setIsDeleting(false)
-                  }
-                }}
-              >
-                Delete doctor
+              <Button variant="danger" loading={isDeleting} onClick={() => confirmDelete(deleting, appointmentsWarning !== null)}>
+                {!appointmentsWarning
+                  ? 'Delete doctor'
+                  : appointmentsWarning.count === 1
+                    ? 'Delete doctor and 1 appointment'
+                    : `Delete doctor and ${appointmentsWarning.count || 'all'} appointments`}
               </Button>
             </>
           }
         >
-          <div className="space-y-3">
-            <p className="text-sm text-ink-800">
-              Are you sure you want to permanently delete <strong>{deleting.full_name}</strong>?
-            </p>
-            <p className="text-xs leading-relaxed text-ink-500">
-              This will remove their profile from the website, weekly consultation calendar, and will automatically update the AI Chatbot's knowledge base.
-            </p>
-          </div>
+          {appointmentsWarning ? (
+            <div className="space-y-3">
+              <Alert tone="error" title="This doctor has appointments">
+                {appointmentsWarning.message}
+              </Alert>
+              <p className="text-sm text-ink-800">
+                Patients' booking details, status history and email logs for these appointments will be lost. This cannot be undone.
+              </p>
+              <p className="text-xs leading-relaxed text-ink-500">
+                To keep the history instead, cancel and untick <strong>Active</strong> on the doctor's profile. Inactive doctors are hidden from the
+                website, booking form and chatbot.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-ink-800">
+                Are you sure you want to permanently delete <strong>{deleting.full_name}</strong>?
+              </p>
+              <p className="text-xs leading-relaxed text-ink-500">
+                This will remove their profile from the website, weekly consultation calendar, and will automatically update the AI Chatbot's knowledge base.
+              </p>
+            </div>
+          )}
         </Modal>
       )}
     </>
@@ -244,7 +283,7 @@ function DoctorForm({ id, initial, onClose, onSaved }: { id: number | null; init
           {(a) => <Input {...a} value={v.qualifications} onChange={(e) => set('qualifications', e.target.value)} />}
         </Field>
         <Field label="Experience (years)" required error={errors.experience_years}>
-          {(a) => <Input {...a} type="number" min={0} max={60} value={v.experience_years} onChange={(e) => set('experience_years', Number(e.target.value))} />}
+          {(a) => <Input {...a} type="number" min={0} max={60} value={v.experience_years ?? 0} onChange={(e) => set('experience_years', Number(e.target.value))} />}
         </Field>
         <Field label="Consultation fee (₹)" error={errors.consultation_fee} hint="Leave empty if the front desk confirms it">
           {(a) => (

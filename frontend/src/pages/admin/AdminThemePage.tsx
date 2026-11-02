@@ -72,7 +72,7 @@ export default function AdminThemePage() {
         })}
       </div>
       <p className="mt-6 flex items-center gap-2 text-sm text-ink-500">
-        <Palette className="size-4" aria-hidden="true" /> Every palette keeps text and buttons at accessible contrast. The orange accent stays the same.
+        <Palette className="size-4" aria-hidden="true" /> Every palette is from the RUA wood-and-cream family and keeps text and buttons at accessible contrast. The gold accent stays the same.
       </p>
     </>
   )
