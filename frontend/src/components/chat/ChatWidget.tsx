@@ -66,7 +66,6 @@ const STARTERS = [
   { label: '👩‍⚕️ Doctors & Dermatologists', question: 'Which doctors are available at RUA?' },
   { label: '✨ Skin & Laser Treatments', question: 'What skin, laser and aesthetic treatments do you offer?' },
   { label: '💇 Hair Loss & Transplant', question: 'What treatments do you offer for hair loss and hair transplant?' },
-  { label: '💳 Pricing & EMI', question: 'Do you offer EMI or flexible payment plans for treatment packages?' },
   { label: '📅 Book an Appointment', question: 'How do I book an appointment?' },
 ]
 
@@ -77,7 +76,6 @@ const QUICK = [
   { label: '👩‍⚕️ Dermatologists', question: 'Tell me about the doctors at RUA.' },
   { label: '✨ Skin & Laser', question: 'What skin and laser treatments do you offer?' },
   { label: '💇 Hair & Transplant', question: 'What hair loss and transplant treatments are available?' },
-  { label: '💳 Payment & EMI', question: 'Do you offer EMI or flexible payment options?' },
 ]
 
 // The booking flow pulls in form libraries, so it's only downloaded when a patient starts booking.
