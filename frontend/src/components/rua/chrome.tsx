@@ -505,7 +505,8 @@ export function MobileActionBar() {
 }
 
 export function WhatsAppFloat() {
-  // Bottom-right, stacked just above the "Ask RUA AI" launcher (48px tall at bottom-6).
+  // Bottom-right, stacked just above the "Ask RUA AI" launcher (48px tall; bottom-20 on phones, above the
+  // mobile action bar, and bottom-6 from sm up), so the two always sit together.
   return (
     <a
       href={whatsappLink(WHATSAPP_HELLO)}
@@ -513,7 +514,7 @@ export function WhatsAppFloat() {
       rel="noopener noreferrer"
       aria-label="Chat with RUA on WhatsApp"
       title="Chat on WhatsApp"
-      className="fixed right-6 bottom-[5.25rem] z-40 hidden size-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_26px_-8px_rgba(37,211,102,0.6)] transition hover:-translate-y-0.5 hover:scale-105 md:inline-flex"
+      className="fixed right-4 bottom-[8.75rem] z-40 inline-flex size-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_26px_-8px_rgba(37,211,102,0.6)] transition hover:-translate-y-0.5 hover:scale-105 sm:right-6 sm:bottom-[5.25rem]"
     >
       <WhatsAppIcon className="size-7" aria-hidden="true" />
     </a>
