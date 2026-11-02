@@ -19,9 +19,19 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
 
-DEPARTMENTS = ("general", "dental", "skin", "hair", "pediatrics")
+# RUA's service categories double as booking "departments" (what the patient needs help with).
+DEPARTMENTS = (
+    "medical-dermatology",
+    "dermatosurgery",
+    "aesthetic-dermatology",
+    "laser-treatments",
+    "hair-treatments",
+    "hair-transplant",
+    "premium-packages",
+)
 THEMES = ("cedar", "emerald", "sapphire", "slate", "plum")
-_DEPT_CHECK = "department IN ('general', 'dental', 'skin', 'hair', 'pediatrics')"
+DEPARTMENT_CHECK = "department IN (" + ", ".join(f"'{d}'" for d in DEPARTMENTS) + ")"
+_DEPT_CHECK = DEPARTMENT_CHECK
 
 
 class ClinicInfo(TimestampMixin, Base):
@@ -61,10 +71,13 @@ class Doctor(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     slug: Mapped[str] = mapped_column(String(120), unique=True)
     full_name: Mapped[str] = mapped_column(String(120))
+    # Primary category, plus every category the doctor takes bookings for.
     department: Mapped[str] = mapped_column(String(30), index=True)
+    departments: Mapped[list[str]] = mapped_column(ARRAY(String(30)), default=list, server_default="{}")
     specialization: Mapped[str] = mapped_column(String(150))
     qualifications: Mapped[str] = mapped_column(String(255))
-    experience_years: Mapped[int] = mapped_column(Integer)
+    fellowship: Mapped[str | None] = mapped_column(String(255))
+    experience_years: Mapped[int | None] = mapped_column(Integer)
     bio: Mapped[str] = mapped_column(Text)
     languages: Mapped[list[str]] = mapped_column(ARRAY(String(40)), default=list)
     photo_url: Mapped[str | None] = mapped_column(String(500))
@@ -75,6 +88,23 @@ class Doctor(TimestampMixin, Base):
     slot_minutes: Mapped[int] = mapped_column(Integer, default=30)
     # Standard first-consultation fee in INR; NULL means "confirmed by the front desk".
     consultation_fee: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+
+
+class Branch(TimestampMixin, Base):
+    """A RUA centre. Bookings record which centre the patient chose."""
+
+    __tablename__ = "branches"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    slug: Mapped[str] = mapped_column(String(80), unique=True)
+    name: Mapped[str] = mapped_column(String(120))
+    area: Mapped[str] = mapped_column(String(80))
+    address: Mapped[str] = mapped_column(Text)
+    phone: Mapped[str] = mapped_column(String(40))
+    whatsapp: Mapped[str | None] = mapped_column(String(40))
+    map_url: Mapped[str | None] = mapped_column(String(500))
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
 

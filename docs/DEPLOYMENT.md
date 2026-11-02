@@ -40,9 +40,9 @@ The repository includes a root `render.yaml` configuring both the backend API (D
 5. Fill in the required environment variables:
    - `DATABASE_URL`: Your Neon PostgreSQL connection string.
    - `GEMINI_API_KEY`: Your Google Gemini API key.
-   - `ADMIN_PASSWORD`: Secure password for `admin@cedarline.example`.
-   - `STAFF_PASSWORD`: Secure password for `staff@cedarline.example`.
-   - `DOCTOR_PASSWORD`: Secure password for `doctor@cedarline.example`.
+   - `ADMIN_PASSWORD`: Secure password for `admin@ruaskinandhair.example`.
+   - `STAFF_PASSWORD`: Secure password for `staff@ruaskinandhair.example`.
+   - `DOCTOR_PASSWORD`: Secure password for `doctor@ruaskinandhair.example`.
    - `CORS_ORIGINS`: Your frontend URL (e.g. `https://cedarline-clinic.onrender.com`).
    - `VITE_API_URL`: Your backend API URL (e.g. `https://cedarline-api.onrender.com`).
    - `VITE_SITE_URL`: Your frontend URL (e.g. `https://cedarline-clinic.onrender.com`).
@@ -60,11 +60,11 @@ The repository includes a root `render.yaml` configuring both the backend API (D
   - `DATABASE_URL=postgresql://...`
   - `JWT_SECRET=<long-random-string>`
   - `CORS_ORIGINS=https://cedarline-clinic.onrender.com`
-  - `ADMIN_EMAIL=admin@cedarline.example`
+  - `ADMIN_EMAIL=admin@ruaskinandhair.example`
   - `ADMIN_PASSWORD=<strong-password>`
-  - `STAFF_EMAIL=staff@cedarline.example`
+  - `STAFF_EMAIL=staff@ruaskinandhair.example`
   - `STAFF_PASSWORD=<strong-password>`
-  - `DOCTOR_EMAIL=doctor@cedarline.example`
+  - `DOCTOR_EMAIL=doctor@ruaskinandhair.example`
   - `DOCTOR_PASSWORD=<strong-password>`
   - `EMBEDDING_PROVIDER=gemini`
   - `EMBEDDING_MODEL=gemini-embedding-001`

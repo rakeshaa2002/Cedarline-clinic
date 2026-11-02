@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token
 from app.db.session import get_db
-from app.models import User
+from app.models import Patient, User
 
 DbSession = Annotated[Session, Depends(get_db)]
 
@@ -52,3 +52,32 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 StaffUser = Annotated[User, Depends(require_roles("admin", "staff", "doctor"))]
 AdminUser = Annotated[User, Depends(require_roles("admin"))]
 
+
+
+def get_current_patient(
+    db: DbSession,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
+) -> Patient:
+    """Patient-portal login. Patient tokens use subject "patient:<id>", so they can never pass as staff
+    tokens (get_current_user requires a numeric subject) and staff tokens never pass here."""
+    unauthorized = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Please sign in to your RUA account again.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if credentials is None:
+        raise unauthorized
+    try:
+        payload = decode_access_token(credentials.credentials)
+        kind, _, raw_id = str(payload["sub"]).partition(":")
+        if kind != "patient" or payload.get("role") != "patient":
+            raise ValueError
+        patient = db.get(Patient, int(raw_id))
+    except (jwt.PyJWTError, KeyError, ValueError):
+        raise unauthorized from None
+    if patient is None:
+        raise unauthorized
+    return patient
+
+
+CurrentPatient = Annotated[Patient, Depends(get_current_patient)]

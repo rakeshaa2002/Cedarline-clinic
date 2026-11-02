@@ -1,0 +1,2857 @@
+{
+ "brand": {
+  "name": "RUA Skin & Hair Center",
+  "shortName": "RUA",
+  "tagline": "Restore. Unfold. Awaken.",
+  "positioning": "3 Expert Dermatologists · Doctor-Led",
+  "specialities": [
+   "Dermatology",
+   "Cosmetology",
+   "Lasers",
+   "Hair Transplants"
+  ],
+  "promise": "RUA offers personalised, holistic treatment plans rooted in evidence-based, ethical practice — assuring visible results with uncompromised quality, hygiene and safety.",
+  "description": "Doctor-led dermatology, cosmetology, lasers and hair transplants by three MD (DVL) dermatologists at two centres in Bengaluru — Ramamurthy Nagar and Indiranagar.",
+  "siteUrl": "https://www.ruaskinandhair.com",
+  "whatsapp": "917019976689",
+  "whatsappDisplay": "+91 70199 76689",
+  "hours": {
+   "days": "Sunday – Saturday",
+   "open": "10:00",
+   "close": "20:00",
+   "label": "10:00 am – 8:00 pm",
+   "short": "10am – 8pm"
+  },
+  "social": [
+   {
+    "id": "instagram",
+    "label": "Instagram",
+    "handle": "@ruaskinandhair",
+    "url": "https://www.instagram.com/ruaskinandhair/"
+   },
+   {
+    "id": "youtube",
+    "label": "YouTube",
+    "handle": "@RUASkinandhair",
+    "url": "https://www.youtube.com/@RUASkinandhair"
+   },
+   {
+    "id": "facebook",
+    "label": "Facebook",
+    "handle": "RUA Skin & Hair Center",
+    "url": "https://www.facebook.com/profile.php?id=61581739901248"
+   },
+   {
+    "id": "threads",
+    "label": "Threads",
+    "handle": "@ruaskinandhair",
+    "url": "https://www.threads.net/@ruaskinandhair"
+   }
+  ]
+ },
+ "categories": [
+  {
+   "slug": "medical-dermatology",
+   "name": "Medical Dermatology",
+   "navName": "Medical Dermatology",
+   "icon": "stethoscope",
+   "tagline": "Comprehensive diagnosis and management for a wide spectrum of skin, hair, and nail disorders with evidence-based care.",
+   "intro": "From acne and pigmentation to psoriasis, infections and autoimmune skin disease, our dermatologists diagnose precisely — using dermoscopy where it helps — and treat the cause, not just the symptoms. Care for babies, children and teenagers is a special interest of the team.",
+   "image": "/images/rua/services/medical-dermatology.webp",
+   "imageAlt": "Dermatologist examining skin with a dermatoscope",
+   "items": [
+    {
+     "name": "Acne and Acne Scar Treatments",
+     "treatment": "acne-scar-treatment"
+    },
+    {
+     "name": "Pigmentation and Melasma Correction",
+     "treatment": "pigmentation-melasma-treatment"
+    },
+    {
+     "name": "Eczema, Psoriasis and Allergy Management",
+     "treatment": "psoriasis-eczema-treatment"
+    },
+    {
+     "name": "Rosacea and Sensitive Skin Care"
+    },
+    {
+     "name": "Fungal, Viral and Bacterial Infection Treatment"
+    },
+    {
+     "name": "Pediatric Dermatology",
+     "treatment": "paediatric-dermatology"
+    },
+    {
+     "name": "Nail and Hair Disorder Evaluation"
+    },
+    {
+     "name": "Autoimmune and Chronic Skin Disease Management"
+    },
+    {
+     "name": "Diagnostic Skin Biopsies"
+    },
+    {
+     "name": "Sexually Transmitted Diseases and Other Sexual Problems"
+    },
+    {
+     "name": "Skin Cancers"
+    },
+    {
+     "name": "Leprosy"
+    }
+   ],
+   "doctors": [
+    "dr-jeevith-c-reddy",
+    "dr-eshritha-c",
+    "dr-jatin-k-reddy"
+   ],
+   "equipment": [
+    "lllt",
+    "q-switched-diode"
+   ],
+   "faqs": [
+    {
+     "q": "When should I see a dermatologist?",
+     "a": "For any skin, hair or nail problem that lasts more than a couple of weeks, keeps coming back or worries you — rashes, acne, pigmentation, infections, hair fall or changing moles. A dermatologist can diagnose precisely and treat the cause."
+    },
+    {
+     "q": "Do you treat children?",
+     "a": "Yes. Paediatric dermatology is a special interest of Dr. Eshritha C, and we see babies, children and teenagers for eczema, infections, birthmarks, warts, acne and more."
+    },
+    {
+     "q": "Are consultations for sexual health and STDs confidential?",
+     "a": "Yes. Consultations for sexually transmitted diseases and other sexual problems are private and handled with complete confidentiality."
+    }
+   ],
+   "seo": {
+    "title": "Dermatologist in Bangalore – Medical Dermatology | RUA",
+    "description": "Medical dermatology in Bengaluru for acne, pigmentation, psoriasis, eczema, infections, hair & nail disorders and skin cancer checks — by MD dermatologists at RUA.",
+    "h1": "Medical Dermatology in Bangalore"
+   }
+  },
+  {
+   "slug": "dermatosurgery",
+   "name": "Dermatosurgery",
+   "navName": "Dermatosurgery",
+   "icon": "scissors",
+   "tagline": "Performed with utmost safety and aesthetics in mind, our minor skin surgeries combine precision with cosmetic finesse.",
+   "intro": "Minor skin surgeries are done in a sterile procedure room under local anaesthesia, usually in a single short visit. Our dermatosurgeons plan every procedure to keep marks as small as possible — with scarless techniques wherever they suit.",
+   "image": "/images/rua/services/dermatosurgery.webp",
+   "imageAlt": "Dermatosurgeon performing a precise minor skin procedure",
+   "items": [
+    {
+     "name": "Mole removal or transplant",
+     "treatment": "wart-skin-tag-removal"
+    },
+    {
+     "name": "Wart and skin tag removal",
+     "treatment": "wart-skin-tag-removal"
+    },
+    {
+     "name": "Circumcision"
+    },
+    {
+     "name": "Ear lobe repair"
+    },
+    {
+     "name": "Nose piercing repair"
+    },
+    {
+     "name": "Ear, Nose & Body Piercings"
+    },
+    {
+     "name": "Cyst and lipoma excision"
+    },
+    {
+     "name": "Scar revision procedures",
+     "treatment": "co2-laser-resurfacing"
+    },
+    {
+     "name": "Nail surgeries (ingrown nail, nail bed repair)"
+    },
+    {
+     "name": "Vitiligo surgeries",
+     "treatment": "vitiligo-surgery"
+    },
+    {
+     "name": "Punch grafting for vitiligo",
+     "treatment": "vitiligo-surgery"
+    },
+    {
+     "name": "Electrocautery and radiofrequency procedures",
+     "treatment": "wart-skin-tag-removal"
+    },
+    {
+     "name": "Diagnostic and therapeutic biopsies"
+    },
+    {
+     "name": "Scarless surgeries"
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy",
+    "dr-eshritha-c"
+   ],
+   "equipment": [
+    "rf-plasma-pen",
+    "cryo",
+    "co2-laser"
+   ],
+   "faqs": [
+    {
+     "q": "Are dermatosurgery procedures painful?",
+     "a": "Procedures are done under local anaesthesia or numbing cream, so most people feel only the initial numbing. Any soreness afterwards is usually mild."
+    },
+    {
+     "q": "Will there be a scar?",
+     "a": "Procedures are planned to minimise marks, and many leave little or no visible scar once healed. Your dermatosurgeon will explain what to expect for your specific procedure."
+    },
+    {
+     "q": "How long do the procedures take?",
+     "a": "Most minor procedures take between 10 and 45 minutes, and you go home the same day with simple aftercare instructions."
+    }
+   ],
+   "seo": {
+    "title": "Dermatosurgery in Bangalore – Mole, Wart & Cyst Removal | RUA",
+    "description": "Minor skin surgery in Bengaluru: mole, wart and skin tag removal, cyst and lipoma excision, earlobe repair, nail surgery, scar revision and vitiligo surgery at RUA.",
+    "h1": "Dermatosurgery in Bangalore"
+   }
+  },
+  {
+   "slug": "aesthetic-dermatology",
+   "name": "Advanced Cosmetic Dermatology",
+   "navName": "Cosmetic Dermatology",
+   "icon": "sparkles",
+   "tagline": "Cutting-edge aesthetic treatments to rejuvenate, refine, and enhance while preserving natural-looking results.",
+   "intro": "Aesthetic treatments at RUA are planned by dermatologists, not beauticians — from HydraFacial and peels to skin boosters, Botox and fillers. The goal is always natural: skin that looks healthier and more rested, still unmistakably you.",
+   "image": "/images/rua/equipment/microneedling-radiofrequency.webp",
+   "imageAlt": "Microneedling radiofrequency treatment on the forehead",
+   "items": [
+    {
+     "name": "Laser hair reduction (Triple wavelength)",
+     "treatment": "laser-hair-reduction"
+    },
+    {
+     "name": "Pigment and tattoo removal lasers",
+     "treatment": "tattoo-removal"
+    },
+    {
+     "name": "Exosome and PRP skin rejuvenation",
+     "treatment": "skin-boosters"
+    },
+    {
+     "name": "NCTF",
+     "treatment": "skin-boosters"
+    },
+    {
+     "name": "PDRN treatments",
+     "treatment": "skin-boosters"
+    },
+    {
+     "name": "Medifacials and chemical peels",
+     "treatment": "chemical-peel"
+    },
+    {
+     "name": "Microneedling RF and collagen induction therapy",
+     "treatment": "mnrf-microneedling"
+    },
+    {
+     "name": "Botox and dermal fillers",
+     "treatment": "botox-fillers"
+    },
+    {
+     "name": "Thread lift for contouring and lift",
+     "treatment": "botox-fillers"
+    },
+    {
+     "name": "Skin boosters for hydration and glow",
+     "treatment": "skin-boosters"
+    },
+    {
+     "name": "Carbon and Hollywood laser peel"
+    },
+    {
+     "name": "Laser resurfacing for scars and texture",
+     "treatment": "co2-laser-resurfacing"
+    },
+    {
+     "name": "HIFU"
+    },
+    {
+     "name": "Laser toning",
+     "treatment": "pigmentation-melasma-treatment"
+    },
+    {
+     "name": "Lip, Nipple & Vaginal Micropigmentation"
+    },
+    {
+     "name": "Ombre brows"
+    },
+    {
+     "name": "Microblading"
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c",
+    "dr-jatin-k-reddy"
+   ],
+   "equipment": [
+    "hydrafacial",
+    "mnrf",
+    "derma-pen",
+    "q-switched-diode"
+   ],
+   "faqs": [
+    {
+     "q": "Who performs cosmetic treatments at RUA?",
+     "a": "Every cosmetic treatment is planned and supervised by our MD dermatologists, who choose the right treatment, product and strength for your skin."
+    },
+    {
+     "q": "Will my results look natural?",
+     "a": "That is our priority. We prefer conservative, well-planned treatments that refresh and refine rather than change how you look."
+    },
+    {
+     "q": "Is there downtime?",
+     "a": "Many treatments — like HydraFacial or skin boosters — have little or no downtime. We tell you exactly what to expect before every treatment."
+    }
+   ],
+   "seo": {
+    "title": "Cosmetic Dermatology in Bangalore – HydraFacial, Botox | RUA",
+    "description": "Advanced cosmetic dermatology in Bengaluru: HydraFacial, chemical peels, MNRF, skin boosters, PDRN, NCTF, Botox, fillers and thread lifts — by RUA’s dermatologists.",
+    "h1": "Advanced Cosmetic Dermatology in Bangalore"
+   }
+  },
+  {
+   "slug": "laser-treatments",
+   "name": "Laser Treatments",
+   "navName": "Laser Treatments",
+   "icon": "zap",
+   "tagline": "Medical-grade lasers for unwanted hair, pigmentation, tattoos, scars and skin texture — chosen and operated by dermatologists.",
+   "intro": "RUA uses a triple-wavelength diode laser for hair reduction, a Q-switched Nd:YAG laser for pigment, tattoos and laser toning, a fractional CO₂ laser for scars and texture, and red & blue light (LLLT). Settings are tailored to Indian skin by our doctors.",
+   "image": "/images/rua/equipment/q-switched-nd-yag-diode-laser.webp",
+   "imageAlt": "Laser treatment being performed on the face",
+   "items": [
+    {
+     "name": "Laser hair reduction (Triple wavelength)",
+     "treatment": "laser-hair-reduction"
+    },
+    {
+     "name": "Lifetime laser hair reduction packages",
+     "treatment": "laser-hair-reduction"
+    },
+    {
+     "name": "Pigment and tattoo removal lasers",
+     "treatment": "tattoo-removal"
+    },
+    {
+     "name": "Laser toning",
+     "treatment": "pigmentation-melasma-treatment"
+    },
+    {
+     "name": "Laser resurfacing for scars and texture",
+     "treatment": "co2-laser-resurfacing"
+    },
+    {
+     "name": "Laser for acne and acne scars",
+     "treatment": "acne-scar-treatment"
+    },
+    {
+     "name": "Laser for pigmentation and melasma",
+     "treatment": "pigmentation-melasma-treatment"
+    },
+    {
+     "name": "Carbon and Hollywood laser peel"
+    },
+    {
+     "name": "Low-level laser therapy (LLLT) for hair",
+     "treatment": "hair-loss-treatment"
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c",
+    "dr-jatin-k-reddy"
+   ],
+   "equipment": [
+    "q-switched-diode",
+    "co2-laser",
+    "lllt"
+   ],
+   "faqs": [
+    {
+     "q": "Are lasers safe for Indian skin?",
+     "a": "Yes, when the right laser and settings are used. Our dermatologists choose wavelengths and energies for your skin type and prepare the skin where needed to reduce the risk of pigmentation."
+    },
+    {
+     "q": "Which lasers does RUA use?",
+     "a": "A triple-wavelength diode laser, a Q-switched Nd:YAG laser, a fractional CO₂ laser, and red & blue light (LLLT) devices."
+    },
+    {
+     "q": "How many laser sessions will I need?",
+     "a": "It depends on the treatment — for example, laser hair reduction usually needs 6–8 sessions and scar resurfacing 2–4. Your dermatologist will give you a plan at consultation."
+    }
+   ],
+   "seo": {
+    "title": "Laser Treatments in Bangalore – Hair, Pigment & Scars | RUA",
+    "description": "Dermatologist-led laser treatments in Bengaluru: triple-wavelength laser hair reduction, tattoo and pigment removal, laser toning and CO₂ resurfacing for scars at RUA.",
+    "h1": "Laser Treatments in Bangalore"
+   }
+  },
+  {
+   "slug": "hair-treatments",
+   "name": "Hair Treatments",
+   "navName": "Hair Treatments",
+   "icon": "sprout",
+   "tagline": "Advanced therapeutic solutions for hair loss, scalp health, and long-term maintenance.",
+   "intro": "Hair fall has many causes — genetics, hormones, nutrition, stress or scalp disease. We diagnose first, then combine medical treatment with regenerative therapies such as PRP, GFC and exosomes, scalp mesotherapy, QR678 and low-level laser therapy.",
+   "image": "/images/rua/equipment/derma-pen.webp",
+   "imageAlt": "Microneedling treatment with a derma pen",
+   "items": [
+    {
+     "name": "PRP / GFC / Exosome therapy for hair growth",
+     "treatment": "prp-hair-treatment"
+    },
+    {
+     "name": "Scalp mesotherapy and microneedling",
+     "treatment": "hair-loss-treatment"
+    },
+    {
+     "name": "QR-678",
+     "treatment": "hair-loss-treatment"
+    },
+    {
+     "name": "Low-level laser therapy (LLLT)",
+     "treatment": "hair-loss-treatment"
+    },
+    {
+     "name": "Medical management of male and female hair loss",
+     "treatment": "hair-loss-treatment"
+    },
+    {
+     "name": "Dandruff and scalp treatments",
+     "treatment": "hair-loss-treatment"
+    },
+    {
+     "name": "Hair strengthening and maintenance programs",
+     "treatment": "gfc-hair-treatment"
+    },
+    {
+     "name": "Post-transplant care and rejuvenation",
+     "treatment": "fue-hair-transplant"
+    },
+    {
+     "name": "Scalp Micropigmentation",
+     "treatment": "scalp-micropigmentation"
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy",
+    "dr-jeevith-c-reddy"
+   ],
+   "equipment": [
+    "derma-pen",
+    "lllt"
+   ],
+   "faqs": [
+    {
+     "q": "What causes hair fall?",
+     "a": "Common causes include genetic pattern hair loss, hormonal changes (including PCOS and after childbirth), low iron or vitamin levels, thyroid problems, stress, crash dieting and scalp conditions. Finding the cause is the first step."
+    },
+    {
+     "q": "How long do hair treatments take to work?",
+     "a": "Hair grows slowly, so most treatments take three to six months to show a visible change. Starting early gives the best results."
+    },
+    {
+     "q": "Do you treat women’s hair loss?",
+     "a": "Yes. Female hair loss often has hormonal or nutritional causes, so we tailor the work-up and treatment plan for women."
+    }
+   ],
+   "seo": {
+    "title": "Hair Loss Treatment in Bangalore – PRP, GFC & More | RUA",
+    "description": "Dermatologist-led hair fall and hair loss treatment in Bengaluru: diagnosis, PRP, GFC, exosomes, QR678, mesotherapy, LLLT and scalp micropigmentation at RUA.",
+    "h1": "Hair Loss & Hair Treatments in Bangalore"
+   }
+  },
+  {
+   "slug": "hair-transplant",
+   "name": "Hair Transplant",
+   "navName": "Hair Transplant",
+   "icon": "crown",
+   "tagline": "At RUA, our hair restoration techniques are designed for natural, long-lasting results with minimal downtime.",
+   "intro": "Hair transplants at RUA are planned and performed by Dr. Jatin K Reddy, a consultant dermatologist and hair transplant surgeon with a fellowship in hair transplantation, in a dedicated procedure theatre. Every hairline is designed to suit your face, age and future hair loss.",
+   "image": "/images/rua/services/hair-transplant.webp",
+   "imageAlt": "Hair transplant procedure in progress",
+   "items": [
+    {
+     "name": "FUE (Follicular Unit Extraction)",
+     "treatment": "fue-hair-transplant"
+    },
+    {
+     "name": "DHI (Direct Hair Implantation)",
+     "treatment": "dhi-hair-transplant"
+    },
+    {
+     "name": "Sapphire Bio FUE",
+     "treatment": "fue-hair-transplant"
+    },
+    {
+     "name": "Bio-Enhanced Hair Transplant",
+     "treatment": "fue-hair-transplant"
+    },
+    {
+     "name": "Beard and Moustache Transplant",
+     "treatment": "beard-eyebrow-transplant"
+    },
+    {
+     "name": "Eyebrow Transplant",
+     "treatment": "beard-eyebrow-transplant"
+    },
+    {
+     "name": "Revision / Corrective Transplant",
+     "treatment": "dhi-hair-transplant"
+    },
+    {
+     "name": "Female Hairline & Crown Restoration",
+     "treatment": "fue-hair-transplant"
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy"
+   ],
+   "equipment": [],
+   "faqs": [
+    {
+     "q": "Who performs the hair transplant?",
+     "a": "Dr. Jatin K Reddy — MBBS, MD (DVL), consultant dermatologist and hair transplant surgeon with a fellowship in hair transplantation."
+    },
+    {
+     "q": "Which technique is right for me?",
+     "a": "It depends on the area to be covered, the density you want and your donor hair. FUE (including Sapphire Bio FUE) covers larger areas efficiently; DHI gives fine control for hairlines and dense packing. We recommend the best fit after a scalp assessment."
+    },
+    {
+     "q": "How long is the recovery?",
+     "a": "Most people return to desk work in 3–5 days. Small crusts clear in about 10 days, new growth begins around month 3–4, and the final result shows at 9–12 months."
+    }
+   ],
+   "seo": {
+    "title": "Hair Transplant in Bangalore – FUE, DHI & Sapphire FUE | RUA",
+    "description": "Hair transplant in Bengaluru by a fellowship-trained dermatologist surgeon: FUE, Sapphire Bio FUE, DHI, beard and eyebrow transplants. Natural hairlines, EMI options.",
+    "h1": "Hair Transplant in Bangalore"
+   }
+  },
+  {
+   "slug": "premium-packages",
+   "name": "Premium Aesthetic Packages",
+   "navName": "Premium Packages",
+   "icon": "gem",
+   "tagline": "Curated transformation programs and maintenance plans tailored to your goals and timelines.",
+   "intro": "Packages bring together the right treatments, in the right order, for a goal and a date — a wedding, a milestone or simply better skin. Every programme is built by a dermatologist after a consultation, with flexible payment and EMI options.",
+   "image": "/images/rua/services/premium-glow.webp",
+   "imageAlt": "Glowing skin after a facial treatment",
+   "items": [
+    {
+     "name": "Bridal and groom transformation packages",
+     "treatment": "hydrafacial"
+    },
+    {
+     "name": "RUA Signature Glow Therapy",
+     "treatment": "hydrafacial"
+    },
+    {
+     "name": "Anti-ageing and skin tightening programs",
+     "treatment": "skin-boosters"
+    },
+    {
+     "name": "Pigmentation correction and brightening plans",
+     "treatment": "pigmentation-melasma-treatment"
+    },
+    {
+     "name": "Acne control and scar refinement programs",
+     "treatment": "acne-scar-treatment"
+    },
+    {
+     "name": "Hair revitalisation and nourishment therapies",
+     "treatment": "gfc-hair-treatment"
+    },
+    {
+     "name": "Monthly skin maintenance facials",
+     "treatment": "hydrafacial"
+    },
+    {
+     "name": "Post-travel and detox facials",
+     "treatment": "hydrafacial"
+    },
+    {
+     "name": "IV wellness drips"
+    },
+    {
+     "name": "Lifetime Laser hair reduction packages",
+     "treatment": "laser-hair-reduction"
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c",
+    "dr-jatin-k-reddy",
+    "dr-jeevith-c-reddy"
+   ],
+   "equipment": [
+    "hydrafacial",
+    "q-switched-diode",
+    "mnrf"
+   ],
+   "faqs": [
+    {
+     "q": "Can packages be customised?",
+     "a": "Yes. Every programme is tailored to your goals, skin and timeline after a consultation with one of our dermatologists."
+    },
+    {
+     "q": "When should brides and grooms start?",
+     "a": "Ideally three to six months before the wedding, so treatments can be spaced safely and the final glow sessions land just before the day."
+    },
+    {
+     "q": "Do packages include EMI options?",
+     "a": "Yes. RUA offers flexible payment options and EMI plans for treatment packages."
+    }
+   ],
+   "seo": {
+    "title": "Bridal & Skin Packages in Bangalore – Premium Programs | RUA",
+    "description": "Premium aesthetic packages in Bengaluru: bridal and groom programmes, RUA Signature Glow Therapy, anti-ageing, pigmentation and acne plans, and lifetime laser packages.",
+    "h1": "Premium Aesthetic Packages"
+   }
+  }
+ ],
+ "treatments": [
+  {
+   "slug": "acne-scar-treatment",
+   "category": "medical-dermatology",
+   "name": "Acne & Acne Scar Treatment",
+   "h1": "Acne & Acne Scar Treatment in Bangalore",
+   "seo": {
+    "title": "Acne Treatment in Bangalore – Acne & Scar Specialists | RUA",
+    "description": "Dermatologist-led acne treatment and acne scar reduction — medical therapy, peels, blue light, MNRF and CO₂ laser — at RUA Skin & Hair Center, Bengaluru."
+   },
+   "summary": "Acne is a medical skin condition, and treating it early prevents scars. RUA’s dermatologists first control active pimples, blackheads and cysts with medical treatment, then reduce marks and scars with procedures such as chemical peels, microneedling RF and fractional CO₂ laser — an area our doctors have published research on.",
+   "facts": [
+    {
+     "label": "Approach",
+     "value": "Control active acne first, then treat scars"
+    },
+    {
+     "label": "Medical care",
+     "value": "Prescription creams and tablets when needed"
+    },
+    {
+     "label": "Procedures",
+     "value": "Peels, extraction, blue light, MNRF, CO₂ laser"
+    },
+    {
+     "label": "Visible change",
+     "value": "Acne: 6–12 weeks · scars: over several months"
+    },
+    {
+     "label": "Also treats",
+     "value": "Back acne, blackheads, closed comedones"
+    }
+   ],
+   "whoFor": [
+    "Pimples, blackheads and whiteheads",
+    "Painful cystic or hormonal acne",
+    "Back and body acne",
+    "Dark marks left after acne",
+    "Pitted, rolling, boxcar or papular acne scars"
+   ],
+   "steps": [
+    {
+     "title": "Grade & find the cause",
+     "text": "Skin examination, acne grading and a look at triggers such as hormones and skincare."
+    },
+    {
+     "title": "Control active acne",
+     "text": "Medical treatment, comedone extraction, peels or blue light to calm breakouts."
+    },
+    {
+     "title": "Fade the marks",
+     "text": "Peels and targeted treatments for dark spots left behind."
+    },
+    {
+     "title": "Repair scars",
+     "text": "MNRF, fractional CO₂ laser or scar revision procedures, often combined."
+    }
+   ],
+   "results": "Active acne usually improves within six to twelve weeks of the right treatment. Scars improve gradually over several sessions as new collagen forms. We set realistic goals at the start and adjust as your skin responds.",
+   "cost": "Cost depends on the treatments in your plan. Acne control and scar refinement programmes are available as packages, with EMI options.",
+   "faqs": [
+    {
+     "q": "Can acne scars be removed completely?",
+     "a": "Scars can usually be improved significantly, often by combining treatments over several sessions. Complete removal is not always possible, and we set realistic expectations at the start."
+    },
+    {
+     "q": "Why does my acne keep coming back?",
+     "a": "Hormones, skincare products, diet, stress and stopping treatment too early can all play a part. A dermatologist looks for the cause and plans maintenance to keep acne under control."
+    },
+    {
+     "q": "Should acne be treated before scars?",
+     "a": "Yes. Active acne is controlled first so that new scars don’t form while existing ones are being treated."
+    }
+   ],
+   "doctors": [
+    "dr-jeevith-c-reddy",
+    "dr-eshritha-c"
+   ],
+   "equipment": [
+    "mnrf",
+    "co2-laser",
+    "lllt"
+   ],
+   "related": [
+    "co2-laser-resurfacing",
+    "mnrf-microneedling",
+    "chemical-peel"
+   ],
+   "image": "/images/rua/equipment/microneedling-radiofrequency.webp",
+   "procedureType": "TherapeuticProcedure"
+  },
+  {
+   "slug": "pigmentation-melasma-treatment",
+   "category": "medical-dermatology",
+   "name": "Pigmentation & Melasma Treatment",
+   "h1": "Pigmentation & Melasma Treatment in Bangalore",
+   "seo": {
+    "title": "Pigmentation Treatment in Bangalore – Melasma Care | RUA",
+    "description": "Diagnosis-led treatment for pigmentation, melasma, dark spots, lip pigmentation and uneven tone — medical care, peels and laser toning at RUA, Bengaluru."
+   },
+   "summary": "Pigmentation has many causes — melasma, sun damage, post-acne marks, lip pigmentation and more — and each needs a different plan. RUA’s dermatologists diagnose the type and depth of pigment, then combine medical creams, sun protection, chemical peels and Q-switched laser toning to fade it safely.",
+   "facts": [
+    {
+     "label": "Diagnosis",
+     "value": "Skin examination, with dermoscopy where useful"
+    },
+    {
+     "label": "Treatments",
+     "value": "Medical creams, peels, laser toning"
+    },
+    {
+     "label": "Typical course",
+     "value": "Several sessions over 3–6 months"
+    },
+    {
+     "label": "Melasma",
+     "value": "Chronic — controlled with maintenance"
+    },
+    {
+     "label": "Must-have",
+     "value": "Daily broad-spectrum sunscreen"
+    }
+   ],
+   "whoFor": [
+    "Melasma — brown patches on the cheeks, forehead or upper lip",
+    "Sun spots, freckles and uneven tone",
+    "Dark marks after acne or injury",
+    "Lip and under-eye pigmentation"
+   ],
+   "steps": [
+    {
+     "title": "Diagnose",
+     "text": "Identify the type and depth of pigmentation and any triggers."
+    },
+    {
+     "title": "Protect",
+     "text": "Sun protection and trigger control — the foundation of every plan."
+    },
+    {
+     "title": "Treat",
+     "text": "Depigmenting creams, chemical peels and Q-switched laser toning, as suited to your skin."
+    },
+    {
+     "title": "Maintain",
+     "text": "A maintenance routine to keep pigment from returning."
+    }
+   ],
+   "results": "Many people notice lightening within six to eight weeks; deeper pigment takes longer. Melasma tends to recur with sun exposure and hormonal changes, so a maintenance plan keeps it under control.",
+   "cost": "Pigmentation correction and brightening plans are available as packages, with EMI options. Your dermatologist recommends the right combination after examining your skin.",
+   "faqs": [
+    {
+     "q": "Can melasma be cured permanently?",
+     "a": "Melasma can be controlled very well, but it tends to come back with sun exposure and hormonal changes. A maintenance plan keeps it under control."
+    },
+    {
+     "q": "Is laser toning safe for Indian skin?",
+     "a": "Low-energy Q-switched laser toning is commonly used for pigmentation in Indian skin when the settings are carefully chosen by a dermatologist."
+    },
+    {
+     "q": "How soon will I see results?",
+     "a": "Many people see lightening within six to eight weeks. Deeper or long-standing pigmentation takes longer and may need a combination of treatments."
+    }
+   ],
+   "doctors": [
+    "dr-jeevith-c-reddy",
+    "dr-eshritha-c"
+   ],
+   "equipment": [
+    "q-switched-diode"
+   ],
+   "related": [
+    "chemical-peel",
+    "tattoo-removal",
+    "hydrafacial"
+   ],
+   "image": "/images/rua/services/skin-ritual.webp",
+   "procedureType": "TherapeuticProcedure"
+  },
+  {
+   "slug": "psoriasis-eczema-treatment",
+   "category": "medical-dermatology",
+   "name": "Psoriasis, Eczema & Allergy Care",
+   "h1": "Psoriasis & Eczema Treatment in Bangalore",
+   "seo": {
+    "title": "Psoriasis & Eczema Treatment in Bangalore | RUA",
+    "description": "Long-term care for psoriasis, eczema, dermatitis, urticaria and skin allergies — from topical therapy to biologics — with RUA’s dermatologists in Bengaluru."
+   },
+   "summary": "Psoriasis, eczema and skin allergies are chronic inflammatory conditions that flare and settle. RUA’s dermatologists confirm the diagnosis, identify triggers and build a step-by-step plan — from creams and moisturisers to tablets and, for severe disease, biologic therapy — to keep your skin calm in the long term.",
+   "facts": [
+    {
+     "label": "Conditions",
+     "value": "Psoriasis, eczema, dermatitis, urticaria"
+    },
+    {
+     "label": "Approach",
+     "value": "Diagnosis, trigger control, stepwise treatment"
+    },
+    {
+     "label": "Advanced options",
+     "value": "Systemic and biologic therapy when needed"
+    },
+    {
+     "label": "Follow-up",
+     "value": "Regular reviews to prevent flares"
+    },
+    {
+     "label": "Also",
+     "value": "Scalp, nail and children’s eczema care"
+    }
+   ],
+   "whoFor": [
+    "Red, scaly patches on the scalp, elbows, knees or nails",
+    "Dry, itchy, inflamed skin — atopic or contact dermatitis",
+    "Seborrheic dermatitis and dandruff-prone skin",
+    "Hives (urticaria) and suspected skin allergies",
+    "Children with eczema"
+   ],
+   "steps": [
+    {
+     "title": "Confirm the diagnosis",
+     "text": "A careful examination, and tests or a biopsy when needed."
+    },
+    {
+     "title": "Identify triggers",
+     "text": "Skincare, irritants, stress, infections and lifestyle factors."
+    },
+    {
+     "title": "Treat in steps",
+     "text": "Topical therapy first; tablets or biologics for more severe disease."
+    },
+    {
+     "title": "Stay in control",
+     "text": "Regular reviews and a flare plan, with lifestyle guidance."
+    }
+   ],
+   "results": "Most people see calmer skin within weeks of the right treatment. Because these conditions are long-term, the aim is lasting control — fewer, milder flares — rather than a one-time fix.",
+   "cost": "Cost depends on the treatment needed. Consultation first; follow-up visits are planned around how your skin responds.",
+   "faqs": [
+    {
+     "q": "Is psoriasis contagious?",
+     "a": "No. Psoriasis is an immune-related condition and cannot spread from person to person."
+    },
+    {
+     "q": "Can eczema be cured?",
+     "a": "Eczema can’t always be cured, but it can usually be controlled well with the right skincare, trigger management and treatment. Many children improve as they grow."
+    },
+    {
+     "q": "What are biologics?",
+     "a": "Biologics are advanced medicines that target specific parts of the immune system. They are considered for moderate to severe psoriasis and some other conditions when other treatments are not enough."
+    }
+   ],
+   "doctors": [
+    "dr-jeevith-c-reddy"
+   ],
+   "related": [
+    "paediatric-dermatology",
+    "pigmentation-melasma-treatment",
+    "acne-scar-treatment"
+   ],
+   "image": "/images/rua/services/medical-dermatology.webp",
+   "procedureType": "TherapeuticProcedure"
+  },
+  {
+   "slug": "paediatric-dermatology",
+   "category": "medical-dermatology",
+   "name": "Paediatric Dermatology",
+   "h1": "Paediatric Dermatologist in Bangalore",
+   "seo": {
+    "title": "Paediatric Dermatologist in Bangalore – Child Skin Care | RUA",
+    "description": "Gentle, expert skin, hair and nail care for babies, children and teens — eczema, birthmarks, warts, infections and teen acne — at RUA, Bengaluru."
+   },
+   "summary": "Children’s skin needs gentle, specialised care. RUA treats babies, children and teenagers for eczema, birthmarks, warts and molluscum, fungal and bacterial infections, hair and nail problems and teen acne — with treatments chosen for young skin. Paediatric dermatology is a special interest of Dr. Eshritha C.",
+   "facts": [
+    {
+     "label": "Ages",
+     "value": "Newborns to teenagers"
+    },
+    {
+     "label": "Approach",
+     "value": "Gentle, child-friendly and explained to parents"
+    },
+    {
+     "label": "Common concerns",
+     "value": "Eczema, infections, warts, birthmarks, acne"
+    },
+    {
+     "label": "Procedures",
+     "value": "Minimal, and only when needed"
+    },
+    {
+     "label": "Special interest of",
+     "value": "Dr. Eshritha C"
+    }
+   ],
+   "whoFor": [
+    "Eczema and dry, itchy skin",
+    "Birthmarks and pigmented patches",
+    "Warts and molluscum contagiosum",
+    "Fungal, viral and bacterial skin infections",
+    "Teen acne, and hair or nail concerns"
+   ],
+   "steps": [
+    {
+     "title": "Listen & examine",
+     "text": "A calm, unhurried consultation for your child."
+    },
+    {
+     "title": "Explain",
+     "text": "We explain the diagnosis and options clearly to parents."
+    },
+    {
+     "title": "Treat gently",
+     "text": "Treatments and strengths chosen for your child’s age and skin."
+    },
+    {
+     "title": "Follow up",
+     "text": "Reviews to track progress and adjust the plan."
+    }
+   ],
+   "results": "Many childhood skin conditions improve quickly once correctly diagnosed. Long-term conditions such as eczema are kept under control with a simple routine and flare plan.",
+   "cost": "Consultation first. Most children need simple treatment; any procedure is discussed with parents beforehand.",
+   "faqs": [
+    {
+     "q": "At what age can my child see a dermatologist?",
+     "a": "At any age, including newborns. Many skin concerns in babies are simple to manage once diagnosed."
+    },
+    {
+     "q": "Are skin treatments safe for children?",
+     "a": "We choose treatments and strengths suited to a child’s age and skin, and explain every step to parents."
+    },
+    {
+     "q": "Should birthmarks be checked?",
+     "a": "Yes. A dermatologist can identify the type of birthmark and advise whether it needs monitoring or treatment."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c"
+   ],
+   "related": [
+    "psoriasis-eczema-treatment",
+    "wart-skin-tag-removal",
+    "acne-scar-treatment"
+   ],
+   "image": "/images/rua/services/medical-dermatology.webp",
+   "procedureType": "TherapeuticProcedure"
+  },
+  {
+   "slug": "wart-skin-tag-removal",
+   "category": "dermatosurgery",
+   "name": "Wart & Skin Tag Removal",
+   "h1": "Wart & Skin Tag Removal in Bangalore",
+   "seo": {
+    "title": "Wart & Skin Tag Removal in Bangalore – Quick & Safe | RUA",
+    "description": "Quick removal of warts, skin tags, DPNs and moles with radiofrequency, plasma pen, cryotherapy or CO₂ laser — by dermatologists at RUA, Bengaluru."
+   },
+   "summary": "Warts, skin tags, DPNs (small dark bumps on the face) and moles are common and usually harmless, but they can be bothersome or unsightly. RUA’s dermatologists examine each lesion first, then remove it precisely — usually in a single short visit — with radiofrequency, plasma pen, cryotherapy or CO₂ laser.",
+   "facts": [
+    {
+     "label": "Procedure time",
+     "value": "Usually 10–30 minutes"
+    },
+    {
+     "label": "Anaesthesia",
+     "value": "Numbing cream or local anaesthetic"
+    },
+    {
+     "label": "Healing",
+     "value": "Small scabs heal in 5–10 days"
+    },
+    {
+     "label": "Methods",
+     "value": "Radiofrequency, plasma pen, cryo, CO₂ laser"
+    },
+    {
+     "label": "Warts",
+     "value": "May need more than one session"
+    }
+   ],
+   "whoFor": [
+    "Skin tags on the neck, underarms or eyelids",
+    "Common, plantar and flat warts",
+    "DPNs (dermatosis papulosa nigra)",
+    "Moles, after examination — removal, excision or transplant"
+   ],
+   "steps": [
+    {
+     "title": "Examine",
+     "text": "Each lesion is checked first — with dermoscopy for moles."
+    },
+    {
+     "title": "Numb",
+     "text": "Numbing cream or a small local anaesthetic injection."
+    },
+    {
+     "title": "Remove",
+     "text": "Precise removal with the method best suited to the lesion."
+    },
+    {
+     "title": "Heal",
+     "text": "Simple wound care; small scabs fall off within about a week."
+    }
+   ],
+   "results": "Most lesions are removed in one visit and heal within one to two weeks with little or no mark. Warts are caused by a virus and sometimes need repeat treatment.",
+   "cost": "Priced by the number and type of lesions. You get a clear quote at your consultation.",
+   "faqs": [
+    {
+     "q": "Will skin tags grow back?",
+     "a": "A removed skin tag doesn’t regrow, but new ones can appear over time, especially in areas of friction."
+    },
+    {
+     "q": "Why do warts sometimes need more than one session?",
+     "a": "Warts are caused by a virus that can remain in the surrounding skin, so some need repeat treatment to clear completely."
+    },
+    {
+     "q": "Is mole removal safe?",
+     "a": "Yes. A dermatologist examines the mole first; suspicious moles are excised and can be sent for testing."
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy",
+    "dr-eshritha-c",
+    "dr-jeevith-c-reddy"
+   ],
+   "equipment": [
+    "rf-plasma-pen",
+    "cryo",
+    "co2-laser"
+   ],
+   "related": [
+    "co2-laser-resurfacing",
+    "vitiligo-surgery",
+    "paediatric-dermatology"
+   ],
+   "image": "/images/rua/equipment/radiofrequency-plasma-pen.webp",
+   "procedureType": "SurgicalProcedure"
+  },
+  {
+   "slug": "vitiligo-surgery",
+   "category": "dermatosurgery",
+   "name": "Vitiligo Surgery",
+   "h1": "Vitiligo Surgery & Punch Grafting in Bangalore",
+   "seo": {
+    "title": "Vitiligo Surgery in Bangalore – Punch Grafting | RUA",
+    "description": "Surgical treatment for stable vitiligo — punch grafting and other vitiligo surgeries to restore pigment — with RUA’s dermatosurgeons in Bengaluru."
+   },
+   "summary": "When vitiligo patches have been stable and stopped spreading, surgery can restore colour where medicines haven’t. In punch grafting, tiny pieces of normally pigmented skin are transferred into the white patch, where pigment gradually spreads out from each graft.",
+   "facts": [
+    {
+     "label": "Suitable for",
+     "value": "Stable vitiligo — no change for several months"
+    },
+    {
+     "label": "Techniques",
+     "value": "Punch grafting and other vitiligo surgeries"
+    },
+    {
+     "label": "Anaesthesia",
+     "value": "Local"
+    },
+    {
+     "label": "Repigmentation",
+     "value": "Gradual, over weeks to months"
+    },
+    {
+     "label": "Often combined with",
+     "value": "Medical treatment to support repigmentation"
+    }
+   ],
+   "whoFor": [
+    "Stable vitiligo patches that haven’t responded to medicines",
+    "Segmental vitiligo",
+    "Patches on the face, lips or hands, after assessment",
+    "Loss of pigment after burns or injury (leucoderma)"
+   ],
+   "steps": [
+    {
+     "title": "Confirm stability",
+     "text": "We review your history to confirm the patches have been stable."
+    },
+    {
+     "title": "Plan",
+     "text": "Donor and recipient areas are planned for the best match."
+    },
+    {
+     "title": "Grafting",
+     "text": "Tiny grafts are placed into the white patch under local anaesthesia."
+    },
+    {
+     "title": "Follow-up",
+     "text": "Supportive treatment and reviews while pigment spreads."
+    }
+   ],
+   "results": "Pigment usually starts to spread from the grafts within a few weeks and continues to improve over the following months. Results are best in stable vitiligo.",
+   "cost": "Priced by the size and number of patches treated. You receive a quote after your assessment.",
+   "faqs": [
+    {
+     "q": "How do I know if my vitiligo is stable?",
+     "a": "Generally, no new patches and no increase in size for several months. Your dermatologist will assess this before recommending surgery."
+    },
+    {
+     "q": "Is vitiligo surgery painful?",
+     "a": "It is done under local anaesthesia, so you should feel little during the procedure. Mild soreness afterwards is usually brief."
+    },
+    {
+     "q": "When will the colour return?",
+     "a": "Pigment usually begins to spread from the grafts over a few weeks and keeps improving over months."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c"
+   ],
+   "related": [
+    "wart-skin-tag-removal",
+    "psoriasis-eczema-treatment",
+    "paediatric-dermatology"
+   ],
+   "image": "/images/rua/services/dermatosurgery.webp",
+   "procedureType": "SurgicalProcedure"
+  },
+  {
+   "slug": "hydrafacial",
+   "category": "aesthetic-dermatology",
+   "name": "HydraFacial & Medifacials",
+   "h1": "HydraFacial in Bangalore",
+   "seo": {
+    "title": "HydraFacial in Bangalore – Medifacial by Dermatologists | RUA",
+    "description": "HydraFacial and dermatologist-designed medifacials that cleanse, exfoliate, extract and hydrate — glowing skin with no downtime at RUA, Bengaluru."
+   },
+   "summary": "HydraFacial is a medical-grade facial that cleanses, exfoliates, extracts and hydrates in one session, using vortex suction and serums matched to your skin. At RUA it is part of a range of dermatologist-designed medifacials — ideal before events or as monthly skin maintenance.",
+   "facts": [
+    {
+     "label": "Session time",
+     "value": "About 45–60 minutes"
+    },
+    {
+     "label": "Downtime",
+     "value": "None — straight back to your day"
+    },
+    {
+     "label": "Results",
+     "value": "Instant glow; best with a monthly routine"
+    },
+    {
+     "label": "Suits",
+     "value": "Most skin types"
+    },
+    {
+     "label": "Popular for",
+     "value": "Bridal prep, dull or congested skin"
+    }
+   ],
+   "whoFor": [
+    "Dull, tired or dehydrated skin",
+    "Blackheads, congestion and large pores",
+    "Pre-event and bridal glow",
+    "Monthly maintenance, and post-travel or detox facials"
+   ],
+   "steps": [
+    {
+     "title": "Cleanse & exfoliate",
+     "text": "Gentle resurfacing removes dead skin and prepares the pores."
+    },
+    {
+     "title": "Extract",
+     "text": "Painless vortex suction clears blackheads and congestion."
+    },
+    {
+     "title": "Infuse",
+     "text": "Hydrating serums chosen for your skin are infused deep into it."
+    },
+    {
+     "title": "Protect",
+     "text": "Antioxidants and sunscreen to finish."
+    }
+   ],
+   "results": "Skin looks brighter, smoother and more hydrated straight away. Regular monthly sessions maintain the results and keep pores clear.",
+   "cost": "Priced per session or as monthly, bridal and RUA Signature Glow packages, with EMI options.",
+   "faqs": [
+    {
+     "q": "How often should I get a HydraFacial?",
+     "a": "Once a month suits most people for maintenance. Before an event, a session a few days earlier gives the best glow."
+    },
+    {
+     "q": "Is HydraFacial suitable for acne-prone skin?",
+     "a": "It can help with congestion and blackheads. If you have active, inflamed acne, your dermatologist may treat the acne medically first."
+    },
+    {
+     "q": "HydraFacial or chemical peel?",
+     "a": "HydraFacial is gentle with no downtime; peels work deeper on pigmentation, acne and texture. Many plans combine both."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c"
+   ],
+   "equipment": [
+    "hydrafacial"
+   ],
+   "related": [
+    "chemical-peel",
+    "skin-boosters",
+    "mnrf-microneedling"
+   ],
+   "image": "/images/rua/services/premium-glow.webp",
+   "procedureType": "NoninvasiveProcedure"
+  },
+  {
+   "slug": "chemical-peel",
+   "category": "aesthetic-dermatology",
+   "name": "Chemical Peels",
+   "h1": "Chemical Peels in Bangalore",
+   "seo": {
+    "title": "Chemical Peel in Bangalore – For Acne & Pigmentation | RUA",
+    "description": "Dermatologist-chosen chemical peels — glycolic, salicylic, lactic, TCA and depigmenting peels — for acne, pigmentation and dull skin at RUA, Bengaluru."
+   },
+   "summary": "A chemical peel applies a carefully selected acid solution to remove damaged outer layers of skin and stimulate renewal. Your dermatologist chooses the peel and its strength for your concern and skin type — for acne, pigmentation, melasma, dullness or texture.",
+   "facts": [
+    {
+     "label": "Session time",
+     "value": "20–40 minutes"
+    },
+    {
+     "label": "Typical course",
+     "value": "4–6 sessions, 2–4 weeks apart"
+    },
+    {
+     "label": "Downtime",
+     "value": "Light flaking for a few days"
+    },
+    {
+     "label": "Peel types",
+     "value": "Glycolic, salicylic, lactic, TCA, depigmenting"
+    },
+    {
+     "label": "Essential",
+     "value": "Daily sunscreen"
+    }
+   ],
+   "whoFor": [
+    "Active acne and post-acne marks",
+    "Pigmentation, melasma and uneven tone",
+    "Dull, rough or tired-looking skin",
+    "Fine lines and uneven texture"
+   ],
+   "steps": [
+    {
+     "title": "Analyse & prime",
+     "text": "Skin analysis, with priming creams when needed for Indian skin."
+    },
+    {
+     "title": "Apply",
+     "text": "The chosen peel is applied and timed precisely."
+    },
+    {
+     "title": "Neutralise & soothe",
+     "text": "The peel is neutralised and the skin calmed."
+    },
+    {
+     "title": "Home care",
+     "text": "Gentle skincare and strict sun protection between sessions."
+    }
+   ],
+   "results": "Skin looks fresher after the first peel, with clearer, more even skin building over a course of sessions.",
+   "cost": "Priced per session or as part of acne, pigmentation or glow programmes, with EMI options.",
+   "faqs": [
+    {
+     "q": "Are chemical peels safe for Indian skin?",
+     "a": "Yes, when the peel is chosen and timed by a dermatologist. We often prime the skin first to reduce the risk of pigmentation."
+    },
+    {
+     "q": "Will my skin peel a lot?",
+     "a": "Most medical peels cause light flaking for a few days rather than visible sheets of skin."
+    },
+    {
+     "q": "How many peels will I need?",
+     "a": "Usually four to six sessions, two to four weeks apart, depending on your concern and how your skin responds."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c",
+    "dr-jeevith-c-reddy"
+   ],
+   "related": [
+    "pigmentation-melasma-treatment",
+    "acne-scar-treatment",
+    "hydrafacial"
+   ],
+   "image": "/images/rua/services/skin-ritual.webp",
+   "procedureType": "NoninvasiveProcedure"
+  },
+  {
+   "slug": "mnrf-microneedling",
+   "category": "aesthetic-dermatology",
+   "name": "Microneedling RF (MNRF)",
+   "h1": "Microneedling RF (MNRF) in Bangalore",
+   "seo": {
+    "title": "MNRF in Bangalore – Microneedling RF for Scars & Pores | RUA",
+    "description": "Microneedling radiofrequency (MNRF) and collagen induction therapy for acne scars, open pores, texture and skin tightening at RUA, Bengaluru."
+   },
+   "summary": "Microneedling RF combines fine needles with radiofrequency energy delivered beneath the skin’s surface. This stimulates collagen and elastin to improve acne scars, enlarged pores, fine lines and early skin laxity — with less surface downtime than ablative lasers.",
+   "facts": [
+    {
+     "label": "Session time",
+     "value": "45–60 minutes, including numbing"
+    },
+    {
+     "label": "Typical course",
+     "value": "3–4 sessions, 4–6 weeks apart"
+    },
+    {
+     "label": "Downtime",
+     "value": "Redness for 1–3 days"
+    },
+    {
+     "label": "Results",
+     "value": "Improve over about 3 months"
+    },
+    {
+     "label": "Also available",
+     "value": "Derma Pen collagen induction therapy"
+    }
+   ],
+   "whoFor": [
+    "Acne scars and uneven texture",
+    "Enlarged pores",
+    "Fine lines and early skin laxity",
+    "Stretch marks, in selected cases"
+   ],
+   "steps": [
+    {
+     "title": "Consult",
+     "text": "Scar type, skin quality and goals are assessed."
+    },
+    {
+     "title": "Numb",
+     "text": "A numbing cream keeps the treatment comfortable."
+    },
+    {
+     "title": "Treat",
+     "text": "Microneedles deliver radiofrequency energy at the planned depth."
+    },
+    {
+     "title": "Recover",
+     "text": "Gentle skincare and sunscreen while collagen rebuilds."
+    }
+   ],
+   "results": "Skin feels smoother within weeks, and scars and pores continue to improve for about three months after each session as new collagen forms.",
+   "cost": "Priced per session or as a package, with EMI options.",
+   "faqs": [
+    {
+     "q": "MNRF or CO₂ laser for acne scars?",
+     "a": "MNRF has shorter downtime and suits many skin types; fractional CO₂ can resurface more strongly. Your dermatologist may combine them for the best result."
+    },
+    {
+     "q": "Is MNRF painful?",
+     "a": "A numbing cream is applied first, so most people feel warmth and mild prickling during treatment."
+    },
+    {
+     "q": "When will I see results?",
+     "a": "Texture improves within a few weeks, with continued improvement over about three months after each session."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c"
+   ],
+   "equipment": [
+    "mnrf",
+    "derma-pen"
+   ],
+   "related": [
+    "co2-laser-resurfacing",
+    "acne-scar-treatment",
+    "skin-boosters"
+   ],
+   "image": "/images/rua/equipment/microneedling-radiofrequency.webp",
+   "procedureType": "PercutaneousProcedure"
+  },
+  {
+   "slug": "skin-boosters",
+   "category": "aesthetic-dermatology",
+   "name": "Skin Boosters, PDRN & NCTF",
+   "h1": "Skin Boosters, PDRN & NCTF in Bangalore",
+   "seo": {
+    "title": "Skin Boosters & PDRN in Bangalore – Hydration & Repair | RUA",
+    "description": "Injectable skin boosters, PDRN (polynucleotide “salmon DNA”), NCTF, exosome and PRP rejuvenation for glow, fine lines and tired under-eyes — by RUA’s dermatologists."
+   },
+   "summary": "Skin boosters are micro-injections that improve the skin from within. Hyaluronic-acid boosters deeply hydrate, PDRN (polynucleotides, often called “salmon DNA”) supports repair and regeneration, and NCTF delivers a revitalising complex for dull skin, fine lines and tired under-eyes. Exosome and PRP skin rejuvenation are also available.",
+   "facts": [
+    {
+     "label": "Session time",
+     "value": "30–45 minutes"
+    },
+    {
+     "label": "Typical course",
+     "value": "2–3 sessions, 3–4 weeks apart"
+    },
+    {
+     "label": "Downtime",
+     "value": "Small bumps settle in 1–2 days"
+    },
+    {
+     "label": "Results",
+     "value": "Glow and hydration build over weeks"
+    },
+    {
+     "label": "Options",
+     "value": "HA boosters, PDRN, NCTF, exosomes, PRP"
+    }
+   ],
+   "whoFor": [
+    "Dull, dehydrated or tired-looking skin",
+    "Fine lines and crepey texture",
+    "Under-eye hollowness and dark circles (NCTF)",
+    "Skin recovering from acne, lasers or sun damage (PDRN)"
+   ],
+   "steps": [
+    {
+     "title": "Assess",
+     "text": "Skin quality, concerns and goals are reviewed."
+    },
+    {
+     "title": "Numb",
+     "text": "A numbing cream is applied for comfort."
+    },
+    {
+     "title": "Micro-injections",
+     "text": "The chosen booster is placed in tiny amounts across the treatment area."
+    },
+    {
+     "title": "Aftercare",
+     "text": "Small bumps settle within a day or two; avoid make-up briefly."
+    }
+   ],
+   "results": "Skin looks more hydrated and radiant within a few weeks, and keeps improving through the course. Maintenance sessions every few months sustain the effect.",
+   "cost": "Priced by product and number of sessions, or as an anti-ageing programme, with EMI options.",
+   "faqs": [
+    {
+     "q": "What is PDRN or “salmon DNA”?",
+     "a": "PDRN is a purified polynucleotide derived from salmon DNA. It is used in dermatology to support skin repair and regeneration, and is injected in tiny amounts by a doctor."
+    },
+    {
+     "q": "Are skin boosters the same as fillers?",
+     "a": "No. Boosters spread through the skin to improve hydration and quality; fillers add volume or shape to specific areas."
+    },
+    {
+     "q": "How long do the results last?",
+     "a": "Typically a few months. A maintenance session every few months keeps the effect."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c"
+   ],
+   "related": [
+    "botox-fillers",
+    "hydrafacial",
+    "mnrf-microneedling"
+   ],
+   "image": "/images/rua/services/premium-glow.webp",
+   "procedureType": "PercutaneousProcedure"
+  },
+  {
+   "slug": "botox-fillers",
+   "category": "aesthetic-dermatology",
+   "name": "Botox & Dermal Fillers",
+   "h1": "Botox & Dermal Fillers in Bangalore",
+   "seo": {
+    "title": "Botox & Fillers in Bangalore – Natural Results | RUA",
+    "description": "Doctor-administered Botox for lines and jaw slimming, hyaluronic-acid fillers for lips, under-eyes and contours, and thread lifts — natural-looking results at RUA."
+   },
+   "summary": "Botulinum toxin (“Botox”) relaxes specific muscles to soften expression lines, while hyaluronic-acid dermal fillers restore volume and refine contours. At RUA both are performed by dermatologists, with a conservative approach that keeps your expressions natural. Thread lifts are also available for lifting and contouring.",
+   "facts": [
+    {
+     "label": "Treatment time",
+     "value": "15–45 minutes"
+    },
+    {
+     "label": "Downtime",
+     "value": "Minimal; small bruises are possible"
+    },
+    {
+     "label": "Botox results",
+     "value": "Visible in 3–7 days, lasting about 3–4 months"
+    },
+    {
+     "label": "Filler results",
+     "value": "Immediate, lasting months depending on area"
+    },
+    {
+     "label": "Approach",
+     "value": "Natural, conservative and doctor-led"
+    }
+   ],
+   "whoFor": [
+    "Forehead lines, frown lines and crow’s feet",
+    "Jaw (masseter) slimming and teeth grinding",
+    "Lip enhancement and definition",
+    "Under-eye hollows, cheeks and chin",
+    "Lifting and contouring with threads"
+   ],
+   "steps": [
+    {
+     "title": "Facial assessment",
+     "text": "Your features, expressions and goals are analysed."
+    },
+    {
+     "title": "Plan & consent",
+     "text": "A clear plan, product choice and expected results."
+    },
+    {
+     "title": "Precise treatment",
+     "text": "Fine injections placed by the doctor."
+    },
+    {
+     "title": "Review",
+     "text": "A check-in at about two weeks to fine-tune if needed."
+    }
+   ],
+   "results": "Botox softens lines within a week and lasts around three to four months. Fillers show immediately and last for months, depending on the area and product.",
+   "cost": "Priced by product, units or syringes, and area. You receive a clear quote after your facial assessment.",
+   "faqs": [
+    {
+     "q": "Will I look frozen?",
+     "a": "Not with a conservative, well-placed dose. Our aim is to soften lines while keeping natural expression."
+    },
+    {
+     "q": "Are fillers reversible?",
+     "a": "Hyaluronic-acid fillers can be dissolved with an enzyme if needed."
+    },
+    {
+     "q": "Is Botox safe?",
+     "a": "In qualified hands and at cosmetic doses, botulinum toxin has a long safety record. Your dermatologist reviews your medical history first."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c"
+   ],
+   "related": [
+    "skin-boosters",
+    "mnrf-microneedling",
+    "hydrafacial"
+   ],
+   "image": "/images/rua/equipment/radiofrequency-plasma-pen.webp",
+   "procedureType": "PercutaneousProcedure"
+  },
+  {
+   "slug": "laser-hair-reduction",
+   "category": "laser-treatments",
+   "name": "Laser Hair Reduction",
+   "h1": "Laser Hair Reduction in Bangalore",
+   "seo": {
+    "title": "Laser Hair Removal in Bangalore – Triple Wavelength | RUA",
+    "description": "Triple-wavelength diode laser hair reduction for face and body, suited to Indian skin — dermatologist-supervised, with lifetime packages, at RUA, Bengaluru."
+   },
+   "summary": "Laser hair reduction uses light energy to disable hair follicles, so unwanted hair grows back finer and sparser. RUA uses a triple-wavelength diode laser, which combines three wavelengths to treat different hair depths and skin types — including Indian skin — under dermatologist supervision.",
+   "facts": [
+    {
+     "label": "Technology",
+     "value": "Triple-wavelength diode laser"
+    },
+    {
+     "label": "Sessions",
+     "value": "Usually 6–8, 4–8 weeks apart"
+    },
+    {
+     "label": "Session time",
+     "value": "15–60 minutes, by area"
+    },
+    {
+     "label": "Downtime",
+     "value": "None to mild redness"
+    },
+    {
+     "label": "Packages",
+     "value": "Including lifetime laser hair reduction"
+    }
+   ],
+   "whoFor": [
+    "Unwanted facial hair — upper lip, chin and jawline",
+    "Underarms, arms, legs and bikini line",
+    "Beard shaping, back and chest for men",
+    "Hormonal hair growth such as PCOS, alongside medical care",
+    "Ingrown hairs and razor bumps"
+   ],
+   "steps": [
+    {
+     "title": "Consult & patch test",
+     "text": "Skin and hair assessment, with a test spot when needed."
+    },
+    {
+     "title": "Prepare",
+     "text": "Shave the area the day before; avoid waxing, threading and tanning."
+    },
+    {
+     "title": "Treat",
+     "text": "Quick laser pulses with built-in cooling for comfort."
+    },
+    {
+     "title": "Maintain",
+     "text": "Sessions spaced to the hair cycle, plus occasional maintenance."
+    }
+   ],
+   "results": "Most people notice finer, sparser regrowth after the first few sessions. Laser gives long-term reduction rather than a guarantee of permanent removal — hormonal areas may need occasional maintenance sessions.",
+   "cost": "Priced by area and number of sessions. Lifetime laser hair reduction packages are available, with EMI options.",
+   "faqs": [
+    {
+     "q": "Is laser hair removal permanent?",
+     "a": "It gives long-lasting reduction: treated hair grows back much finer and sparser, and many people need only occasional maintenance. Hormonal areas may need more."
+    },
+    {
+     "q": "Is it safe for Indian skin?",
+     "a": "Yes, when the right wavelength and settings are used. Triple-wavelength diode lasers treat a wide range of skin types, and our doctors adjust settings for your skin."
+    },
+    {
+     "q": "Does it hurt?",
+     "a": "Most people describe a quick, warm snap. Built-in cooling keeps it comfortable."
+    },
+    {
+     "q": "How should I prepare?",
+     "a": "Shave the area a day before, avoid waxing, threading or plucking for four weeks, and avoid sun tanning before your sessions."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c",
+    "dr-jatin-k-reddy"
+   ],
+   "equipment": [
+    "q-switched-diode"
+   ],
+   "related": [
+    "tattoo-removal",
+    "hydrafacial",
+    "pigmentation-melasma-treatment"
+   ],
+   "image": "/images/rua/equipment/q-switched-nd-yag-diode-laser.webp",
+   "procedureType": "NoninvasiveProcedure"
+  },
+  {
+   "slug": "tattoo-removal",
+   "category": "laser-treatments",
+   "name": "Laser Tattoo & Pigment Removal",
+   "h1": "Laser Tattoo Removal in Bangalore",
+   "seo": {
+    "title": "Laser Tattoo Removal in Bangalore – Q-Switched Laser | RUA",
+    "description": "Q-switched Nd:YAG laser tattoo removal and pigment lasers for unwanted tattoos and pigmented marks — by dermatologists at RUA, Bengaluru."
+   },
+   "summary": "Laser tattoo removal uses very short pulses of laser energy to break tattoo ink into tiny particles, which your body clears over the following weeks. RUA uses a Q-switched Nd:YAG laser, which is also used for certain pigmented marks and for laser toning.",
+   "facts": [
+    {
+     "label": "Technology",
+     "value": "Q-switched Nd:YAG laser"
+    },
+    {
+     "label": "Sessions",
+     "value": "Usually several, 6–8 weeks apart"
+    },
+    {
+     "label": "Session time",
+     "value": "10–30 minutes"
+    },
+    {
+     "label": "Aftercare",
+     "value": "Redness or small blisters heal in about a week"
+    },
+    {
+     "label": "Best response",
+     "value": "Black and dark-blue inks"
+    }
+   ],
+   "whoFor": [
+    "Unwanted or faded tattoos",
+    "Lightening a tattoo before a cover-up",
+    "Eyebrow or cosmetic tattoo correction",
+    "Certain pigmented marks, after diagnosis"
+   ],
+   "steps": [
+    {
+     "title": "Assess",
+     "text": "Ink colours, size, age of the tattoo and your skin type."
+    },
+    {
+     "title": "Test spot",
+     "text": "A small test area when needed, to choose the right settings."
+    },
+    {
+     "title": "Treat",
+     "text": "Laser pulses with cooling; each session takes minutes."
+    },
+    {
+     "title": "Heal & repeat",
+     "text": "Simple aftercare, with sessions spaced for the ink to clear."
+    }
+   ],
+   "results": "Each session lightens the ink further. Amateur and black tattoos usually respond best; dense, multicoloured professional tattoos need more sessions, and some colours may not clear completely.",
+   "cost": "Depends on the size, colours and number of sessions. You receive a quote after assessment.",
+   "faqs": [
+    {
+     "q": "How many sessions will my tattoo need?",
+     "a": "It varies with the size, ink colours, depth and age of the tattoo. Most need several sessions spaced six to eight weeks apart."
+    },
+    {
+     "q": "Does laser tattoo removal leave a scar?",
+     "a": "With the right settings and aftercare, scarring is uncommon. Temporary lightening or darkening of the skin can occur and usually settles."
+    },
+    {
+     "q": "Can eyebrow tattoos be removed?",
+     "a": "Yes. Cosmetic brow tattoos can often be lightened or removed, with care taken around the eye area."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c",
+    "dr-jatin-k-reddy"
+   ],
+   "equipment": [
+    "q-switched-diode"
+   ],
+   "related": [
+    "laser-hair-reduction",
+    "pigmentation-melasma-treatment",
+    "co2-laser-resurfacing"
+   ],
+   "image": "/images/rua/equipment/q-switched-nd-yag-diode-laser.webp",
+   "procedureType": "NoninvasiveProcedure"
+  },
+  {
+   "slug": "co2-laser-resurfacing",
+   "category": "laser-treatments",
+   "name": "CO₂ Laser Resurfacing",
+   "h1": "CO₂ Laser Resurfacing for Scars in Bangalore",
+   "seo": {
+    "title": "CO2 Laser for Acne Scars in Bangalore – Resurfacing | RUA",
+    "description": "Fractional CO₂ laser resurfacing for acne scars, texture and skin growths — by dermatologists who have published research on CO₂ laser scar treatment. RUA, Bengaluru."
+   },
+   "summary": "Fractional CO₂ laser resurfacing creates thousands of microscopic treatment zones in the skin, triggering new collagen to smooth acne scars, uneven texture and enlarged pores. RUA’s dermatologists have published research on pinhole CO₂ ablation for papular scars.",
+   "facts": [
+    {
+     "label": "Technology",
+     "value": "Fractional CO₂ laser"
+    },
+    {
+     "label": "Sessions",
+     "value": "Usually 2–4, 4–8 weeks apart"
+    },
+    {
+     "label": "Downtime",
+     "value": "Redness and fine crusting for 5–7 days"
+    },
+    {
+     "label": "Results",
+     "value": "Build over 3–6 months"
+    },
+    {
+     "label": "Also used for",
+     "value": "Precise removal of certain skin growths"
+    }
+   ],
+   "whoFor": [
+    "Acne scars — rolling, boxcar and papular scars",
+    "Uneven texture and large pores",
+    "Surgical and chickenpox scars",
+    "Skin growths such as warts or DPNs"
+   ],
+   "steps": [
+    {
+     "title": "Prime the skin",
+     "text": "Skin preparation, especially important for darker skin types."
+    },
+    {
+     "title": "Numb",
+     "text": "A numbing cream is applied before the session."
+    },
+    {
+     "title": "Resurface",
+     "text": "Fractional CO₂ treatment tailored to your scars and skin."
+    },
+    {
+     "title": "Heal",
+     "text": "Gentle care and strict sun protection while new skin forms."
+    }
+   ],
+   "results": "Skin looks pink and feels rough for about a week as it heals. Scars soften gradually over the following months as collagen remodels; most people need two to four sessions for a meaningful change.",
+   "cost": "Priced per session or as a scar refinement programme, with EMI options.",
+   "faqs": [
+    {
+     "q": "Is CO₂ laser safe for Indian skin?",
+     "a": "Yes, with careful settings and preparation. Darker skin has a higher risk of temporary pigmentation, so we prime the skin beforehand and plan conservative settings."
+    },
+    {
+     "q": "How much downtime should I expect?",
+     "a": "Usually five to seven days of redness and fine crusting. Most people plan treatment around a few days of rest from social events."
+    },
+    {
+     "q": "Can CO₂ laser be combined with other scar treatments?",
+     "a": "Yes. Scars often respond best to a combination — such as microneedling RF, chemical peels or scar revision procedures — planned by your dermatologist."
+    }
+   ],
+   "doctors": [
+    "dr-eshritha-c",
+    "dr-jatin-k-reddy"
+   ],
+   "equipment": [
+    "co2-laser"
+   ],
+   "related": [
+    "acne-scar-treatment",
+    "mnrf-microneedling",
+    "chemical-peel"
+   ],
+   "image": "/images/rua/equipment/co2-laser.webp",
+   "procedureType": "NoninvasiveProcedure"
+  },
+  {
+   "slug": "hair-loss-treatment",
+   "category": "hair-treatments",
+   "name": "Hair Loss Treatment",
+   "h1": "Hair Loss & Hair Fall Treatment in Bangalore",
+   "seo": {
+    "title": "Hair Loss Treatment in Bangalore – Dermatologist-Led | RUA",
+    "description": "Diagnosis-first hair fall and hair loss treatment for men and women — medical therapy, PRP, GFC, exosomes, QR678, mesotherapy and LLLT — at RUA, Bengaluru."
+   },
+   "summary": "Effective hair loss treatment starts with the right diagnosis. RUA’s dermatologists examine your scalp, find out why you are losing hair — pattern hair loss, shedding after illness or stress, nutritional or hormonal causes, or alopecia areata — and build a plan that may combine medical treatment with in-clinic therapies.",
+   "facts": [
+    {
+     "label": "First visit",
+     "value": "History, scalp examination and trichoscopy where useful"
+    },
+    {
+     "label": "Tests",
+     "value": "Blood tests only when indicated"
+    },
+    {
+     "label": "Therapies",
+     "value": "Medical, PRP, GFC, exosomes, QR678, mesotherapy, LLLT"
+    },
+    {
+     "label": "Visible change",
+     "value": "Usually in 3–6 months"
+    },
+    {
+     "label": "For",
+     "value": "Men and women"
+    }
+   ],
+   "whoFor": [
+    "More hair fall than usual, or a widening parting",
+    "A receding hairline or thinning crown",
+    "Hair loss after illness, childbirth, stress or dieting",
+    "Patchy hair loss",
+    "Dandruff, itchy or oily scalp"
+   ],
+   "steps": [
+    {
+     "title": "Diagnose",
+     "text": "History, scalp examination and trichoscopy, with blood tests when needed."
+    },
+    {
+     "title": "Treat the cause",
+     "text": "Medical management of male and female hair loss, tailored to you."
+    },
+    {
+     "title": "Boost regrowth",
+     "text": "PRP, GFC, exosomes, QR678, scalp mesotherapy, microneedling or LLLT when they are likely to help."
+    },
+    {
+     "title": "Maintain",
+     "text": "Hair strengthening and maintenance programmes, with periodic reviews."
+    }
+   ],
+   "results": "Hair grows slowly, so most treatments take three to six months to make a visible difference. Early treatment usually gives the best results. For advanced, stable baldness, a hair transplant may be discussed.",
+   "cost": "Cost depends on the diagnosis and the therapies chosen. Treatment starts with a consultation; multi-session programmes are available as packages with EMI options.",
+   "faqs": [
+    {
+     "q": "How much hair fall is normal?",
+     "a": "Losing around 50–100 hairs a day is common. If you notice much more hair on your pillow or in the shower, a widening parting or thinning patches, it is worth seeing a dermatologist."
+    },
+    {
+     "q": "Is hair loss treatment different for women?",
+     "a": "Often, yes. Female hair loss can be linked to hormones, iron or thyroid levels, PCOS or childbirth, so the work-up and treatment are tailored."
+    },
+    {
+     "q": "Do I need PRP or GFC?",
+     "a": "Not always. Many people respond well to medical treatment alone; in-clinic therapies are added when they are likely to help. Your dermatologist will advise."
+    },
+    {
+     "q": "When should I consider a hair transplant?",
+     "a": "When hair loss is advanced and stable and you have a good donor area. We assess this honestly at your consultation."
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy",
+    "dr-jeevith-c-reddy"
+   ],
+   "equipment": [
+    "derma-pen",
+    "lllt"
+   ],
+   "related": [
+    "prp-hair-treatment",
+    "gfc-hair-treatment",
+    "fue-hair-transplant"
+   ],
+   "image": "/images/rua/equipment/derma-pen.webp",
+   "procedureType": "TherapeuticProcedure"
+  },
+  {
+   "slug": "prp-hair-treatment",
+   "category": "hair-treatments",
+   "name": "PRP Hair Treatment",
+   "h1": "PRP Hair Treatment in Bangalore",
+   "seo": {
+    "title": "PRP Hair Treatment in Bangalore – Sessions & Results | RUA",
+    "description": "Platelet-rich plasma (PRP) therapy for hair fall and thinning, prepared from your own blood and delivered by RUA’s dermatologists in Bengaluru. Packages and EMI."
+   },
+   "summary": "PRP (platelet-rich plasma) therapy uses growth factors from your own blood to support weakening hair follicles. A small blood sample is processed to concentrate the platelets, which are then injected into thinning areas of the scalp. It works best for early to moderate thinning and is often combined with medical treatment.",
+   "facts": [
+    {
+     "label": "Session time",
+     "value": "About 45–60 minutes"
+    },
+    {
+     "label": "Typical course",
+     "value": "3–4 sessions, 4–6 weeks apart"
+    },
+    {
+     "label": "Downtime",
+     "value": "Minimal — mild scalp tenderness for a day"
+    },
+    {
+     "label": "Visible change",
+     "value": "Often within 3–6 months"
+    },
+    {
+     "label": "Maintenance",
+     "value": "Periodic top-up sessions"
+    }
+   ],
+   "whoFor": [
+    "Early male or female pattern hair loss",
+    "Diffuse thinning and increased hair fall",
+    "Supporting growth after a hair transplant",
+    "Anyone who prefers a non-surgical option"
+   ],
+   "steps": [
+    {
+     "title": "Blood sample",
+     "text": "A small amount of your blood is drawn, like a routine blood test."
+    },
+    {
+     "title": "Processing",
+     "text": "The sample is centrifuged to separate and concentrate the platelet-rich plasma."
+    },
+    {
+     "title": "Scalp preparation",
+     "text": "The scalp is cleaned and numbed for comfort."
+    },
+    {
+     "title": "Micro-injections",
+     "text": "PRP is injected evenly into the thinning areas with fine needles."
+    }
+   ],
+   "results": "Many people notice less hair fall first, followed by thicker, stronger hair over three to six months. Results vary with the cause and stage of hair loss; maintenance sessions help sustain them.",
+   "cost": "PRP is priced per session or as a multi-session package, with EMI options. Your dermatologist will recommend the number of sessions after assessment.",
+   "faqs": [
+    {
+     "q": "Is PRP for hair painful?",
+     "a": "The scalp is numbed before treatment, so most people feel only mild pressure or pricks. Any tenderness usually settles within a day."
+    },
+    {
+     "q": "How many PRP sessions will I need?",
+     "a": "A typical course is three to four sessions, four to six weeks apart, followed by occasional maintenance sessions."
+    },
+    {
+     "q": "PRP or GFC — which is better?",
+     "a": "Both use growth factors from your own blood. GFC concentrates the growth factors in a cell-free form, which some people find more comfortable. Your dermatologist will suggest the better fit for you."
+    },
+    {
+     "q": "Who should avoid PRP?",
+     "a": "People with certain blood or platelet disorders, an active scalp infection, or on some blood-thinning medicines may not be suitable. We check this at the consultation."
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy"
+   ],
+   "related": [
+    "gfc-hair-treatment",
+    "hair-loss-treatment",
+    "fue-hair-transplant"
+   ],
+   "image": "/images/rua/equipment/derma-pen.webp",
+   "procedureType": "TherapeuticProcedure"
+  },
+  {
+   "slug": "gfc-hair-treatment",
+   "category": "hair-treatments",
+   "name": "GFC Hair Treatment",
+   "h1": "GFC Hair Treatment in Bangalore",
+   "seo": {
+    "title": "GFC Hair Treatment in Bangalore – Growth Factor Therapy | RUA",
+    "description": "Growth Factor Concentrate (GFC) therapy for hair thinning — growth factors from your own blood, delivered by RUA’s dermatologists in Bengaluru. Packages and EMI."
+   },
+   "summary": "GFC (Growth Factor Concentrate) therapy is an advanced form of platelet therapy. Growth factors are released from your own platelets and concentrated into a cell-free solution, which is delivered into the scalp to strengthen thinning hair and support regrowth.",
+   "facts": [
+    {
+     "label": "Session time",
+     "value": "About 45–60 minutes"
+    },
+    {
+     "label": "Typical course",
+     "value": "3–4 sessions, about a month apart"
+    },
+    {
+     "label": "Downtime",
+     "value": "Minimal"
+    },
+    {
+     "label": "Visible change",
+     "value": "Usually within 3–6 months"
+    },
+    {
+     "label": "Source",
+     "value": "Your own blood (autologous)"
+    }
+   ],
+   "whoFor": [
+    "Early to moderate pattern hair loss in men and women",
+    "Diffuse thinning and excessive hair fall",
+    "Hair strengthening and maintenance programmes",
+    "Support after a hair transplant"
+   ],
+   "steps": [
+    {
+     "title": "Blood sample",
+     "text": "A small blood sample is taken."
+    },
+    {
+     "title": "Activation & concentration",
+     "text": "Growth factors are released from the platelets and concentrated in a cell-free solution."
+    },
+    {
+     "title": "Scalp preparation",
+     "text": "The scalp is cleaned and numbed."
+    },
+    {
+     "title": "Precise delivery",
+     "text": "GFC is delivered evenly into thinning areas."
+    }
+   ],
+   "results": "Hair fall usually reduces first, with improved thickness and density over the following months. Combined with the right medical treatment, GFC can help maintain your hair long term.",
+   "cost": "Priced per session or as a package, with flexible payment and EMI options.",
+   "faqs": [
+    {
+     "q": "How is GFC different from PRP?",
+     "a": "PRP uses concentrated platelets; GFC uses the growth factors released from them, in a cell-free form. Both come from your own blood."
+    },
+    {
+     "q": "How many GFC sessions do I need?",
+     "a": "Most plans start with three to four sessions about a month apart, followed by maintenance sessions as advised."
+    },
+    {
+     "q": "Is there any downtime after GFC?",
+     "a": "Very little. You can usually return to your routine the same day; avoid heavy workouts and hair products for a short time as advised."
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy"
+   ],
+   "related": [
+    "prp-hair-treatment",
+    "hair-loss-treatment",
+    "scalp-micropigmentation"
+   ],
+   "image": "/images/rua/equipment/derma-pen.webp",
+   "procedureType": "TherapeuticProcedure"
+  },
+  {
+   "slug": "scalp-micropigmentation",
+   "category": "hair-treatments",
+   "name": "Scalp Micropigmentation",
+   "h1": "Scalp Micropigmentation (SMP) in Bangalore",
+   "seo": {
+    "title": "Scalp Micropigmentation in Bangalore – SMP Hair Tattoo | RUA",
+    "description": "Scalp micropigmentation (SMP) creates the look of density or a crisp shaved hairline with fine pigment dots — at RUA Skin & Hair Center, Bengaluru."
+   },
+   "summary": "Scalp micropigmentation (SMP) is a non-surgical cosmetic technique that places tiny pigment dots in the scalp to mimic hair follicles. It creates the look of fuller hair or a closely shaved head, and can camouflage scars.",
+   "facts": [
+    {
+     "label": "Sessions",
+     "value": "Usually 2–3"
+    },
+    {
+     "label": "Session time",
+     "value": "2–4 hours"
+    },
+    {
+     "label": "Downtime",
+     "value": "Mild redness for 1–2 days"
+    },
+    {
+     "label": "Lasts",
+     "value": "Several years, with occasional touch-ups"
+    },
+    {
+     "label": "Regrows hair?",
+     "value": "No — it is cosmetic camouflage"
+    }
+   ],
+   "whoFor": [
+    "Diffuse thinning where you want the look of density",
+    "Men who prefer a shaved, buzz-cut look",
+    "Camouflaging transplant or surgical scars",
+    "People who are not suited to a transplant"
+   ],
+   "steps": [
+    {
+     "title": "Design & shade match",
+     "text": "Hairline and density planned, pigment matched to your skin and hair."
+    },
+    {
+     "title": "First session",
+     "text": "A base layer of fine dots is placed across the area."
+    },
+    {
+     "title": "Build density",
+     "text": "Further sessions add layers for a natural, three-dimensional look."
+    },
+    {
+     "title": "Aftercare",
+     "text": "Simple care for a few days; touch-ups as the pigment softens over the years."
+    }
+   ],
+   "results": "Results are visible straight after each session and settle over a few days. The pigment softens gradually over the years, and a touch-up session refreshes it.",
+   "cost": "Priced by area and number of sessions, with EMI options available.",
+   "faqs": [
+    {
+     "q": "Does SMP look natural?",
+     "a": "With the right dot size, depth and shade matched to your skin and hair, SMP looks like natural follicles. It is planned around how you wear your hair."
+    },
+    {
+     "q": "Does SMP fade?",
+     "a": "Pigment softens gradually over the years. A touch-up session refreshes it."
+    },
+    {
+     "q": "Can SMP be combined with a hair transplant?",
+     "a": "Yes. It can add the look of density between transplanted areas or hide donor-area scars."
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy"
+   ],
+   "related": [
+    "hair-loss-treatment",
+    "fue-hair-transplant",
+    "gfc-hair-treatment"
+   ],
+   "image": "/images/rua/services/hair-transplant.webp",
+   "procedureType": "NoninvasiveProcedure"
+  },
+  {
+   "slug": "fue-hair-transplant",
+   "category": "hair-transplant",
+   "name": "FUE Hair Transplant",
+   "h1": "FUE & Sapphire FUE Hair Transplant in Bangalore",
+   "seo": {
+    "title": "FUE Hair Transplant in Bangalore – Sapphire & Bio FUE | RUA",
+    "description": "FUE, Sapphire Bio FUE and Bio-Enhanced hair transplants by a fellowship-trained hair transplant surgeon at RUA, Bengaluru. Natural hairlines, minimal downtime."
+   },
+   "summary": "Follicular Unit Extraction (FUE) moves healthy hair follicles one by one from the back of your scalp to areas that are thinning or bald — without a linear scar. At RUA, FUE, Sapphire Bio FUE and Bio-Enhanced transplants are planned and performed by Dr. Jatin K Reddy, a consultant dermatologist with a fellowship in hair transplantation.",
+   "facts": [
+    {
+     "label": "Procedure time",
+     "value": "Usually 6–8 hours, in one day"
+    },
+    {
+     "label": "Anaesthesia",
+     "value": "Local — you stay awake and comfortable"
+    },
+    {
+     "label": "Back to desk work",
+     "value": "Typically in 3–5 days"
+    },
+    {
+     "label": "New growth",
+     "value": "From about month 3–4"
+    },
+    {
+     "label": "Final result",
+     "value": "9–12 months (crown may take longer)"
+    },
+    {
+     "label": "Donor area",
+     "value": "Tiny dot marks, hidden in short hair"
+    }
+   ],
+   "whoFor": [
+    "Men with stable male-pattern baldness and a good donor area",
+    "Receding hairlines and temple recession",
+    "Women with hairline or crown thinning, after a medical work-up",
+    "Anyone who wants to wear short hair without a linear donor scar",
+    "Restoring density after an earlier transplant (revision work)"
+   ],
+   "steps": [
+    {
+     "title": "Consultation & hairline design",
+     "text": "Scalp and donor analysis, a graft estimate and a hairline drawn to suit your face, age and future hair loss."
+    },
+    {
+     "title": "Extraction",
+     "text": "Individual follicular units are harvested with fine micro-punches from the permanent donor zone, under local anaesthesia."
+    },
+    {
+     "title": "Implantation",
+     "text": "Recipient channels are opened — with sapphire blades in Sapphire FUE — and each graft is placed at a natural angle, direction and density."
+    },
+    {
+     "title": "Aftercare & follow-up",
+     "text": "Clear washing and sleeping instructions, review visits, and optional PRP or GFC to support healing and growth."
+    }
+   ],
+   "results": "Mild swelling and small crusts settle within 7–10 days. Transplanted hairs usually shed between weeks 2 and 6 — this is expected — before new growth begins around months 3–4. Density keeps improving for up to a year. Medical treatment is often advised alongside, to protect the hair you already have.",
+   "cost": "The cost of an FUE transplant depends on the number of grafts, the technique (classic FUE, Sapphire Bio FUE or Bio-Enhanced), the area treated and your donor quality. You receive a graft estimate and a transparent quote after your scalp assessment, with flexible payment and EMI options.",
+   "faqs": [
+    {
+     "q": "Is an FUE hair transplant permanent?",
+     "a": "Follicles taken from the donor zone at the back of the scalp are resistant to pattern hair loss and keep that resistance after transplantation, so results are long-lasting. Your existing, non-transplanted hair can still thin, which is why we plan for the future and often add medical treatment."
+    },
+    {
+     "q": "Does FUE hurt?",
+     "a": "The procedure is done under local anaesthesia, so most people feel only the first numbing injections. Mild soreness for a few days is usually managed with simple medicines."
+    },
+    {
+     "q": "What is Sapphire Bio FUE?",
+     "a": "Sapphire FUE uses sapphire-tipped blades to open the recipient channels, giving fine, smooth incisions for precise graft placement and comfortable healing. Bio-Enhanced techniques add growth-factor therapy to support healing. Your surgeon will advise whether they suit you."
+    },
+    {
+     "q": "How many grafts will I need?",
+     "a": "It depends on the size of the area, the density you want and your donor supply. We examine your scalp and give you a graft estimate at the consultation."
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy"
+   ],
+   "related": [
+    "dhi-hair-transplant",
+    "hair-transplant-cost",
+    "prp-hair-treatment"
+   ],
+   "image": "/images/rua/services/hair-transplant.webp",
+   "procedureType": "SurgicalProcedure"
+  },
+  {
+   "slug": "dhi-hair-transplant",
+   "category": "hair-transplant",
+   "name": "DHI Hair Transplant",
+   "h1": "DHI Hair Transplant in Bangalore",
+   "seo": {
+    "title": "DHI Hair Transplant in Bangalore – Direct Implantation | RUA",
+    "description": "Direct Hair Implantation (DHI) with implanter pens for dense, natural hairlines — planned and performed by RUA’s fellowship-trained hair transplant surgeon in Bengaluru."
+   },
+   "summary": "Direct Hair Implantation (DHI) refines FUE: follicles are extracted the same way, then loaded into an implanter pen and placed directly into the scalp, controlling the depth, angle and direction of every graft. It is especially suited to hairline design, dense packing and corrective work.",
+   "facts": [
+    {
+     "label": "Procedure time",
+     "value": "Usually 6–8 hours"
+    },
+    {
+     "label": "Anaesthesia",
+     "value": "Local"
+    },
+    {
+     "label": "Shaving",
+     "value": "Decided at consultation — partial shave may suit small areas"
+    },
+    {
+     "label": "Back to desk work",
+     "value": "Typically in 3–5 days"
+    },
+    {
+     "label": "Final result",
+     "value": "9–12 months"
+    }
+   ],
+   "whoFor": [
+    "Hairline restoration and refinement",
+    "Adding density between existing hairs",
+    "Women with hairline or crown thinning, after medical evaluation",
+    "Revision and corrective transplants"
+   ],
+   "steps": [
+    {
+     "title": "Assessment & planning",
+     "text": "Scalp, donor and hair-loss pattern assessment, with a hairline designed for your face."
+    },
+    {
+     "title": "Follicle extraction",
+     "text": "Grafts are harvested individually by FUE from the permanent donor zone."
+    },
+    {
+     "title": "Direct implantation",
+     "text": "Each graft is implanted with a pen-like implanter, setting angle, depth and direction one by one."
+    },
+    {
+     "title": "Recovery & reviews",
+     "text": "Aftercare guidance and review visits, with optional PRP or GFC to support growth."
+    }
+   ],
+   "results": "Healing is similar to FUE: small crusts settle in about 10 days, transplanted hairs shed in the first weeks, and new growth starts around months 3–4. The final density and hairline show at 9–12 months.",
+   "cost": "DHI is priced on graft count and complexity. Because every graft is placed with an implanter pen, DHI usually costs more than classic FUE. You receive a written estimate after your assessment, with EMI options available.",
+   "faqs": [
+    {
+     "q": "Is DHI better than FUE?",
+     "a": "Neither is better for everyone. DHI gives fine control for hairlines and dense packing; FUE, including Sapphire Bio FUE, can cover larger areas efficiently. We recommend the technique that suits your hair-loss pattern and goals."
+    },
+    {
+     "q": "Can DHI be done without shaving?",
+     "a": "In selected cases with smaller areas, the recipient area may not need a full shave. This depends on the number of grafts and is decided at your consultation."
+    },
+    {
+     "q": "When will I see results?",
+     "a": "New hairs usually begin to grow around month three to four, with the final result at nine to twelve months."
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy"
+   ],
+   "related": [
+    "fue-hair-transplant",
+    "hair-transplant-cost",
+    "beard-eyebrow-transplant"
+   ],
+   "image": "/images/rua/services/hair-transplant.webp",
+   "procedureType": "SurgicalProcedure"
+  },
+  {
+   "slug": "hair-transplant-cost",
+   "category": "hair-transplant",
+   "name": "Hair Transplant Cost",
+   "h1": "Hair Transplant Cost in Bangalore",
+   "seo": {
+    "title": "Hair Transplant Cost in Bangalore – Price Guide | RUA",
+    "description": "What decides the cost of a hair transplant in Bangalore — grafts, technique, area and aftercare — and how RUA gives a transparent, graft-based quote with EMI options."
+   },
+   "summary": "The cost of a hair transplant in Bangalore depends mainly on how many grafts you need and the technique used. At RUA you get a scalp assessment, a graft estimate and a transparent written quote before you decide — with flexible payment and EMI options.",
+   "facts": [
+    {
+     "label": "Quote based on",
+     "value": "Graft count, technique and area"
+    },
+    {
+     "label": "Assessment",
+     "value": "Scalp and donor analysis at consultation"
+    },
+    {
+     "label": "Techniques",
+     "value": "FUE, Sapphire Bio FUE, DHI, Bio-Enhanced"
+    },
+    {
+     "label": "Payment",
+     "value": "Flexible options and EMI plans"
+    },
+    {
+     "label": "Performed by",
+     "value": "Fellowship-trained dermatologist surgeon"
+    }
+   ],
+   "whoForTitle": "What affects the price",
+   "whoFor": [
+    "The number of grafts needed — the extent of your hair loss",
+    "The technique: FUE, Sapphire Bio FUE, DHI or Bio-Enhanced",
+    "The area: scalp, hairline, crown, beard or eyebrows",
+    "Donor quality, and whether more than one session is needed",
+    "Add-on therapies such as PRP or GFC to support healing"
+   ],
+   "stepsTitle": "How to get your quote",
+   "steps": [
+    {
+     "title": "Book a consultation",
+     "text": "Online, on WhatsApp or by phone, at either RUA centre."
+    },
+    {
+     "title": "Scalp & donor assessment",
+     "text": "We examine your hair-loss pattern, donor density and scalp health."
+    },
+    {
+     "title": "Graft estimate & plan",
+     "text": "You get a graft estimate, a recommended technique and a hairline design."
+    },
+    {
+     "title": "Written quote",
+     "text": "A clear, written quote with flexible payment and EMI options — no surprises."
+    }
+   ],
+   "results": "A well-planned transplant is a long-term investment: follicles from the donor zone are resistant to pattern hair loss and are long-lasting. Who performs the surgery, the procedure environment and the aftercare matter more to your result than the lowest price per graft.",
+   "cost": "We don’t publish a single price because no two scalps need the same number of grafts. Send photos of your hair loss on WhatsApp for an initial idea, then confirm with an in-person assessment.",
+   "faqs": [
+    {
+     "q": "How much does a hair transplant cost in Bangalore?",
+     "a": "Prices vary with the number of grafts, the technique and the area treated, so an accurate figure needs a scalp assessment. RUA gives you a graft estimate and a written quote at the consultation, with EMI options available."
+    },
+    {
+     "q": "Is cost per graft the best way to compare clinics?",
+     "a": "It is useful, but also compare who performs the surgery, the technique, the procedure environment and the aftercare included. These have a bigger effect on your result than a small difference in price."
+    },
+    {
+     "q": "Do you offer EMI for hair transplants?",
+     "a": "Yes. RUA offers flexible payment options and EMI plans. Ask our front desk for the current options."
+    },
+    {
+     "q": "Can I get an estimate online?",
+     "a": "You can send photos on WhatsApp for an initial idea. The final quote is always confirmed after an in-person examination."
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy"
+   ],
+   "related": [
+    "fue-hair-transplant",
+    "dhi-hair-transplant",
+    "prp-hair-treatment"
+   ],
+   "image": "/images/rua/services/hair-transplant.webp",
+   "procedureType": "SurgicalProcedure"
+  },
+  {
+   "slug": "beard-eyebrow-transplant",
+   "category": "hair-transplant",
+   "name": "Beard, Moustache & Eyebrow Transplant",
+   "h1": "Beard & Eyebrow Transplant in Bangalore",
+   "seo": {
+    "title": "Beard & Eyebrow Transplant in Bangalore | RUA",
+    "description": "Beard, moustache and eyebrow transplants with single-hair grafts placed at natural angles — by RUA’s fellowship-trained hair transplant surgeon in Bengaluru."
+   },
+   "summary": "Patchy beards, thin moustaches and sparse or scarred eyebrows can be filled with hair follicles taken from your own scalp. Each graft is placed at the exact angle and direction of natural facial hair, for a soft and believable result.",
+   "facts": [
+    {
+     "label": "Procedure time",
+     "value": "3–6 hours, depending on the area"
+    },
+    {
+     "label": "Anaesthesia",
+     "value": "Local"
+    },
+    {
+     "label": "Healing",
+     "value": "Small crusts settle in 7–10 days"
+    },
+    {
+     "label": "New growth",
+     "value": "From about month 3"
+    },
+    {
+     "label": "Final result",
+     "value": "Around 9–12 months"
+    }
+   ],
+   "whoFor": [
+    "Patchy or uneven beard growth",
+    "A thin moustache or gaps",
+    "Sparse, over-plucked or scarred eyebrows",
+    "Scars in the beard area, after assessment"
+   ],
+   "steps": [
+    {
+     "title": "Design",
+     "text": "We map a beard, moustache or brow shape that suits your face."
+    },
+    {
+     "title": "Harvest",
+     "text": "Fine single- and double-hair grafts are extracted from the scalp by FUE."
+    },
+    {
+     "title": "Placement",
+     "text": "Grafts are placed one by one at natural angles and direction."
+    },
+    {
+     "title": "Aftercare",
+     "text": "Simple care instructions and review visits as the new hair grows."
+    }
+   ],
+   "results": "Transplanted hairs shed in the first weeks, then regrow from around month three. Eyebrow hairs come from the scalp and can grow longer than natural brow hair, so they need occasional trimming.",
+   "cost": "The cost depends on the number of grafts and the area. You receive a quote after assessment, with EMI options available.",
+   "faqs": [
+    {
+     "q": "Will a beard transplant look natural?",
+     "a": "Yes, when grafts are placed at the right angle and density. We design the beard line and density to match your face and natural hair direction."
+    },
+    {
+     "q": "Do transplanted eyebrows need trimming?",
+     "a": "Yes. They come from the scalp and can grow longer than natural brow hair, so occasional trimming keeps them neat."
+    },
+    {
+     "q": "When can I shave or trim the area?",
+     "a": "Usually after about 10–14 days, once healing is complete. We give you a personalised aftercare schedule."
+    }
+   ],
+   "doctors": [
+    "dr-jatin-k-reddy"
+   ],
+   "related": [
+    "fue-hair-transplant",
+    "dhi-hair-transplant",
+    "hair-transplant-cost"
+   ],
+   "image": "/images/rua/services/hair-transplant.webp",
+   "procedureType": "SurgicalProcedure"
+  }
+ ],
+ "doctors": [
+  {
+   "slug": "dr-jatin-k-reddy",
+   "name": "Dr. Jatin K Reddy",
+   "shortName": "Dr. Jatin",
+   "role": "Consultant Dermatologist & Hair Transplant Surgeon",
+   "qualifications": "MBBS, MD (DVL)",
+   "fellowship": "Fellowship in Hair Transplantation",
+   "persona": "The Jack",
+   "personaLine": "The powerhouse of our team — multitalented and ever-reliable.",
+   "bio": [
+    "Balancing precision with strength, he does it all with ease, uplifting the team and steering our vision forward.",
+    "Dr. Jatin K Reddy has always been drawn to the precision of hair transplantation and dermatosurgery, where science and artistry come together to restore confidence."
+   ],
+   "focus": [
+    "Hair transplantation — FUE, Sapphire Bio FUE & DHI",
+    "Hair loss & scalp treatments",
+    "Dermatosurgery",
+    "Clinical dermatology"
+   ],
+   "categories": [
+    "hair-transplant",
+    "hair-treatments",
+    "dermatosurgery",
+    "laser-treatments"
+   ],
+   "treatments": [
+    "fue-hair-transplant",
+    "dhi-hair-transplant",
+    "beard-eyebrow-transplant",
+    "hair-transplant-cost",
+    "hair-loss-treatment",
+    "prp-hair-treatment",
+    "gfc-hair-treatment",
+    "scalp-micropigmentation",
+    "wart-skin-tag-removal"
+   ],
+   "photo": "/images/rua/doctors/dr-jatin-k-reddy.webp",
+   "seo": {
+    "title": "Dr. Jatin K Reddy – Hair Transplant Surgeon, Bangalore | RUA",
+    "description": "Dr. Jatin K Reddy, MBBS, MD (DVL), Fellowship in Hair Transplantation — consultant dermatologist and hair transplant surgeon at RUA Skin & Hair Center, Bengaluru."
+   }
+  },
+  {
+   "slug": "dr-eshritha-c",
+   "name": "Dr. Eshritha C",
+   "shortName": "Dr. Eshritha",
+   "role": "Consultant Dermatologist",
+   "qualifications": "MBBS, MD (DVL)",
+   "fellowship": "Fellowship in Dermatosurgery, Lasers & Aesthetic Dermatology",
+   "persona": "The Artisan",
+   "personaLine": "Grace meets empathy in her presence — the sweetest soul of our team.",
+   "bio": [
+    "With beauty that shines inside out, she blends warmth with clinical excellence.",
+    "Dr. Eshritha C found her calling in aesthetic and pediatric dermatology, combining gentle care with treatments that are both transformative and reassuring."
+   ],
+   "focus": [
+    "Aesthetic & cosmetic dermatology",
+    "Lasers",
+    "Dermatosurgery & vitiligo surgery",
+    "Paediatric dermatology"
+   ],
+   "categories": [
+    "aesthetic-dermatology",
+    "laser-treatments",
+    "dermatosurgery",
+    "premium-packages",
+    "medical-dermatology"
+   ],
+   "treatments": [
+    "hydrafacial",
+    "chemical-peel",
+    "mnrf-microneedling",
+    "skin-boosters",
+    "botox-fillers",
+    "laser-hair-reduction",
+    "tattoo-removal",
+    "co2-laser-resurfacing",
+    "vitiligo-surgery",
+    "paediatric-dermatology",
+    "acne-scar-treatment",
+    "pigmentation-melasma-treatment"
+   ],
+   "photo": "/images/rua/doctors/dr-eshritha-c.webp",
+   "seo": {
+    "title": "Dr. Eshritha C – Dermatologist in Bangalore | RUA",
+    "description": "Dr. Eshritha C, MBBS, MD (DVL), Fellowship in Dermatosurgery, Lasers & Aesthetic Dermatology — consultant dermatologist at RUA Skin & Hair Center, Bengaluru."
+   }
+  },
+  {
+   "slug": "dr-jeevith-c-reddy",
+   "name": "Dr. Jeevith C Reddy",
+   "shortName": "Dr. Jeevith",
+   "role": "Consultant Dermatologist",
+   "qualifications": "MBBS, MD (DVL)",
+   "fellowship": "Fellowship in Functional & Longevity Medicine",
+   "persona": "The Anchor",
+   "personaLine": "At the heart of our team stands a steady hand and a guiding force — our senior dermatologist.",
+   "bio": [
+    "Dr. Jeevith C Reddy developed a deep interest in biologicals, clinical dermatology, and lifestyle medicine, always looking at skin health as part of a larger picture of well-being."
+   ],
+   "focus": [
+    "Clinical dermatology",
+    "Biologics for chronic skin disease",
+    "Functional & longevity medicine",
+    "Lifestyle medicine"
+   ],
+   "categories": [
+    "medical-dermatology",
+    "hair-treatments",
+    "dermatosurgery"
+   ],
+   "treatments": [
+    "psoriasis-eczema-treatment",
+    "acne-scar-treatment",
+    "pigmentation-melasma-treatment",
+    "hair-loss-treatment",
+    "chemical-peel",
+    "wart-skin-tag-removal"
+   ],
+   "photo": "/images/rua/doctors/dr-jeevith-c-reddy.webp",
+   "seo": {
+    "title": "Dr. Jeevith C Reddy – Dermatologist in Bangalore | RUA",
+    "description": "Dr. Jeevith C Reddy, MBBS, MD (DVL), Fellowship in Functional & Longevity Medicine — senior consultant dermatologist at RUA Skin & Hair Center, Bengaluru."
+   }
+  }
+ ],
+ "centres": [
+  {
+   "slug": "ramamurthy-nagar",
+   "name": "RUA Ramamurthy Nagar",
+   "area": "Ramamurthy Nagar",
+   "addressLines": [
+    "#14, 2nd Floor, 11th Cross, GPH Tower",
+    "Above Burger King, 1st Block Akashaya Nagar",
+    "TC Palya Main Road, KR Puram, Bengaluru – 560016"
+   ],
+   "street": "#14, 2nd Floor, 11th Cross, GPH Tower, Above Burger King, 1st Block Akashaya Nagar, TC Palya Main Road, KR Puram",
+   "locality": "Ramamurthy Nagar",
+   "postalCode": "560016",
+   "landmark": "GPH Tower, above Burger King on TC Palya Main Road",
+   "phone": "+919959763678",
+   "phoneDisplay": "+91 99597 63678",
+   "mapsUrl": "https://maps.app.goo.gl/7ZEBLKJp6LNgWhjo7",
+   "mapEmbedUrl": "https://www.google.com/maps?q=RUA%20Skin%20%26%20Hair%20Center%2C%2013.0207431%2C%2077.6844423&z=16&output=embed",
+   "geo": {
+    "lat": 13.0207431,
+    "lng": 77.6844423
+   },
+   "intro": "Our Ramamurthy Nagar centre sits in GPH Tower on TC Palya Main Road, above Burger King — easy to reach from KR Puram, Ramamurthy Nagar, TC Palya and Akshaya Nagar.",
+   "directions": [
+    "On TC Palya Main Road, KR Puram — look for GPH Tower above Burger King.",
+    "RUA is on the 2nd floor, 11th Cross, 1st Block Akashaya Nagar.",
+    "Call the centre if you need help finding us — we are happy to guide you."
+   ],
+   "seo": {
+    "title": "Skin & Hair Clinic in Ramamurthy Nagar, Bangalore | RUA",
+    "description": "RUA Skin & Hair Center, Ramamurthy Nagar: dermatologists for skin, hair, lasers and hair transplant in GPH Tower, TC Palya Main Road. Open 7 days, 10am–8pm.",
+    "h1": "Skin & Hair Clinic in Ramamurthy Nagar, Bangalore"
+   }
+  },
+  {
+   "slug": "indiranagar",
+   "name": "RUA Indiranagar",
+   "area": "Indiranagar",
+   "isNew": true,
+   "addressLines": [
+    "060/1050, 1st Cross, Puttappa Layout",
+    "HAL 3rd Stage, Backgate of NCFE School",
+    "Bengaluru – 560075"
+   ],
+   "street": "060/1050, 1st Cross, Puttappa Layout, HAL 3rd Stage, Backgate of NCFE School",
+   "locality": "Indiranagar",
+   "postalCode": "560075",
+   "landmark": "Puttappa Layout, HAL 3rd Stage — at the back gate of NCFE School",
+   "phone": "+917019976689",
+   "phoneDisplay": "+91 70199 76689",
+   "mapsUrl": "https://www.google.com/maps/search/?api=1&query=RUA%20Skin%20%26%20Hair%20Center%2C%20060%2F1050%201st%20Cross%2C%20Puttappa%20Layout%2C%20HAL%203rd%20Stage%2C%20Bengaluru%20560075",
+   "mapEmbedUrl": "https://www.google.com/maps?q=060%2F1050%201st%20Cross%2C%20Puttappa%20Layout%2C%20HAL%203rd%20Stage%2C%20Indiranagar%2C%20Bengaluru%20560075&z=16&output=embed",
+   "intro": "Our newest centre, RUA Indiranagar, is on 1st Cross, Puttappa Layout in HAL 3rd Stage — close to the back gate of NCFE School and convenient for Indiranagar, HAL and New Thippasandra.",
+   "directions": [
+    "Head to Puttappa Layout, HAL 3rd Stage, Indiranagar.",
+    "RUA is on 1st Cross, at the back gate of NCFE School.",
+    "Look for the RUA Skin & Hair Center signboard with our cocoa wood-slat facade."
+   ],
+   "seo": {
+    "title": "Skin & Hair Clinic in Indiranagar, Bangalore | RUA",
+    "description": "RUA Skin & Hair Center, Indiranagar: MD dermatologists for acne, pigmentation, lasers, hair loss and hair transplant in HAL 3rd Stage. Open 7 days, 10am–8pm.",
+    "h1": "Skin & Hair Clinic in Indiranagar, Bangalore"
+   }
+  }
+ ],
+ "testimonials": [
+  {
+   "quote": "I cannot thank Dr. Jatin enough for the outstanding care and expertise. Not only did Dr. Jatin quickly identify & treat my skin concerns, but they also took the time to explain everything in detail, making me feel completely at ease. What impressed me most was the personalized attention, patience, and genuine concern for my well-being. The results have been amazing, and I feel more confident than ever.",
+   "context": "Skin treatment with Dr. Jatin K Reddy",
+   "doctor": "dr-jatin-k-reddy"
+  },
+  {
+   "quote": "I had vitiligo surgery done by Dr. Eshritha and I’m really happy with the results. She explained everything clearly, made me feel comfortable, & the procedure went smoothly. The treated areas are healing well & already showing great improvement. Highly recommend her for anyone considering vitiligo treatment — she’s kind, skilled, & genuinely cares.",
+   "context": "Vitiligo surgery with Dr. Eshritha C",
+   "doctor": "dr-eshritha-c"
+  },
+  {
+   "quote": "I had contacted Dr Eshritha from RUA Skin & Hair Center, for my mother who was struggling with a stubborn skin infection that others couldn’t help me with. The doctor was so patient and explained everything in detail. The results have been amazing — I finally have a go-to place & doctor for all of my mother’s skin concerns.",
+   "context": "Skin infection care with Dr. Eshritha C",
+   "doctor": "dr-eshritha-c"
+  }
+ ],
+ "whyRua": [
+  {
+   "icon": "sparkles",
+   "title": "Expert skincare",
+   "text": "RUA makes expert skincare both effective and accessible — every plan is personalised by a dermatologist."
+  },
+  {
+   "icon": "wallet",
+   "title": "Flexible payment",
+   "text": "Flexible payment options and EMI plans for treatment packages."
+  },
+  {
+   "icon": "award",
+   "title": "Fellowship-trained doctors",
+   "text": "Three MBBS, MD (DVL) dermatologists with fellowships in hair transplantation, dermatosurgery, lasers & aesthetics, and functional medicine."
+  },
+  {
+   "icon": "shield",
+   "title": "Safe environment",
+   "text": "We maintain a safe and sterile environment for all our treatments, with uncompromised quality and hygiene."
+  }
+ ],
+ "generalFaqs": [
+  {
+   "q": "Do I need a consultation before a treatment?",
+   "a": "Yes. Every treatment at RUA starts with a consultation with one of our dermatologists, so your plan is right for your skin, hair and health."
+  },
+  {
+   "q": "Which centre should I visit?",
+   "a": "Both centres — Ramamurthy Nagar and Indiranagar — are open every day from 10am to 8pm. Choose the one that is easier for you; our team will confirm your doctor’s availability."
+  },
+  {
+   "q": "Do you offer EMI or payment plans?",
+   "a": "Yes. RUA offers flexible payment options and EMI plans for treatment packages. Ask our front desk for the current options."
+  },
+  {
+   "q": "Are your doctors qualified dermatologists?",
+   "a": "Yes. All three doctors are MBBS, MD (DVL) dermatologists with fellowship training — in hair transplantation; dermatosurgery, lasers & aesthetic dermatology; and functional & longevity medicine."
+  }
+ ],
+ "equipment": [
+  {
+   "id": "q-switched-diode",
+   "name": "Q-switched Nd:YAG & Diode Laser",
+   "image": "/images/rua/equipment/q-switched-nd-yag-diode-laser.webp",
+   "use": "Triple-wavelength laser hair reduction, tattoo and pigment removal, and laser toning.",
+   "treatments": [
+    "laser-hair-reduction",
+    "tattoo-removal",
+    "pigmentation-melasma-treatment"
+   ]
+  },
+  {
+   "id": "hydrafacial",
+   "name": "HydraFacial",
+   "image": "/images/rua/equipment/hydrafacial.webp",
+   "use": "Cleansing, exfoliation, extraction and deep hydration in one medi-facial.",
+   "treatments": [
+    "hydrafacial"
+   ]
+  },
+  {
+   "id": "co2-laser",
+   "name": "CO₂ Laser",
+   "image": "/images/rua/equipment/co2-laser.webp",
+   "use": "Fractional resurfacing for acne scars and texture; precise removal of skin growths.",
+   "treatments": [
+    "co2-laser-resurfacing",
+    "acne-scar-treatment",
+    "wart-skin-tag-removal"
+   ]
+  },
+  {
+   "id": "mnrf",
+   "name": "Microneedling Radiofrequency Device",
+   "image": "/images/rua/equipment/microneedling-radiofrequency.webp",
+   "use": "Collagen induction for acne scars, open pores, fine lines and skin tightening.",
+   "treatments": [
+    "mnrf-microneedling",
+    "acne-scar-treatment"
+   ]
+  },
+  {
+   "id": "rf-plasma-pen",
+   "name": "Radiofrequency / Plasma Pen",
+   "image": "/images/rua/equipment/radiofrequency-plasma-pen.webp",
+   "use": "Precise removal of warts, skin tags, DPNs and moles with minimal marks.",
+   "treatments": [
+    "wart-skin-tag-removal"
+   ]
+  },
+  {
+   "id": "cryo",
+   "name": "Cryo Device",
+   "image": "/images/rua/equipment/cryo-device.webp",
+   "use": "Cryotherapy — controlled freezing for warts and selected benign growths.",
+   "treatments": [
+    "wart-skin-tag-removal"
+   ]
+  },
+  {
+   "id": "derma-pen",
+   "name": "Derma Pen",
+   "image": "/images/rua/equipment/derma-pen.webp",
+   "use": "Microneedling for scars and texture, and scalp microneedling for hair growth.",
+   "treatments": [
+    "mnrf-microneedling",
+    "hair-loss-treatment"
+   ]
+  },
+  {
+   "id": "lllt",
+   "name": "Red & Blue Light Devices (LLLT)",
+   "image": "/images/rua/equipment/red-blue-light-lllt.webp",
+   "use": "Low-level light therapy for acne-prone skin and to support hair growth.",
+   "treatments": [
+    "acne-scar-treatment",
+    "hair-loss-treatment"
+   ]
+  }
+ ]
+}

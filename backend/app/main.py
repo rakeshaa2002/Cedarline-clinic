@@ -1,3 +1,7 @@
+import asyncio
+import contextlib
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -8,18 +12,35 @@ from app.core.exceptions import register_exception_handlers
 from app.core.logging import configure_logging
 
 
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Start the automated WhatsApp reminder loop (not in tests: they call it directly)."""
+    settings = get_settings()
+    task = None
+    if settings.reminders_enabled and settings.environment != "test":
+        from app.services.reminders import reminder_loop
+
+        task = asyncio.create_task(reminder_loop())
+    yield
+    if task:
+        task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await task
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     settings.validate_production()
     configure_logging(settings.log_level)
 
     app = FastAPI(
+        lifespan=lifespan,
         title=settings.app_name,
         version="1.0.0",
         description=(
-            "API for the Cedarline Multispeciality Clinic website: an AI healthcare chatbot "
-            "(RAG over PostgreSQL + pgvector, with medical-safety rules), clinic content, "
-            "and an admin dashboard for the chatbot's knowledge base."
+            "API for RUA Skin & Hair Center: real-time online booking with automated WhatsApp "
+            "notifications and reminders, a patient CRM, admin / doctor / patient portals, and an AI "
+            "assistant (RAG over PostgreSQL + pgvector, with medical-safety rules)."
         ),
         docs_url="/docs",
         redoc_url="/redoc",

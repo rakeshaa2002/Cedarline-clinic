@@ -9,8 +9,9 @@ from sqlalchemy.orm import joinedload
 from app.api.deps import DbSession
 from app.core.exceptions import NotFoundError
 from app.core.rate_limit import rate_limit
-from app.models import BlogPost, ClinicInfo, ContactMessage, Doctor, MediaFile, Service, TransformationCase
+from app.models import BlogPost, Branch, ClinicInfo, ContactMessage, Doctor, MediaFile, Service, TransformationCase
 from app.schemas.clinic import (
+    BranchOut,
     BlogPostOut,
     BlogPostSummary,
     ClinicHighlightsOut,
@@ -24,8 +25,15 @@ from app.schemas.clinic import (
 )
 from app.schemas.common import Message, Page
 from app.seed import data
+from app.services.appointments import department_filter
 
 router = APIRouter(tags=["clinic"])
+
+
+@router.get("/branches", response_model=list[BranchOut])
+def list_branches(db: DbSession):
+    """RUA's centres."""
+    return db.scalars(select(Branch).where(Branch.is_active).order_by(Branch.sort_order, Branch.name)).all()
 
 
 @router.get("/clinic-info", response_model=ClinicInfoOut)
@@ -63,11 +71,9 @@ def list_doctors(
         service = db.get(Service, service_id)
         if not service:
             raise NotFoundError("Service not found.")
-        # General services can be provided by any doctor; others need a matching department.
-        if service.department != "general":
-            department = service.department
+        department = service.department
     if department:
-        stmt = stmt.where(Doctor.department == department)
+        stmt = stmt.where(department_filter(department))
     return db.scalars(stmt).all()
 
 

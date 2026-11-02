@@ -13,9 +13,9 @@ The platform includes an **AI Medical Assistant** that uses Retrieval-Augmented 
 | **Live Website** | [https://cedarline-clinic.onrender.com](https://cedarline-clinic.onrender.com) | Production frontend React 19 SPA (Render Static Site) |
 | **API Documentation** | [https://cedarline-api.onrender.com/docs](https://cedarline-api.onrender.com/docs) | Interactive Swagger UI (ReDoc: [`/redoc`](https://cedarline-api.onrender.com/redoc)) |
 | **Source Code** | [https://github.com/rakeshaa2002/Cedarline-clinic](https://github.com/rakeshaa2002/Cedarline-clinic) | Full-stack monorepo with CI/CD workflows |
-| **Admin Portal** | [`/admin/login`](https://cedarline-clinic.onrender.com/admin/login) | `admin@cedarline.example` / `Cedarline-Admin-2026` |
-| **Staff Portal** | [`/admin/login`](https://cedarline-clinic.onrender.com/admin/login) | `staff@cedarline.example` / `Cedarline-Staff-2026` |
-| **Doctor Portal** | [`/doctor/login`](https://cedarline-clinic.onrender.com/doctor/login) | `doctor@cedarline.example` / `Cedarline-Doctor-2026` |
+| **Admin Portal** | [`/admin/login`](https://cedarline-clinic.onrender.com/admin/login) | `admin@ruaskinandhair.example` / `Cedarline-Admin-2026` |
+| **Staff Portal** | [`/admin/login`](https://cedarline-clinic.onrender.com/admin/login) | `staff@ruaskinandhair.example` / `Cedarline-Staff-2026` |
+| **Doctor Portal** | [`/doctor/login`](https://cedarline-clinic.onrender.com/doctor/login) | `doctor@ruaskinandhair.example` / `Cedarline-Doctor-2026` |
 
 ---
 

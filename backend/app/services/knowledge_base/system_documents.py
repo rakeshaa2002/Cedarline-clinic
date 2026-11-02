@@ -13,7 +13,7 @@ from pathlib import Path
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from app.models import BlogPost, ClinicInfo, Doctor, KnowledgeDocument, Service
+from app.models import BlogPost, Branch, ClinicInfo, Doctor, KnowledgeDocument, Service
 from app.services.knowledge_base.embeddings import Embedder
 from app.services.knowledge_base.extraction import clean_text
 from app.services.knowledge_base.ingestion import ingest_document, reindex_document
@@ -24,13 +24,15 @@ SEED_KNOWLEDGE_DIR = Path(__file__).resolve().parents[2] / "seed" / "knowledge"
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 DEPARTMENT_LABELS = {
-    "general": "General Medicine",
-    "dental": "Dental Care",
-    "skin": "Skin & Dermatology",
-    "hair": "Hair & Trichology",
-    "pediatrics": "Paediatrics",
+    "medical-dermatology": "Medical Dermatology",
+    "dermatosurgery": "Dermatosurgery",
+    "aesthetic-dermatology": "Advanced Cosmetic Dermatology",
+    "laser-treatments": "Laser Treatments",
+    "hair-treatments": "Hair Treatments",
+    "hair-transplant": "Hair Transplant",
+    "premium-packages": "Premium Aesthetic Packages",
 }
-DEPARTMENT_PAGES = {"dental": "/services/dental", "skin": "/services/skin", "hair": "/services/hair"}
+DEPARTMENT_PAGES = {slug: f"/services/{slug}" for slug in DEPARTMENT_LABELS}
 
 
 @dataclass
@@ -55,6 +57,10 @@ def _fee(d: Doctor) -> str:
     return f"Consultation fee for {d.full_name}: INR {d.consultation_fee:,.0f}."
 
 
+def _specialities(d: Doctor) -> str:
+    return ", ".join(DEPARTMENT_LABELS.get(x, x) for x in (d.departments or [d.department]))
+
+
 def build_system_documents(db: Session) -> list[GeneratedDoc]:
     docs: list[GeneratedDoc] = []
     clinic = db.scalar(select(ClinicInfo).limit(1))
@@ -70,7 +76,7 @@ def build_system_documents(db: Session) -> list[GeneratedDoc]:
             "clinic-overview",
             f"About {clinic.name}",
             f"{clinic.name} — {clinic.tagline}\n\n{clinic.about}\n\n"
-            f"Departments: {', '.join(DEPARTMENT_LABELS.values())}.",
+            f"Specialities: {', '.join(DEPARTMENT_LABELS.values())}.",
         ))
         docs.append(GeneratedDoc(
             "clinic-opening-hours",
@@ -80,41 +86,48 @@ def build_system_documents(db: Session) -> list[GeneratedDoc]:
             "Individual doctors consult on specific days within these hours; see each doctor's "
             "profile or the How to book page (/appointments) for their consultation days.",
         ))
+        branches = list(db.scalars(select(Branch).where(Branch.is_active).order_by(Branch.sort_order)))
+        centres = "\n".join(f"- {b.name}: {b.address}. Phone: {b.phone}." for b in branches) or f"- {address}"
         docs.append(GeneratedDoc(
             "clinic-location-contact",
-            "Clinic location, address and contact details",
-            f"Where is the clinic located? {clinic.name} is located at {address}.\n\n"
-            f"Phone: {clinic.phone}\n"
+            "Clinic centres, addresses and contact details",
+            f"Where is the clinic located? {clinic.name} has {len(branches) or 1} centre(s) in Bengaluru:\n{centres}\n\n"
             + (f"WhatsApp: {clinic.whatsapp}\n" if clinic.whatsapp else "")
-            + f"Email: {clinic.email}\n\n"
-            "Directions and a map are available on the Contact Us page (/contact).\n\n"
+            + (f"Email: {clinic.email}\n" if clinic.email else "")
+            + "\nDirections and maps for each centre are on the Centres page (/centers) and Contact page (/contact).\n\n"
             f"Emergencies: {clinic.emergency_note}",
         ))
 
     doctors = list(db.scalars(select(Doctor).where(Doctor.is_active).order_by(Doctor.department, Doctor.full_name)))
     if doctors:
+        clinic_name = clinic.name if clinic else "The clinic"
         listing = "\n".join(
-            f"- {d.full_name} — {d.specialization} ({DEPARTMENT_LABELS[d.department]}); "
-            f"consults {_days(d.consultation_days)}, {_fmt_time(d.start_time)} to {_fmt_time(d.end_time)}. {_fee(d)}"
+            f"- {d.full_name} — {d.specialization}; {d.qualifications}"
+            + (f", {d.fellowship}" if d.fellowship else "")
+            + f". Specialities: {_specialities(d)}. Consults {_days(d.consultation_days)}, "
+            f"{_fmt_time(d.start_time)} to {_fmt_time(d.end_time)}. {_fee(d)}"
             for d in doctors
         )
         docs.append(GeneratedDoc(
             "doctors-directory",
             "Our doctors and their consultation days",
-            f"Which doctors are available at the clinic? Cedarline has {len(doctors)} doctors:\n{listing}\n\n"
-            "Full profiles are on the Our Doctors page (/doctors). To book, call the front desk or see the How to book page (/appointments).",
+            f"Which doctors are available at the clinic? {clinic_name} has {len(doctors)} dermatologists:\n{listing}\n\n"
+            "Full profiles are on the Doctors page (/doctors). To book, use the Book appointment page (/book-appointment), "
+            "this chat, WhatsApp or a call to either centre.",
         ))
         for d in doctors:
             docs.append(GeneratedDoc(
                 f"doctor-{d.slug}",
                 f"Doctor profile: {d.full_name}",
-                f"{d.full_name} is a {d.specialization} in the {DEPARTMENT_LABELS[d.department]} department.\n\n"
-                f"Qualifications: {d.qualifications}. Experience: {d.experience_years} years.\n"
-                f"Languages spoken: {', '.join(d.languages)}.\n"
-                f"Consultation days: {_days(d.consultation_days)}. Consultation hours: "
+                f"{d.full_name} is a {d.specialization} at {clinic_name}.\n\n"
+                f"Qualifications: {d.qualifications}." + (f" {d.fellowship}." if d.fellowship else "")
+                + (f" Experience: {d.experience_years} years." if d.experience_years else "")
+                + f"\nSpecialities: {_specialities(d)}.\n"
+                + (f"Languages spoken: {', '.join(d.languages)}.\n" if d.languages else "")
+                + f"Consultation days: {_days(d.consultation_days)}. Consultation hours: "
                 f"{_fmt_time(d.start_time)} to {_fmt_time(d.end_time)} (a typical consultation lasts about {d.slot_minutes} minutes).\n"
                 f"{_fee(d)}\n\n"
-                f"{d.bio}",
+                f"{d.bio}\n\nProfile: /doctors/{d.slug}",
             ))
 
     services = list(db.scalars(select(Service).where(Service.is_active).order_by(Service.department, Service.sort_order)))
@@ -129,7 +142,7 @@ def build_system_documents(db: Session) -> list[GeneratedDoc]:
             "services-overview",
             "All services offered by the clinic",
             f"What services does the clinic provide? Services offered, by department:\n{overview}\n\n"
-            "See the All Services page (/services) for details.",
+            "See the Services page (/services) for details.",
         ))
     for dept, items in by_dept.items():
         lines = []

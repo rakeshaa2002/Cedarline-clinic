@@ -8,7 +8,8 @@ from app.models.appointment import (
     AppointmentEmail,
 )
 from app.models.chat import CHAT_STATUSES, ChatEvent
-from app.models.clinic import DEPARTMENTS, THEMES, BlogPost, ClinicInfo, ContactMessage, Doctor, Service
+from app.models.clinic import DEPARTMENTS, THEMES, BlogPost, Branch, ClinicInfo, ContactMessage, Doctor, Service
+from app.models.crm import PATIENT_SOURCES, WHATSAPP_KINDS, Patient, PatientOtp, WhatsAppMessage
 from app.models.knowledge import KnowledgeChunk, KnowledgeDocument
 from app.models.media import MediaFile, TransformationCase
 from app.models.user import USER_ROLES, User
@@ -24,6 +25,7 @@ __all__ = [
     "Appointment",
     "AppointmentEmail",
     "BlogPost",
+    "Branch",
     "ChatEvent",
     "ClinicInfo",
     "ContactMessage",
@@ -31,7 +33,12 @@ __all__ = [
     "KnowledgeChunk",
     "KnowledgeDocument",
     "MediaFile",
+    "PATIENT_SOURCES",
+    "Patient",
+    "PatientOtp",
     "Service",
     "TransformationCase",
     "User",
+    "WHATSAPP_KINDS",
+    "WhatsAppMessage",
 ]

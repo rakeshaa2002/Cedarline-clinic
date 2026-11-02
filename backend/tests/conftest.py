@@ -25,6 +25,9 @@ os.environ.update(
         "RATE_LIMIT_LOGIN_PER_MINUTE": "1000",
         "RATE_LIMIT_BOOKING_PER_MINUTE": "1000",
         "RATE_LIMIT_CONTACT_PER_MINUTE": "1000",
+        "RATE_LIMIT_OTP_PER_MINUTE": "1000",
+        "WHATSAPP_ACCESS_TOKEN": "",
+        "WHATSAPP_PHONE_NUMBER_ID": "",
         "GEMINI_API_KEY": "",
         "OPENAI_API_KEY": "",
     }
@@ -71,7 +74,7 @@ def database():
 
 
 TABLES = (
-    "appointment_emails, appointments, media_files, transformation_cases, "
+    "whatsapp_messages, patient_otps, appointment_emails, appointments, patients, branches, media_files, transformation_cases, "
     "blog_posts, chat_events, contact_messages, knowledge_chunks, knowledge_documents, "
     "services, doctors, clinic_info, users"
 )

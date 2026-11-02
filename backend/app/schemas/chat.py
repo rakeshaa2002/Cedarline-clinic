@@ -47,7 +47,7 @@ class ChatDoctor(BaseModel):
     specialization: str
     department: str
     qualifications: str
-    experience_years: int
+    experience_years: int | None
     languages: list[str]
     photo_url: str | None
     consultation_fee: int | None

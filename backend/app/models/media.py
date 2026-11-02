@@ -4,6 +4,7 @@ from sqlalchemy import Boolean, CheckConstraint, DateTime, Integer, LargeBinary,
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin
+from app.models.clinic import DEPARTMENT_CHECK
 
 
 class MediaFile(Base):
@@ -24,7 +25,7 @@ class TransformationCase(TimestampMixin, Base):
 
     __tablename__ = "transformation_cases"
     __table_args__ = (
-        CheckConstraint("department IN ('general', 'dental', 'skin', 'hair', 'pediatrics')", name="department_valid"),
+        CheckConstraint(DEPARTMENT_CHECK, name="department_valid"),
         CheckConstraint("NOT is_published OR patient_consent", name="consent_before_publishing"),
     )
 

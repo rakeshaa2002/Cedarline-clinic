@@ -35,8 +35,12 @@ def build_ics(appointment: Appointment, clinic: ClinicInfo | None, *, cancel: bo
     start = datetime.combine(appointment.appointment_date, appointment.start_time, tz).astimezone(UTC)
     end = datetime.combine(appointment.appointment_date, appointment.end_time, tz).astimezone(UTC)
     now = datetime.now(UTC)
-    clinic_name = clinic.name if clinic else "Cedarline Multispeciality Clinic"
-    address = f"{clinic.address_line}, {clinic.city} {clinic.postal_code}" if clinic else ""
+    clinic_name = clinic.name if clinic else "RUA Skin & Hair Center"
+    address = (
+        appointment.branch.address
+        if appointment.branch
+        else (f"{clinic.address_line}, {clinic.city} {clinic.postal_code}" if clinic else "")
+    )
     doctor = appointment.doctor
     description = (
         f"Booking reference: {appointment.reference}\n"
@@ -47,11 +51,11 @@ def build_ics(appointment: Appointment, clinic: ClinicInfo | None, *, cancel: bo
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//Cedarline Clinic//Appointments//EN",
+        "PRODID:-//RUA Skin & Hair Center//Appointments//EN",
         "CALSCALE:GREGORIAN",
         f"METHOD:{'CANCEL' if cancel else 'REQUEST'}",
         "BEGIN:VEVENT",
-        f"UID:{appointment.reference}@cedarline-clinic",
+        f"UID:{appointment.reference}@ruaskinandhair.com",
         f"SEQUENCE:{int(now.timestamp())}",
         f"DTSTAMP:{now:{_FMT}}",
         f"DTSTART:{start:{_FMT}}",

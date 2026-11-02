@@ -5,14 +5,23 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, BackgroundTasks, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.api.deps import AdminUser, DbSession, StaffUser
 from app.core.config import get_settings
 from app.core.exceptions import ConflictError, NotFoundError
 from app.db.session import SessionLocal
-from app.models import CHAT_STATUSES, ChatEvent, ContactMessage, Doctor, KnowledgeChunk, KnowledgeDocument, Service
+from app.models import (
+    CHAT_STATUSES,
+    Appointment,
+    ChatEvent,
+    ContactMessage,
+    Doctor,
+    KnowledgeChunk,
+    KnowledgeDocument,
+    Service,
+)
 from app.schemas.chat import ChatDayCount, ChatUsage, KnowledgeSummary, Overview
 from app.schemas.clinic import (
     ContactOut,
@@ -128,19 +137,44 @@ def update_doctor(doctor_id: int, data: DoctorUpdate, db: DbSession, _: AdminUse
     return doctor
 
 
+class DoctorHasAppointmentsError(ConflictError):
+    """Raised so the admin UI can offer to delete the doctor together with their appointments."""
+
+    code = "doctor_has_appointments"
+
+
 @router.delete("/doctors/{doctor_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_doctor(doctor_id: int, db: DbSession, _: AdminUser, tasks: BackgroundTasks):
+def delete_doctor(
+    doctor_id: int,
+    db: DbSession,
+    _: AdminUser,
+    tasks: BackgroundTasks,
+    delete_appointments: Annotated[
+        bool, Query(description="Also permanently delete this doctor's appointments (cannot be undone).")
+    ] = False,
+):
     doctor = db.get(Doctor, doctor_id)
     if not doctor:
         raise NotFoundError("Doctor not found.")
+
+    booked = db.scalar(select(func.count(Appointment.id)).where(Appointment.doctor_id == doctor_id)) or 0
+    if booked and not delete_appointments:
+        noun = "appointment" if booked == 1 else "appointments"
+        raise DoctorHasAppointmentsError(
+            f"{doctor.full_name} has {booked} {noun} on record. "
+            f"Deleting the doctor will also permanently delete {'it' if booked == 1 else 'them'}.",
+            details=[{"field": "appointments", "message": str(booked)}],
+        )
+
+    if booked:
+        # Their email audit rows go with them (ON DELETE CASCADE on appointment_emails).
+        db.execute(delete(Appointment).where(Appointment.doctor_id == doctor_id))
     db.delete(doctor)
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise ConflictError(
-            "This doctor has appointments on record. Mark them inactive instead so the history is kept."
-        ) from None
+        raise ConflictError("This doctor is still linked to other records and could not be deleted.") from None
     tasks.add_task(refresh_knowledge_base)
     return None
 

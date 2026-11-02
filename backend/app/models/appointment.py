@@ -5,7 +5,7 @@ from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Index, Numer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
-from app.models.clinic import Doctor
+from app.models.clinic import Branch, Doctor
 
 APPOINTMENT_STATUSES = ("pending", "confirmed", "completed", "cancelled")
 ACTIVE_STATUSES = ("pending", "confirmed")  # these hold their slot
@@ -37,12 +37,14 @@ class Appointment(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     reference: Mapped[str] = mapped_column(String(20), unique=True)
     doctor_id: Mapped[int] = mapped_column(ForeignKey("doctors.id", ondelete="RESTRICT"), index=True)
-    # Copied from the doctor at booking time so analytics survive later edits.
+    # What the patient needs help with (a service category) — drives demand analytics.
     department: Mapped[str] = mapped_column(String(30), index=True)
+    branch_id: Mapped[int | None] = mapped_column(ForeignKey("branches.id", ondelete="SET NULL"), index=True)
+    patient_id: Mapped[int | None] = mapped_column(ForeignKey("patients.id", ondelete="SET NULL"), index=True)
     consultation_fee: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
 
     patient_name: Mapped[str] = mapped_column(String(120))
-    patient_email: Mapped[str] = mapped_column(String(255))
+    patient_email: Mapped[str | None] = mapped_column(String(255))
     patient_phone: Mapped[str] = mapped_column(String(30))
     reason: Mapped[str] = mapped_column(Text)
 
@@ -57,8 +59,18 @@ class Appointment(TimestampMixin, Base):
     confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Automated WhatsApp reminders (set once sent, so each goes out only once).
+    reminder_24h_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    reminder_2h_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     doctor: Mapped[Doctor] = relationship(lazy="joined")
+    branch: Mapped[Branch | None] = relationship(lazy="joined")
+    whatsapp_messages: Mapped[list["WhatsAppMessage"]] = relationship(  # noqa: F821
+        "WhatsAppMessage",
+        primaryjoin="Appointment.id == foreign(WhatsAppMessage.appointment_id)",
+        order_by="(WhatsAppMessage.created_at.desc(), WhatsAppMessage.id.desc())",
+        viewonly=True,
+    )
     emails: Mapped[list["AppointmentEmail"]] = relationship(
         back_populates="appointment",
         cascade="all, delete-orphan",
@@ -68,6 +80,10 @@ class Appointment(TimestampMixin, Base):
     @property
     def last_email(self) -> "AppointmentEmail | None":
         return self.emails[0] if self.emails else None
+
+    @property
+    def last_whatsapp(self):
+        return self.whatsapp_messages[0] if self.whatsapp_messages else None
 
 
 class AppointmentEmail(Base):

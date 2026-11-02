@@ -1,27 +1,27 @@
-# How to book an appointment
+# How to book an appointment at RUA Skin & Hair Center
 
 ## How can I book an appointment?
-You can book an appointment online or through the front desk:
-- Online on the How to book page (/appointments): choose a department and doctor (or the first available doctor), pick a date, choose a free time slot and add brief details about your visit. It takes about two minutes.
-- Right here in the website chat: the assistant can walk you through the same steps without leaving the conversation.
-- Call or WhatsApp the front desk on +91 94835 41927 during opening hours (Monday to Saturday).
-- Email hello@cedarline.example with your name, phone number, the doctor or service you need and your preferred dates.
-- Visit the reception desk at the clinic in person.
+You can book in about a minute:
+- Online on the Book appointment page (/book-appointment): choose your centre (Ramamurthy Nagar or Indiranagar), what you need help with, a doctor (or the first available dermatologist), a date and a free time slot, then add your name and mobile number.
+- Right here in the website chat: the assistant walks you through the same steps without leaving the conversation.
+- WhatsApp RUA on +91 70199 76689.
+- Call RUA Ramamurthy Nagar on +91 99597 63678 or RUA Indiranagar on +91 70199 76689.
+- Visit the reception desk at either centre.
 
-## Can I book online?
-Yes. The online booking engine on the How to book page (/appointments) shows each doctor's free time slots in real time, so you can only pick a slot that is actually available. As soon as you submit, the slot is held for you and you get a booking reference (for example CED-7K3QX9) on screen and by email.
+## What happens after I book?
+Your slot is held immediately and you get a booking reference (for example RUA-7K3QX9). You also receive an automatic WhatsApp message with your booking details. The front desk reviews each request and confirms it on WhatsApp. Confirmed appointments get a WhatsApp reminder the day before and about two hours before the visit.
 
 ## What information do I need to give?
-Please give your full name, a phone number we can reach you on, your email address and a short reason for the visit or your main symptoms. Please do not send detailed medical history by email; your doctor will discuss it with you during the consultation.
-
-## How do I know my appointment is confirmed?
-Online bookings start as "pending". The front desk reviews each request and you receive a confirmation email, usually within a few working hours, with a calendar invite (.ics) that adds the visit to Google Calendar, Apple Calendar or Outlook and reminds you two hours before. If the clinic has to cancel a slot, you get an email with the reason and a link to choose a new time. If you have not heard back within one working day, please call the clinic.
+Your full name, a mobile number on WhatsApp and, if you like, a short note about your concern. Email is optional.
 
 ## Can I choose my doctor?
-Yes. You can ask for a specific doctor when you book. Each doctor consults on particular days, which are listed on the Our Doctors page (/doctors) and on the How to book page (/appointments).
+Yes. You can book with Dr. Jatin K Reddy, Dr. Eshritha C or Dr. Jeevith C Reddy, or choose the first available dermatologist. The booking page highlights the doctor best suited to your concern.
 
-## Rescheduling and cancelling
-Please let us know at least 24 hours in advance if you need to reschedule or cancel, by phone, WhatsApp or email. Your confirmation email also has a "Reschedule" link that opens the booking form with the same doctor selected. This allows us to offer the time to another patient.
+## Can I see my appointments, or cancel one?
+Yes. Sign in to My appointments (/patient) with your mobile number — you get a 6-digit login code on WhatsApp. You can see upcoming and past visits, cancel an upcoming appointment and book a new one. You can also call either centre to cancel or reschedule.
 
-## Arriving for your appointment
-Please arrive about 10 minutes before your appointment time to complete registration. Bring a photo ID, any previous reports or prescriptions, and a list of medicines you currently take. If you arrive more than 15 minutes late, we may need to reschedule your visit.
+## Which centre should I choose?
+Both centres are open Sunday to Saturday, 10am to 8pm, with the same team of dermatologists. Choose the one that is easier for you; the front desk confirms which day your doctor consults at that centre.
+
+## How much does a consultation cost?
+Consultation fees and treatment costs are confirmed by the front desk and after your consultation. RUA offers flexible payment options and EMI plans for treatment packages.

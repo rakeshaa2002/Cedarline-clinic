@@ -22,15 +22,15 @@ services:
       - key: CORS_ORIGINS
         sync: false # Comma-separated allowed frontend origins (e.g. https://cedarline-frontend.onrender.com)
       - key: ADMIN_EMAIL
-        value: admin@cedarline.example
+        value: admin@ruaskinandhair.example
       - key: ADMIN_PASSWORD
         sync: false
       - key: STAFF_EMAIL
-        value: staff@cedarline.example
+        value: staff@ruaskinandhair.example
       - key: STAFF_PASSWORD
         sync: false
       - key: DOCTOR_EMAIL
-        value: doctor@cedarline.example
+        value: doctor@ruaskinandhair.example
       - key: DOCTOR_PASSWORD
         sync: false
       - key: EMBEDDING_PROVIDER

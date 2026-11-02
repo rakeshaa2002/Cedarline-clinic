@@ -1,6 +1,18 @@
 from fastapi import APIRouter
 
-from app.api.v1.routers import admin, admin_appointments, admin_content, appointments, auth, chat, clinic, health, knowledge
+from app.api.v1.routers import (
+    admin,
+    admin_appointments,
+    admin_content,
+    admin_patients,
+    appointments,
+    auth,
+    chat,
+    clinic,
+    health,
+    knowledge,
+    patient,
+)
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(health.router)
@@ -10,5 +22,7 @@ api_router.include_router(appointments.router)
 api_router.include_router(chat.router)
 api_router.include_router(admin.router)
 api_router.include_router(admin_appointments.router)
+api_router.include_router(admin_patients.router)
+api_router.include_router(patient.router)
 api_router.include_router(admin_content.router)
 api_router.include_router(knowledge.router)

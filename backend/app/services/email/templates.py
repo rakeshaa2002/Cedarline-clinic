@@ -11,10 +11,10 @@ from urllib.parse import quote
 
 from app.models import Appointment, ClinicInfo
 
-BRAND = "#135a5f"
-INK = "#0d2139"
-MUTED = "#55657a"
-LINE = "#e3e9ef"
+BRAND = "#592f23"
+INK = "#2b1f1a"
+MUTED = "#6b5649"
+LINE = "#efe3d6"
 
 
 @dataclass
@@ -36,7 +36,7 @@ class OutgoingEmail:
 
 
 def _button(label: str, href: str, *, primary: bool = True) -> str:
-    bg, fg, border = (BRAND, "#ffffff", BRAND) if primary else ("#ffffff", BRAND, "#a9dbdc")
+    bg, fg, border = (BRAND, "#ffffff", BRAND) if primary else ("#ffffff", BRAND, "#e0b48f")
     return (
         '<table role="presentation" cellpadding="0" cellspacing="0" style="display:inline-table;margin:0 8px 8px 0">'
         f'<tr><td style="background:{bg};border:1px solid {border};border-radius:10px;vertical-align:middle">'
@@ -58,7 +58,7 @@ def _details(rows: list[tuple[str, str]]) -> str:
 
 
 def _layout(clinic: ClinicInfo | None, preheader: str, heading: str, body: str) -> str:
-    name = escape(clinic.name if clinic else "Cedarline Multispeciality Clinic")
+    name = escape(clinic.name if clinic else "RUA Skin & Hair Center")
     footer = (
         f"{name}<br>{escape(clinic.address_line)}, {escape(clinic.city)} {escape(clinic.postal_code)}<br>"
         f"{escape(clinic.phone)} · {escape(clinic.email)}"
@@ -96,10 +96,17 @@ def appointment_email(kind: str, appointment: Appointment, clinic: ClinicInfo | 
     rows = [("Reference", a.reference), ("Doctor", doctor), ("Date", when_date), ("Time", when_time)]
     if a.consultation_fee is not None:
         rows.append(("Consultation fee", f"₹{a.consultation_fee:,.0f} (payable at the clinic)"))
-    reschedule = f"{site_url}/appointments?doctor={a.doctor.slug}#book"
-    address = f"{clinic.address_line}, {clinic.city} {clinic.postal_code}" if clinic else ""
-    directions = f"https://www.google.com/maps/search/?api=1&query={quote(address)}" if address else f"{site_url}/contact"
-    phone = clinic.phone if clinic else ""
+    reschedule = f"{site_url}/book-appointment?doctor={a.doctor.slug}"
+    branch = a.branch
+    address = branch.address if branch else (f"{clinic.address_line}, {clinic.city} {clinic.postal_code}" if clinic else "")
+    directions = (
+        branch.map_url
+        if branch and branch.map_url
+        else (f"https://www.google.com/maps/search/?api=1&query={quote(address)}" if address else f"{site_url}/contact")
+    )
+    phone = branch.phone if branch else (clinic.phone if clinic else "")
+    if branch:
+        rows.append(("Centre", branch.name))
 
     if kind == "received":
         subject = f"We've received your appointment request · {a.reference}"

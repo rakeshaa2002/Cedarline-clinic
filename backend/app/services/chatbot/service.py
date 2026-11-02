@@ -38,7 +38,7 @@ from app.services.chatbot.grounding import extractive_answer, is_grounded
 from app.services.chatbot.llm import LLMError, LLMProvider
 from app.services.chatbot.prompt import NO_ANSWER_TOKEN, build_messages
 from app.services.chatbot.retrieval import RetrievedChunk, retrieve
-from app.services.knowledge_base.embeddings import Embedder, EmbeddingError
+from app.services.knowledge_base.embeddings import Embedder, EmbeddingError, lexical_terms
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +46,13 @@ _GREETING = re.compile(r"^\s*(hi+|hello+|hey+|good (morning|afternoon|evening)|n
 _THANKS = re.compile(r"^\s*(thanks?|thank you|thx|ok(ay)?|great|cool|bye|goodbye)\b[\s\w!.]{0,20}$", re.I)
 
 DEPARTMENT_ACTIONS = {
-    "dental": ChatAction(label="Dental treatments", href="/services/dental"),
-    "skin": ChatAction(label="Skin treatments", href="/services/skin"),
-    "hair": ChatAction(label="Hair treatments", href="/services/hair"),
+    "medical-dermatology": ChatAction(label="Medical dermatology", href="/services/medical-dermatology"),
+    "dermatosurgery": ChatAction(label="Dermatosurgery", href="/services/dermatosurgery"),
+    "aesthetic-dermatology": ChatAction(label="Cosmetic treatments", href="/services/aesthetic-dermatology"),
+    "laser-treatments": ChatAction(label="Laser treatments", href="/services/laser-treatments"),
+    "hair-treatments": ChatAction(label="Hair treatments", href="/services/hair-treatments"),
+    "hair-transplant": ChatAction(label="Hair transplant", href="/services/hair-transplant"),
+    "premium-packages": ChatAction(label="Premium packages", href="/services/premium-packages"),
 }
 
 
@@ -73,12 +77,17 @@ class ChatService:
         return self.llm.name if self.llm else "extractive"
 
     @staticmethod
-    def _sources(chunks: list[RetrievedChunk]) -> list[ChatSource]:
-        seen: dict[int, ChatSource] = {}
+    def _sources(chunks: list[RetrievedChunk], question: str = "") -> list[ChatSource]:
+        """Up to three documents to cite: vector similarity, nudged by shared keywords so the
+        document a quoted answer comes from is cited even when it ranked a little lower."""
+        terms = set(lexical_terms(question))
+        best: dict[int, tuple[float, RetrievedChunk]] = {}
         for c in chunks:
-            if c.document_id not in seen:
-                seen[c.document_id] = ChatSource(document_id=c.document_id, title=c.title, similarity=c.similarity)
-        return list(seen.values())[:3]
+            score = c.similarity + 0.1 * len(terms & set(lexical_terms(f"{c.title} {c.content}")))
+            if c.document_id not in best or score > best[c.document_id][0]:
+                best[c.document_id] = (score, c)
+        ranked = sorted(best.values(), key=lambda sc: -sc[0])[:3]
+        return [ChatSource(document_id=c.document_id, title=c.title, similarity=c.similarity) for _, c in ranked]
 
     def _retrieval_query(self, request: ChatRequest) -> str:
         """Short follow-ups ("and on Sunday?") are combined with the previous user question."""
@@ -91,7 +100,8 @@ class ChatService:
     def _no_context(self, question: str) -> ChatResponse:
         contact = ""
         if self.clinic:
-            contact = f" Please contact our front desk on {self.clinic.phone} or {self.clinic.email} and they'll be glad to help."
+            ways = " or ".join(x for x in (self.clinic.phone, self.clinic.email) if x)
+            contact = f" Please contact our front desk on {ways} and they'll be glad to help." if ways else ""
         return ChatResponse(
             answer="I'm sorry — I couldn't find that in the clinic's approved information, so I'd rather not guess."
             + contact,
@@ -117,7 +127,7 @@ class ChatService:
             )
         if screen.kind == "medical_advice":
             # No diagnosis, but route the patient: show the recommended department's doctors to book with.
-            department = screen.department or "general"
+            department = screen.department or "medical-dermatology"
             actions = [BOOK]
             if department in DEPARTMENT_ACTIONS:
                 actions.append(DEPARTMENT_ACTIONS[department])
@@ -178,7 +188,7 @@ class ChatService:
         if not chunks and live is None:
             return self._no_context(question)
 
-        sources = self._sources(chunks)
+        sources = self._sources(chunks, question)
         context = ([RetrievedChunk(0, 0, LIVE_SOURCE_TITLE, live, 1.0)] if live else []) + chunks
 
         def reply(text: str, status: ChatStatus, provider: str) -> ChatResponse:

@@ -22,10 +22,10 @@ def verify_password(password: str, hashed: str) -> bool:
         return False
 
 
-def create_access_token(subject: str, role: str) -> tuple[str, int]:
+def create_access_token(subject: str, role: str, expire_minutes: int | None = None) -> tuple[str, int]:
     """Return (token, expires_in_seconds)."""
     settings = get_settings()
-    expires_in = settings.jwt_expire_minutes * 60
+    expires_in = (expire_minutes or settings.jwt_expire_minutes) * 60
     now = datetime.now(UTC)
     payload = {
         "sub": subject,

@@ -50,10 +50,16 @@ _DIAGNOSIS = re.compile(
 )
 
 _DEPARTMENT_HINTS = [
-    ("dental", re.compile(r"\b(tooth|teeth|gum|gums|jaw|cavity|dental|mouth|braces|wisdom)\b", re.I)),
-    ("skin", re.compile(r"\b(skin|acne|pimple|rash|eczema|psoriasis|mole|pigment\w*|itch\w*|spots?|scar)\b", re.I)),
-    ("hair", re.compile(r"\b(hair|scalp|dandruff|bald\w*|hairfall)\b", re.I)),
-    ("pediatrics", re.compile(r"\b(child|baby|infant|kid|son|daughter|toddler)\b", re.I)),
+    ("hair-transplant", re.compile(r"\b(bald\w*|transplant|receding hairline|hairline)\b", re.I)),
+    ("dermatosurgery", re.compile(r"\b(wart\w*|skin ?tags?|moles?|cysts?|lipoma|vitiligo|ingrown|earlobe)\b", re.I)),
+    ("laser-treatments", re.compile(r"\b(tattoo\w*|unwanted hair|facial hair|laser)\b", re.I)),
+    ("aesthetic-dermatology", re.compile(r"\b(wrinkle\w*|fine lines|ageing|aging|dull|glow|botox|fillers?|sagging)\b", re.I)),
+    ("hair-treatments", re.compile(r"\b(hair|scalp|dandruff|hairfall|thinning)\b", re.I)),
+    ("medical-dermatology", re.compile(
+        r"\b(skin|acne|pimple\w*|rash\w*|eczema|psoriasis|pigment\w*|melasma|itch\w*|spots?|scars?|infection|"
+        r"fungal|nails?|allerg\w*|hives|child|baby|infant|kid|son|daughter|toddler)\b",
+        re.I,
+    )),
 ]
 
 SafetyKind = Literal["emergency", "medical_advice"]
@@ -81,11 +87,13 @@ def screen_message(message: str) -> SafetyResult:
 
 
 DEPARTMENT_NAMES = {
-    "dental": "our Dental Care team",
-    "skin": "our Skin & Dermatology team",
-    "hair": "our Hair & Trichology team",
-    "pediatrics": "our Paediatrics team",
-    "general": "a General Medicine doctor",
+    "medical-dermatology": "one of our dermatologists (Medical Dermatology)",
+    "dermatosurgery": "our dermatosurgery team",
+    "aesthetic-dermatology": "our cosmetic dermatology team",
+    "laser-treatments": "our laser specialists",
+    "hair-treatments": "our hair specialists",
+    "hair-transplant": "our hair transplant surgeon",
+    "premium-packages": "our aesthetic team",
 }
 
 
@@ -101,11 +109,11 @@ def emergency_reply(clinic_phone: str | None) -> str:
 
 def medical_advice_reply(department: str | None) -> str:
     # Routing, not diagnosis: point to the department whose doctors can examine the patient.
-    who = DEPARTMENT_NAMES[department or "general"]
+    who = DEPARTMENT_NAMES.get(department or "", DEPARTMENT_NAMES["medical-dermatology"])
     return (
         "I'm sorry, I can't diagnose conditions or recommend treatments or medicines — that needs "
         "a qualified healthcare professional who can examine you and review your history.\n\n"
         f"The right place to start is **{who}**. You can book a consultation with one of the doctors below "
-        "(right here in the chat or on the How to book page), call the clinic or visit the front desk. "
+        "(right here in the chat or on the Book appointment page), call the clinic or visit the front desk. "
         "If your symptoms are severe or getting worse quickly, please seek urgent medical care."
     )

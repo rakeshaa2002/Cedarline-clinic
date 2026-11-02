@@ -8,15 +8,19 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Annotated
 
+from datetime import datetime
+
 from fastapi import APIRouter, Query, status
+from pydantic import BaseModel
 from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import AdminUser, DbSession, StaffUser
 from app.core.exceptions import ConflictError, NotFoundError
-from app.models import Appointment, User
+from app.models import Appointment, Branch, ClinicInfo, Doctor, User, WhatsAppMessage
 from app.schemas.appointment import (
     AppointmentAnalytics,
+    BranchDemand,
     AppointmentDetail,
     AppointmentList,
     AppointmentOut,
@@ -28,8 +32,11 @@ from app.schemas.appointment import (
     StatusUpdate,
 )
 from app.schemas.clinic import Department
-from app.services.appointments import change_status, clinic_now, reschedule
+from app.schemas.crm import AvailabilityBoard, BoardDoctor, BoardSlot
+from app.services.appointments import change_status, clinic_now, clinic_open_on, reschedule, slot_grid
 from app.services.email.appointment_emails import send_appointment_email
+from app.services.reminders import send_due_reminders
+from app.services.whatsapp.notify import send_appointment_whatsapp
 
 router = APIRouter(prefix="/admin/appointments", tags=["admin: appointments"])
 
@@ -45,7 +52,10 @@ def _scoped(stmt: Select, user: User) -> Select:
 
 def _get(db, appointment_id: int, user: User) -> Appointment:
     stmt = _scoped(
-        select(Appointment).options(selectinload(Appointment.emails)).where(Appointment.id == appointment_id), user
+        select(Appointment)
+        .options(selectinload(Appointment.emails), selectinload(Appointment.whatsapp_messages))
+        .where(Appointment.id == appointment_id),
+        user,
     )
     appointment = db.scalar(stmt)
     if appointment is None:
@@ -94,7 +104,7 @@ def list_appointments(
     else:
         order = (Appointment.appointment_date.desc(), Appointment.start_time.desc())
     items = db.scalars(
-        stmt.options(selectinload(Appointment.emails)).order_by(*order).offset((page - 1) * page_size).limit(page_size)
+        stmt.options(selectinload(Appointment.emails), selectinload(Appointment.whatsapp_messages)).order_by(*order).offset((page - 1) * page_size).limit(page_size)
     ).all()
     return AppointmentList(
         items=[AppointmentOut.model_validate(a) for a in items],
@@ -112,7 +122,7 @@ def appointment_analytics(db: DbSession, user: StaffUser):
     rows = db.execute(_scoped(
         select(
             Appointment.status, Appointment.department, Appointment.source,
-            Appointment.appointment_date, Appointment.consultation_fee,
+            Appointment.appointment_date, Appointment.consultation_fee, Appointment.branch_id,
         ),
         user,
     )).all()
@@ -137,6 +147,12 @@ def appointment_analytics(db: DbSession, user: StaffUser):
         if r.status in WENT_AHEAD:
             dept_revenue[r.department] += fee(r)
 
+    branch_names = dict(db.execute(select(Branch.id, Branch.name)).all())
+    branch_total: Counter = Counter(branch_names.get(r.branch_id, "Not specified") for r in rows)
+    wa_rows = db.execute(
+        _scoped(select(WhatsAppMessage.status).join(Appointment, Appointment.id == WhatsAppMessage.appointment_id), user)
+    ).all()
+
     went_ahead = sum(1 for r in rows if r.status in WENT_AHEAD)
     cancelled = sum(1 for r in rows if r.status == "cancelled")
     decided = went_ahead + cancelled
@@ -160,8 +176,66 @@ def appointment_analytics(db: DbSession, user: StaffUser):
         by_department=[
             DepartmentDemand(department=d, total=n, revenue=dept_revenue[d]) for d, n in dept_total.most_common()
         ],
+        by_branch=[BranchDemand(branch=b, total=n) for b, n in branch_total.most_common()],
         by_source=dict(Counter(r.source for r in rows)),
+        whatsapp_sent=sum(1 for r in wa_rows if r.status == "sent"),
+        whatsapp_pending=sum(1 for r in wa_rows if r.status != "sent"),
     )
+
+
+@router.get("/board", response_model=AvailabilityBoard)
+def availability_board(db: DbSession, user: StaffUser, day: Annotated[date | None, Query(alias="date")] = None):
+    """Every doctor's slots for one day: free, booked (with the patient) or already past."""
+    day = day or clinic_now().date()
+    now = clinic_now()
+    clinic = db.scalar(select(ClinicInfo).limit(1))
+    stmt = select(Doctor).where(Doctor.is_active).order_by(Doctor.full_name)
+    if user.role == "doctor" and user.doctor_id:
+        stmt = stmt.where(Doctor.id == user.doctor_id)
+    doctors = list(db.scalars(stmt))
+    booked = {
+        (a.doctor_id, a.start_time): a
+        for a in db.scalars(
+            select(Appointment).where(
+                Appointment.appointment_date == day,
+                Appointment.status.in_(("pending", "confirmed", "completed")),
+                Appointment.doctor_id.in_([d.id for d in doctors] or [0]),
+            )
+        )
+    }
+    result = []
+    for d in doctors:
+        slots = []
+        for start, end in slot_grid(d, day):
+            appt = booked.get((d.id, start))
+            if appt:
+                slots.append(BoardSlot(
+                    start_time=start, end_time=end, state="booked", appointment_id=appt.id, reference=appt.reference,
+                    patient_name=appt.patient_name, status=appt.status,
+                ))
+            else:
+                past = datetime.combine(day, start) < now
+                slots.append(BoardSlot(start_time=start, end_time=end, state="past" if past else "free"))
+        consulting = bool(slots)
+        result.append(BoardDoctor(
+            doctor_id=d.id, slug=d.slug, full_name=d.full_name, specialization=d.specialization, photo_url=d.photo_url,
+            consulting=consulting,
+            hours=f"{d.start_time:%H:%M}–{d.end_time:%H:%M}" if consulting else None,
+            free=sum(1 for s in slots if s.state == "free"),
+            booked=sum(1 for s in slots if s.state == "booked"),
+            slots=slots,
+        ))
+    return AvailabilityBoard(date=day, clinic_open=clinic_open_on(clinic, day), doctors=result)
+
+
+class ReminderRun(BaseModel):
+    sent: int
+
+
+@router.post("/reminders/run", response_model=ReminderRun)
+def run_reminders(db: DbSession, _: StaffUser):
+    """Send any WhatsApp reminders that are due now (the server also does this automatically)."""
+    return ReminderRun(sent=send_due_reminders(db))
 
 
 @router.get("/{appointment_id}", response_model=AppointmentDetail)
@@ -171,12 +245,15 @@ def get_appointment(appointment_id: int, db: DbSession, user: StaffUser):
 
 @router.patch("/{appointment_id}/status", response_model=AppointmentDetail)
 def update_status(appointment_id: int, data: StatusUpdate, db: DbSession, user: StaffUser):
-    """Confirm, cancel (with a reason) or complete. Confirmations and cancellations email the patient."""
+    """Confirm, cancel (with a reason) or complete. Confirmations and cancellations are sent to the patient
+    automatically on WhatsApp (and by email when we have one)."""
     appointment = _get(db, appointment_id, user)
     change_status(appointment, data.status, data.reason)
     db.commit()
     if data.notify and data.status in ("confirmed", "cancelled"):
-        send_appointment_email(db, appointment, "confirmation" if data.status == "confirmed" else "cancellation")
+        kind = "confirmation" if data.status == "confirmed" else "cancellation"
+        send_appointment_whatsapp(db, appointment, kind)
+        send_appointment_email(db, appointment, kind)
     return _get(db, appointment_id, user)
 
 
@@ -190,8 +267,12 @@ def update_appointment(appointment_id: int, data: AppointmentUpdate, db: DbSessi
         db.commit()
     if data.appointment_date and data.start_time:
         reschedule(db, appointment, day=data.appointment_date, start=data.start_time, doctor_id=data.doctor_id)
-        if data.notify and appointment.status == "confirmed":
-            send_appointment_email(db, appointment, "confirmation")
+        appointment.reminder_24h_sent_at = appointment.reminder_2h_sent_at = None  # remind for the new time
+        db.commit()
+        if data.notify:
+            send_appointment_whatsapp(db, appointment, "reschedule")
+            if appointment.status == "confirmed":
+                send_appointment_email(db, appointment, "confirmation")
     return _get(db, appointment_id, user)
 
 
@@ -202,6 +283,29 @@ def resend_email(appointment_id: int, data: ResendEmail, db: DbSession, user: St
     if appointment.status not in allowed:
         raise ConflictError(f"A {data.kind} email can't be sent for a {appointment.status} appointment.")
     send_appointment_email(db, appointment, data.kind)
+    return _get(db, appointment_id, user)
+
+
+class ResendWhatsApp(BaseModel):
+    kind: str
+
+
+@router.post("/{appointment_id}/whatsapp", response_model=AppointmentDetail)
+def resend_whatsapp(appointment_id: int, data: ResendWhatsApp, db: DbSession, user: StaffUser):
+    """Send (or re-send) a WhatsApp notification for this appointment."""
+    appointment = _get(db, appointment_id, user)
+    allowed = {
+        "received": ("pending",),
+        "confirmation": ("confirmed",),
+        "reminder": ("confirmed",),
+        "cancellation": ("cancelled",),
+        "reschedule": ("pending", "confirmed"),
+    }
+    if data.kind not in allowed:
+        raise ConflictError("Unknown WhatsApp message type.")
+    if appointment.status not in allowed[data.kind]:
+        raise ConflictError(f"A {data.kind} message can't be sent for a {appointment.status} appointment.")
+    send_appointment_whatsapp(db, appointment, data.kind)
     return _get(db, appointment_id, user)
 
 

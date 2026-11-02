@@ -10,6 +10,9 @@ from app.services.knowledge_base.embeddings import EmbeddingError, GeminiEmbedde
 from app.main import app
 from tests.conftest import FakeLLM
 
+JATIN, ESHRITHA, JEEVITH = "dr-jatin-k-reddy", "dr-eshritha-c", "dr-jeevith-c-reddy"
+FRONT_DESK = "+91 70199 76689"
+
 
 def ask(client, message, history=None):
     resp = client.post("/api/v1/chat", json={"message": message, "history": history or []})
@@ -27,11 +30,11 @@ def use_llm(llm):
 @pytest.mark.parametrize(
     ("question", "expected_text", "expected_source"),
     [
-        ("What are the clinic's opening hours?", "Monday: 09:00 to 20:00", "opening hours"),
-        ("Where is the clinic located?", "48 Lakeside Avenue", "location"),
-        ("How do I book an appointment?", "+91 94835 41927", "book an appointment"),
-        ("Do you accept insurance?", "cashless", "Frequently asked questions"),
-        ("How much does teeth whitening cost?", "Teeth Whitening", "Dental"),
+        ("What are the clinic's opening hours?", "Monday: 10:00 to 20:00", "opening hours"),
+        ("Where is the clinic located?", "Puttappa Layout", "centres"),
+        ("How do I book an appointment?", FRONT_DESK, "book an appointment"),
+        ("Do you offer EMI?", "EMI plans", "Frequently asked questions"),
+        ("How much does a HydraFacial cost?", "HydraFacial & Medifacials", "Advanced Cosmetic Dermatology"),
     ],
 )
 def test_answers_from_knowledge_base_with_sources(client, knowledge, question, expected_text, expected_source):
@@ -42,27 +45,30 @@ def test_answers_from_knowledge_base_with_sources(client, knowledge, question, e
 
 
 def test_booking_question_offers_booking_link(client, knowledge):
-    body = ask(client, "How can I book an appointment with a dentist?")
-    assert {"label": "Book an Appointment", "href": "/appointments"} in body["actions"]
+    body = ask(client, "How can I book an appointment with a dermatologist?")
+    assert {"label": "Book an Appointment", "href": "/book-appointment"} in body["actions"]
 
 
 def test_llm_receives_retrieved_context_and_rules(client, knowledge):
-    llm = FakeLLM("The clinic is open Monday to Friday from 09:00 to 20:00, and closed on Sunday.")
+    llm = FakeLLM("The clinic is open every day from 10:00 to 20:00.")
     use_llm(llm)
     body = ask(client, "What are your timings?")
     assert body["status"] == "answered" and body["provider"] == "fake-llm"
     system, messages = llm.calls[0]
-    assert "Use ONLY the facts inside <context>" in system
-    assert "<context>" in messages[-1]["content"] and "Monday: 09:00 to 20:00" in messages[-1]["content"]
+    assert "Use ONLY the facts inside <context>" in system and "RUA Skin & Hair Center" in system
+    assert "<context>" in messages[-1]["content"] and "Monday: 10:00 to 20:00" in messages[-1]["content"]
 
 
 def test_conversation_history_is_passed_to_llm(client, knowledge):
-    llm = FakeLLM("Dr. Sara Thomas consults on Monday, Thursday and Friday.")
+    llm = FakeLLM("Dr. Jeevith C Reddy consults from Tuesday to Sunday.")
     use_llm(llm)
-    history = [{"role": "user", "content": "Tell me about Dr. Sara Thomas"}, {"role": "assistant", "content": "She is our trichologist."}]
+    history = [
+        {"role": "user", "content": "Tell me about Dr. Jeevith C Reddy"},
+        {"role": "assistant", "content": "He is one of our consultant dermatologists."},
+    ]
     ask(client, "Which days?", history)
     messages = llm.calls[0][1]
-    assert messages[0]["content"] == "Tell me about Dr. Sara Thomas"
+    assert messages[0]["content"] == "Tell me about Dr. Jeevith C Reddy"
     assert messages[1]["role"] == "assistant"
 
 
@@ -74,16 +80,16 @@ def test_unrelated_question_returns_no_context(client, knowledge):
     use_llm(llm)
     body = ask(client, "What is the capital of France?")
     assert body["status"] == "no_context"
-    assert "couldn't find" in body["answer"] and "+91 94835 41927" in body["answer"]
+    assert "couldn't find" in body["answer"] and f"on {FRONT_DESK} and" in body["answer"]  # no empty email slot
     assert llm.calls == []  # nothing relevant was retrieved, so the LLM was never asked
 
 
 def test_empty_knowledge_base_still_answers_from_live_directory(client, seeded):
     # Hours, doctors and prices are read straight from the database, so they work before indexing...
     body = ask(client, "What are the opening hours?")
-    assert body["status"] == "answered" and "Monday: 09:00 to 20:00" in body["answer"]
-    # ...while everything else still needs the knowledge base.
-    assert ask(client, "Do you accept insurance?")["status"] == "no_context"
+    assert body["status"] == "answered" and "Monday: 10:00 to 20:00" in body["answer"]
+    # ...while policies (payments, consent...) still need the knowledge base.
+    assert ask(client, "Do you offer EMI?")["status"] == "no_context"
 
 
 def test_llm_no_answer_token_becomes_no_context(client, knowledge):
@@ -99,21 +105,21 @@ def test_ungrounded_llm_answer_is_replaced(client, knowledge):
     use_llm(FakeLLM("We are open every day from 04:45 to 23:59."))
     body = ask(client, "What are the clinic's opening hours?")
     assert body["status"] == "fallback"
-    assert "23:59" not in body["answer"] and "09:00 to 20:00" in body["answer"]
+    assert "23:59" not in body["answer"] and "10:00 to 20:00" in body["answer"]
 
 
 def test_invented_doctor_name_is_rejected():
-    chunk = RetrievedChunk(1, 1, "Doctors", "Dr. Meera Iyer is our dentist. Open 09:00 to 20:00.", 0.9)
-    assert is_grounded("Dr. Meera Iyer is available from 09:00.", [chunk])
+    chunk = RetrievedChunk(1, 1, "Doctors", "Dr. Eshritha C is our aesthetic dermatologist. Open 10:00 to 20:00.", 0.9)
+    assert is_grounded("Dr. Eshritha C is available from 10:00.", [chunk])
     assert not is_grounded("Dr. John Smith is available.", [chunk])
-    assert not is_grounded("A cleaning costs INR 999.", [chunk])
+    assert not is_grounded("A HydraFacial costs INR 999.", [chunk])
 
 
 def test_llm_outage_falls_back_to_extractive_answer(client, knowledge):
     use_llm(FakeLLM(error=True))
     body = ask(client, "Where is the clinic located?")
     assert body["status"] == "fallback" and body["provider"] == "extractive-fallback"
-    assert "Lakeside Avenue" in body["answer"]
+    assert "Puttappa Layout" in body["answer"] and "GPH Tower" in body["answer"]  # both centres
 
 
 def test_embedding_outage_returns_clear_503(client, knowledge):
@@ -132,49 +138,94 @@ def test_embedding_outage_returns_clear_503(client, knowledge):
 # --- Live clinic directory ---------------------------------------------------------------------------------
 
 
-def test_doctor_list_is_complete_with_fees_and_profile_chips(client, knowledge):
+def test_doctor_list_is_complete_with_profile_cards(client, knowledge):
     body = ask(client, "Which doctors do you have?")
     assert body["status"] == "answered"
-    for name in ("Dr. Ananya Rao", "Dr. Arjun Nair", "Dr. Leela Krishnan", "Dr. Daniel D'Souza", "Dr. Rohan Kapoor"):
+    for name in ("Dr. Jatin K Reddy", "Dr. Eshritha C", "Dr. Jeevith C Reddy"):
         assert name in body["answer"]
-    assert "Fee: ₹700" in body["answer"]
+    assert "Fee: confirmed by the front desk" in body["answer"] and "Tue–Sun" in body["answer"]
+    assert {d["slug"] for d in body["doctors"]} == {JATIN, ESHRITHA, JEEVITH}
     assert {"label": "Browse All Doctors & Profiles", "href": "/doctors"} in body["actions"]
-    assert len(body["suggestions"]) == 4
-    assert all(s["message"].startswith("Tell me about Dr.") for s in body["suggestions"])
+    assert len(body["suggestions"]) == 3
 
 
 def test_single_doctor_gets_profile_card_and_direct_booking_link(client, knowledge):
-    body = ask(client, "Tell me about Dr. Arjun Nair")
-    assert "Orthodontist" in body["answer"] and "₹800" in body["answer"]
+    body = ask(client, "Tell me about Dr. Eshritha C")
+    assert "Fellowship in Dermatosurgery" in body["answer"] and "11:00 AM to 8:00 PM" in body["answer"]
     [card] = body["doctors"]
-    assert card["slug"] == "arjun-nair" and card["consultation_fee"] == 800
-    assert card["booking_href"] == "/appointments?doctor=arjun-nair"
-    assert body["actions"][0] == {"label": "Book with Dr. Arjun Nair", "href": "/appointments?doctor=arjun-nair"}
+    assert card["slug"] == ESHRITHA and card["consultation_fee"] is None
+    assert card["booking_href"] == "/book-appointment?doctor=dr-eshritha-c"
+    assert body["actions"][0] == {"label": "Book with Dr. Eshritha C", "href": "/book-appointment?doctor=dr-eshritha-c"}
+
+
+def test_shared_surname_does_not_pick_a_doctor(client, knowledge):
+    # Two doctors are "Reddy": the surname alone must not open one profile.
+    body = ask(client, "Tell me about Dr. Reddy")
+    assert len(body["doctors"]) != 1
 
 
 def test_follow_up_question_keeps_the_doctor(client, knowledge):
     history = [
-        {"role": "user", "content": "Tell me about Dr. Sara Thomas"},
-        {"role": "assistant", "content": "Dr. Sara Thomas is our Trichologist."},
+        {"role": "user", "content": "Tell me about Dr. Jeevith C Reddy"},
+        {"role": "assistant", "content": "Dr. Jeevith C Reddy is a consultant dermatologist."},
     ]
-    body = ask(client, "What is her fee?", history)
-    assert "₹1,200" in body["answer"]
-    assert [d["slug"] for d in body["doctors"]] == ["sara-thomas"]
+    body = ask(client, "Which days does he consult?", history)
+    assert "Tuesday" in body["answer"] and "Sunday" in body["answer"]
+    assert [d["slug"] for d in body["doctors"]] == [JEEVITH]
 
 
 def test_department_question_shows_its_doctors_and_booking(client, knowledge):
-    body = ask(client, "How can I book with a skin specialist?")
-    assert {d["slug"] for d in body["doctors"]} == {"naomi-fernandes", "rohan-kapoor"}
-    assert body["actions"][0]["href"] == "/appointments"
-    assert {"label": "Browse Skin & Dermatology Doctors", "href": "/doctors?department=skin"} in body["actions"]
+    body = ask(client, "How can I book with a hair transplant surgeon?")
+    assert [d["slug"] for d in body["doctors"]] == [JATIN]
+    assert body["actions"][0]["href"] == "/book-appointment?doctor=dr-jatin-k-reddy"
+    assert {"label": "Browse Hair Transplant Doctors", "href": "/doctors?department=hair-transplant"} in body["actions"]
 
 
-def test_price_question_lists_every_department_price(client, knowledge):
-    body = ask(client, "What are the prices for dental treatments?")
-    for service in ("Root Canal Treatment", "Dental Implants", "Teeth Whitening", "Braces & Clear Aligners"):
+def test_price_question_lists_every_department_service(client, knowledge):
+    body = ask(client, "What are the prices for laser treatments?")
+    for service in ("Laser Hair Reduction", "Laser Tattoo & Pigment Removal", "CO₂ Laser Resurfacing"):
         assert service in body["answer"]
-    assert "₹45,000" in body["answer"]
-    assert {"label": "Dental Care Treatments & Prices", "href": "/services/dental"} in body["actions"]
+    assert "price confirmed at the clinic" in body["answer"] and "HydraFacial" not in body["answer"]
+    assert {"label": "Explore Laser Treatments", "href": "/services/laser-treatments"} in body["actions"]
+
+
+def test_named_speciality_beats_keyword_hints(client, knowledge):
+    body = ask(client, "What are the prices for Premium Aesthetic Packages?")
+    assert "Prices — Premium Aesthetic Packages" in body["answer"] and "HydraFacial" not in body["answer"]
+
+
+def test_treatment_overview_names_every_speciality(client, knowledge):
+    body = ask(client, "What treatments do you offer?")
+    for label in ("Medical Dermatology", "Dermatosurgery", "Advanced Cosmetic Dermatology", "Laser Treatments",
+                  "Hair Treatments", "Hair Transplant", "Premium Aesthetic Packages"):
+        assert f"**{label}**" in body["answer"]
+    assert {"label": "All Services", "href": "/services"} in body["actions"]
+
+
+def test_specific_treatment_is_described_not_just_priced(client, knowledge):
+    body = ask(client, "Do you do PRP for hair?")
+    assert "PRP Hair Treatment" in body["answer"] and "platelet" in body["answer"].lower()
+    cost = ask(client, "How much does a HydraFacial cost?")
+    assert "Hair Transplant Cost" not in cost["answer"]  # "cost" alone doesn't identify a service
+
+
+def test_payment_questions_do_not_dump_the_price_list(client, knowledge):
+    body = ask(client, "Do you offer EMI?")
+    assert "EMI plans" in body["answer"] and "price confirmed at the clinic" not in body["answer"]
+
+
+@pytest.mark.parametrize("message", ["Can I cancel my appointment?", "I want to reschedule my booking"])
+def test_existing_appointments_point_to_the_patient_portal(client, knowledge, message):
+    body = ask(client, message)
+    assert "/patient" in body["answer"] and "WhatsApp" in body["answer"]
+    assert body["actions"][0] == {"label": "My Appointments", "href": "/patient"}
+    assert {"label": "Book an Appointment", "href": "/book-appointment"} not in body["actions"]
+
+
+def test_centre_questions_list_both_centres(client, knowledge):
+    body = ask(client, "Which centre is near KR Puram?")
+    assert "RUA Ramamurthy Nagar" in body["answer"] and "RUA Indiranagar" in body["answer"]
+    assert {"label": "Centres & Directions", "href": "/centers"} in body["actions"]
 
 
 def test_directory_reflects_admin_edits_without_reindexing(client, knowledge, db):
@@ -184,33 +235,33 @@ def test_directory_reflects_admin_edits_without_reindexing(client, knowledge, db
 
     from app.models import Doctor
 
-    doctor = db.scalar(select(Doctor).where(Doctor.slug == "meera-iyer"))
+    doctor = db.scalar(select(Doctor).where(Doctor.slug == JATIN))
     doctor.consultation_fee = Decimal("950")
     db.commit()
-    body = ask(client, "What is Dr. Meera Iyer's consultation fee?")
+    body = ask(client, "What is Dr. Jatin K Reddy's consultation fee?")
     assert "₹950" in body["answer"] and body["doctors"][0]["consultation_fee"] == 950
 
 
 def test_llm_receives_the_full_live_directory(client, knowledge):
-    llm = FakeLLM("**👩‍⚕️ Our doctors:**\n\n- **Dr. Ananya Rao** – Family Physician (Fee: ₹700)")
+    llm = FakeLLM("**👩‍⚕️ Our doctors:**\n\n- **Dr. Eshritha C** – Consultant Dermatologist")
     use_llm(llm)
     body = ask(client, "Which doctors do you have?")
     prompt = llm.calls[0][1][-1]["content"]
     assert 'title="Live clinic directory"' in prompt
-    assert all(name in prompt for name in ("Dr. Ananya Rao", "Dr. Leela Krishnan", "Dr. Rohan Kapoor"))
+    assert all(name in prompt for name in ("Dr. Jatin K Reddy", "Dr. Eshritha C", "Dr. Jeevith C Reddy"))
     assert body["status"] == "answered" and body["provider"] == "fake-llm"
 
 
 @pytest.mark.parametrize(
-    ("now", "expected_today", "expected_doctor"),
+    ("now", "expected_today", "in_today", "not_in_today"),
     [
-        # Sunday 11:00 — closed all day, nobody consults.
-        ((2026, 10, 25, 11, 0), "**Today (Sunday):** closed", None),
-        # Wednesday 10:30 — open, and Dr. Ananya Rao (Mon–Sat mornings) is in.
-        ((2026, 10, 21, 10, 30), "**Today (Wednesday):** 09:00 to 20:00 (open now)", "Dr. Ananya Rao"),
+        # Sunday 11:00 — open; only Dr. Jeevith (Tue–Sun) consults on Sundays.
+        ((2026, 10, 25, 11, 0), "**Today (Sunday):** 10:00 to 20:00 (open now)", "Dr. Jeevith C Reddy", "Dr. Jatin K Reddy"),
+        # Monday 21:30 — after hours; Dr. Jeevith is off on Mondays.
+        ((2026, 10, 26, 21, 30), "**Today (Monday):** 10:00 to 20:00 (closed right now)", "Dr. Eshritha C", "Dr. Jeevith C Reddy"),
     ],
 )
-def test_today_questions_use_the_clinic_date(client, knowledge, monkeypatch, now, expected_today, expected_doctor):
+def test_today_questions_use_the_clinic_date(client, knowledge, monkeypatch, now, expected_today, in_today, not_in_today):
     from datetime import datetime
     from zoneinfo import ZoneInfo
 
@@ -224,15 +275,15 @@ def test_today_questions_use_the_clinic_date(client, knowledge, monkeypatch, now
     use_llm(llm)
     body = ask(client, "What are the clinic timings today?")
     assert expected_today in body["answer"]
-    if expected_doctor:
-        assert expected_doctor in body["answer"].split("Doctors consulting today:")[1]
+    consulting = body["answer"].split("Doctors consulting today:")[1].split("\n")[0]
+    assert in_today in consulting and not_in_today not in consulting
     prompt = llm.calls[0][1][-1]["content"]
     assert f"Today is {fixed:%A}, {fixed:%d %B %Y}" in prompt
 
 
 def test_numbered_steps_are_not_treated_as_facts():
-    chunk = RetrievedChunk(1, 1, "Booking", "Book online at /appointments or call the front desk.", 0.9)
-    assert is_grounded("1. Open the booking form\n2. Choose a doctor\n3. Submit your details", [chunk])
+    chunk = RetrievedChunk(1, 1, "Booking", "Book online at /book-appointment or call the front desk.", 0.9)
+    assert is_grounded("1. Choose your centre\n2. Choose a doctor\n3. Submit your details", [chunk])
     assert not is_grounded("Call the front desk on 12345.", [chunk])
 
 
@@ -244,9 +295,9 @@ def test_numbered_steps_are_not_treated_as_facts():
     [
         "I have a rash on my arm, what cream should I use?",
         "Do I have an infection?",
-        "Can you diagnose my tooth pain?",
+        "Can you diagnose my pimples?",
         "What dosage of paracetamol should I take?",
-        "My gums are bleeding, what's wrong with me?",
+        "My scalp is itchy and flaky, what's wrong with me?",
         "Which medicine is best for hair fall?",
         "Should I take antibiotics for my acne?",
     ],
@@ -257,7 +308,7 @@ def test_medical_advice_requests_are_redirected_without_llm(client, knowledge, m
     body = ask(client, message)
     assert body["status"] == "safety_redirect"
     assert "can't diagnose" in body["answer"]
-    assert any(a["href"] == "/appointments" for a in body["actions"])
+    assert any(a["href"] == "/book-appointment" for a in body["actions"])
     assert llm.calls == []
 
 
@@ -273,26 +324,27 @@ def test_emergencies_get_urgent_care_message(client, knowledge, message):
 
 @pytest.mark.parametrize(
     "message",
-    ["What dental treatments do you offer?", "Do you treat hair loss?", "Which doctors are available?",
+    ["What laser treatments do you offer?", "Do you treat hair loss?", "Which doctors are available?",
      "What are the clinic timings?", "Is there a skin specialist?", "Do I have to bring my old reports?",
-     "Could I have an appointment on Saturday?", "Can I have a copy of my bill?"],
+     "Could I have an appointment on Saturday?", "Can I have a copy of my bill?", "Do you do PRP for hair?",
+     "How much does a hair transplant cost?"],
 )
 def test_general_questions_are_not_blocked(message):
     assert screen_message(message).kind is None
 
 
 def test_department_hint_for_redirect(client, knowledge):
-    body = ask(client, "My tooth hurts, what should I take?")
-    assert "Dental Care" in body["answer"]
-    assert {"label": "Dental treatments", "href": "/services/dental"} in body["actions"]
-    # Routing without diagnosis: the recommended department's doctors, ready to book.
-    assert {d["slug"] for d in body["doctors"]} == {"arjun-nair", "meera-iyer"}
+    body = ask(client, "My hair is falling a lot, what should I take?")
+    assert "hair specialists" in body["answer"]
+    assert {"label": "Hair treatments", "href": "/services/hair-treatments"} in body["actions"]
+    # Routing without diagnosis: the recommended speciality's doctors, ready to book.
+    assert {d["slug"] for d in body["doctors"]} == {JATIN, JEEVITH}
 
 
-def test_symptoms_without_a_department_go_to_general_medicine(client, knowledge):
+def test_symptoms_without_a_department_go_to_medical_dermatology(client, knowledge):
     body = ask(client, "Do I have an infection?")
-    assert body["status"] == "safety_redirect" and "General Medicine" in body["answer"]
-    assert {d["slug"] for d in body["doctors"]} == {"ananya-rao", "vikram-menon"}
+    assert body["status"] == "safety_redirect" and "Medical Dermatology" in body["answer"]
+    assert {d["slug"] for d in body["doctors"]} == {JATIN, ESHRITHA, JEEVITH}
 
 
 # --- Input validation & misc ---------------------------------------------------------------------------------
@@ -307,7 +359,7 @@ def test_chat_input_validation(client):
 
 def test_greeting(client, seeded):
     body = ask(client, "Hello!")
-    assert body["status"] == "answered" and "Cedarline" in body["answer"]
+    assert body["status"] == "answered" and "RUA Skin & Hair Center" in body["answer"]
 
 
 def test_chat_health(client, knowledge):
@@ -402,3 +454,93 @@ def test_gemini_embedder_checks_dimensions():
 def test_missing_api_key_is_reported():
     with pytest.raises(EmbeddingError):
         GeminiEmbedder(get_settings().model_copy(update={"gemini_api_key": None}))
+
+
+# --- Live free slots (which doctor is free when) ------------------------------------------------
+
+
+def _pin_clock(monkeypatch, *when):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    from app.services.chatbot.directory import ClinicDirectory
+
+    fixed = datetime(*when, tzinfo=ZoneInfo(get_settings().clinic_timezone))
+    original = ClinicDirectory.load.__func__
+    monkeypatch.setattr(ClinicDirectory, "load", classmethod(lambda cls, db, now=None: original(cls, db, fixed)))
+    return fixed
+
+
+def test_free_slot_questions_read_the_live_booking_engine(client, knowledge):
+    from datetime import timedelta
+
+    from app.services.appointments import clinic_now
+
+    today = clinic_now().date()
+    sunday = today + timedelta(days=(6 - today.weekday()) % 7 + 7)  # a Sunday 7-13 days ahead
+    question = f"Which doctors have free slots on {sunday.isoformat()}?"
+
+    body = ask(client, question)  # offline: the formatted directory answer
+    assert body["status"] == "answered" and "**🗓️ Free appointment slots:**" in body["answer"]
+    line = next(x for x in body["answer"].splitlines() if f"{sunday:%d %B %Y}" in x)
+    assert "Dr. Jeevith C Reddy — free 10:00 AM–6:00 PM (16 slots of 30 min)" in line
+    assert "Dr. Eshritha C" in line and "do not consult on Sundays" in line  # Mon–Sat doctors
+    assert {"label": "Book an Appointment", "href": "/book-appointment"} in body["actions"]
+
+    # A booking takes its slot out of the next answer.
+    booked = client.post("/api/v1/appointments", json={
+        "department": "medical-dermatology", "doctor_slug": JEEVITH, "branch_slug": "indiranagar",
+        "appointment_date": sunday.isoformat(), "start_time": "10:00", "patient_name": "Asha Kumar",
+        "patient_phone": "+91 90000 20001", "reason": "Acne flare-up for three weeks",
+    })
+    assert booked.status_code == 201, booked.text
+    assert "Dr. Jeevith C Reddy — free 10:30 AM–6:00 PM (15 slots of 30 min)" in ask(client, question)["answer"]
+
+
+def test_doctor_availability_without_a_date_lists_the_next_free_days(client, knowledge):
+    body = ask(client, "When is Dr. Eshritha available?")
+    assert len([x for x in body["answer"].splitlines() if "Dr. Eshritha C — free" in x]) == 2
+    assert "Dr. Jatin K Reddy — free" not in body["answer"]  # only the doctor asked about
+    assert body["actions"][0] == {"label": "Book with Dr. Eshritha C", "href": f"/book-appointment?doctor={ESHRITHA}"}
+
+
+def test_a_day_with_nothing_free_offers_the_next_free_day(client, knowledge, monkeypatch):
+    _pin_clock(monkeypatch, 2026, 10, 26, 21, 30)  # Monday, after the last slot
+    llm = FakeLLM(error=True)
+    use_llm(llm)
+    answer = ask(client, "Which doctor is available today?")["answer"]
+    assert "Monday 26 October 2026 (today): Dr. Eshritha C — no free slots left" in answer
+    assert "Next day with free slots — Tuesday 27 October 2026: Dr. Eshritha C — free 11:00 AM–8:00 PM" in answer
+    assert "Live free appointment slots from the booking system" in llm.calls[0][1][-1]["content"]
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("free slots tomorrow?", ["2026-11-03"]),
+        ("who is available on Sunday", ["2026-11-08"]),
+        ("next monday please", ["2026-11-09"]),
+        ("anyone this weekend?", ["2026-11-07", "2026-11-08"]),
+        ("on 5th Nov", ["2026-11-05"]),
+        ("05/11/2026", ["2026-11-05"]),
+        ("1 jan", ["2027-01-01"]),
+        ("are you open 24/7?", []),
+        ("May I book?", []),
+        ("acne for 2 decades", []),
+        ("31 feb", []),
+    ],
+)
+def test_requested_days(text, expected):
+    from datetime import date
+
+    from app.services.chatbot.directory import requested_days
+
+    assert [d.isoformat() for d in requested_days(text, date(2026, 11, 2))] == expected  # a Monday
+
+
+@pytest.mark.parametrize(
+    "message",
+    ["Is laser hair reduction available?", "What are the clinic timings today?", "Is the consultation free?"],
+)
+def test_general_questions_do_not_trigger_slot_lookups(client, knowledge, message):
+    assert "Free appointment slots" not in ask(client, message)["answer"]

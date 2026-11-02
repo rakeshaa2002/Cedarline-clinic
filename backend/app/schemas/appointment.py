@@ -10,6 +10,7 @@ from app.schemas.common import ORMModel, PersonName, PhoneNumber
 AppointmentStatus = Literal["pending", "confirmed", "completed", "cancelled"]
 AppointmentSource = Literal["website", "chatbot", "admin"]
 EmailKind = Literal["received", "confirmation", "cancellation"]
+WhatsAppKind = Literal["received", "confirmation", "cancellation", "reschedule", "reminder", "otp", "manual"]
 
 
 # --- Availability -------------------------------------------------------------------
@@ -37,6 +38,35 @@ class AvailabilityOut(BaseModel):
     doctors: list[DoctorAvailability]
 
 
+class DayAvailability(BaseModel):
+    date: date
+    free: int
+    total: int
+
+
+class NextSlot(BaseModel):
+    date: date
+    start_time: time
+
+
+class DoctorAvailabilitySummary(BaseModel):
+    doctor_id: int
+    slug: str
+    full_name: str
+    specialization: str
+    photo_url: str | None
+    consultation_days: list[int]
+    start_time: time
+    end_time: time
+    next_available: NextSlot | None
+    days: list[DayAvailability]
+
+
+class AvailabilitySummary(BaseModel):
+    days: int
+    doctors: list[DoctorAvailabilitySummary]
+
+
 # --- Booking --------------------------------------------------------------------------
 
 
@@ -44,10 +74,12 @@ class AppointmentCreate(BaseModel):
     department: Department
     # None = "first available doctor in the department at that time".
     doctor_slug: str | None = Field(default=None, max_length=120)
+    # The RUA centre the patient will visit.
+    branch_slug: str | None = Field(default=None, max_length=80)
     appointment_date: date
     start_time: time
     patient_name: PersonName
-    patient_email: EmailStr
+    patient_email: EmailStr | None = None
     patient_phone: PhoneNumber
     reason: str = Field(min_length=5, max_length=1000)
     source: Literal["website", "chatbot"] = "website"
@@ -65,6 +97,11 @@ class AppointmentCreate(BaseModel):
     def _any_doctor(cls, v):
         return None if v in ("", "any") else v
 
+    @field_validator("patient_email", "branch_slug", mode="before")
+    @classmethod
+    def _empty_is_none(cls, v):
+        return v or None
+
 
 class AppointmentDoctor(ORMModel):
     id: int
@@ -73,6 +110,16 @@ class AppointmentDoctor(ORMModel):
     specialization: str
     department: Department
     photo_url: str | None
+
+
+class AppointmentBranch(ORMModel):
+    id: int
+    slug: str
+    name: str
+    area: str
+    address: str
+    phone: str
+    map_url: str | None
 
 
 class AppointmentConfirmation(ORMModel):
@@ -86,8 +133,10 @@ class AppointmentConfirmation(ORMModel):
     end_time: time
     consultation_fee: Decimal | None
     patient_name: str
-    patient_email: str
+    patient_email: str | None
+    patient_phone: str
     doctor: AppointmentDoctor
+    branch: AppointmentBranch | None
 
 
 # --- Admin ------------------------------------------------------------------------------
@@ -104,18 +153,32 @@ class AppointmentEmailOut(ORMModel):
     created_at: datetime
 
 
+class WhatsAppMessageOut(ORMModel):
+    id: int
+    appointment_id: int | None
+    to_phone: str
+    kind: WhatsAppKind
+    body: str
+    status: Literal["sent", "failed", "skipped"]
+    provider_message_id: str | None
+    error: str | None
+    created_at: datetime
+
+
 class AppointmentOut(ORMModel):
     id: int
     reference: str
     status: AppointmentStatus
     source: AppointmentSource
     department: Department
+    patient_id: int | None
+    branch: AppointmentBranch | None
     appointment_date: date
     start_time: time
     end_time: time
     consultation_fee: Decimal | None
     patient_name: str
-    patient_email: str
+    patient_email: str | None
     patient_phone: str
     reason: str
     cancellation_reason: str | None
@@ -127,10 +190,14 @@ class AppointmentOut(ORMModel):
     updated_at: datetime
     doctor: AppointmentDoctor
     last_email: AppointmentEmailOut | None
+    last_whatsapp: WhatsAppMessageOut | None
 
 
 class AppointmentDetail(AppointmentOut):
     emails: list[AppointmentEmailOut]
+    whatsapp_messages: list[WhatsAppMessageOut]
+    reminder_24h_sent_at: datetime | None
+    reminder_2h_sent_at: datetime | None
 
 
 class AppointmentList(BaseModel):
@@ -201,6 +268,11 @@ class DepartmentDemand(BaseModel):
     revenue: Decimal
 
 
+class BranchDemand(BaseModel):
+    branch: str
+    total: int
+
+
 class AppointmentAnalytics(BaseModel):
     total: int
     this_month: int
@@ -215,4 +287,7 @@ class AppointmentAnalytics(BaseModel):
     revenue_total: Decimal
     by_month: list[MonthCount]
     by_department: list[DepartmentDemand]
+    by_branch: list[BranchDemand]
     by_source: dict[str, int]
+    whatsapp_sent: int
+    whatsapp_pending: int

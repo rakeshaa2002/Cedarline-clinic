@@ -9,15 +9,16 @@ import secrets
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.exceptions import ConflictError, NotFoundError, ValidationFailedError
-from app.models import ACTIVE_STATUSES, Appointment, ClinicInfo, Doctor
+from app.models import ACTIVE_STATUSES, Appointment, Branch, ClinicInfo, Doctor
 from app.schemas.appointment import AppointmentCreate, Slot
 from app.services.knowledge_base.system_documents import DEPARTMENT_LABELS, WEEKDAYS
+from app.services.patients import upsert_patient
 
 _REFERENCE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # no 0/O, 1/I/L: easy to read over the phone
 
@@ -36,7 +37,21 @@ def clinic_now() -> datetime:
 
 
 def new_reference() -> str:
-    return "CED-" + "".join(secrets.choice(_REFERENCE_ALPHABET) for _ in range(6))
+    return "RUA-" + "".join(secrets.choice(_REFERENCE_ALPHABET) for _ in range(6))
+
+
+def department_filter(department: str):
+    """Doctors who take bookings for a category: their primary category or any listed in `departments`."""
+    return or_(Doctor.department == department, Doctor.departments.any(department))
+
+
+def active_branch(db: Session, slug: str | None) -> Branch | None:
+    if not slug:
+        return None
+    branch = db.scalar(select(Branch).where(Branch.slug == slug, Branch.is_active))
+    if branch is None:
+        raise ValidationFailedError("Please choose one of our centres.")
+    return branch
 
 
 def slot_grid(doctor: Doctor, day: date) -> list[tuple[time, time]]:
@@ -149,8 +164,9 @@ def _commit_slot(db: Session, appointment: Appointment) -> None:
 
 def book(db: Session, data: AppointmentCreate, *, now: datetime | None = None) -> Appointment:
     now = now or clinic_now()
-    stmt = select(Doctor).where(Doctor.is_active, Doctor.department == data.department).order_by(Doctor.full_name)
+    stmt = select(Doctor).where(Doctor.is_active, department_filter(data.department)).order_by(Doctor.full_name)
     candidates = list(db.scalars(stmt))
+    branch = active_branch(db, data.branch_slug)
     if data.doctor_slug:
         candidates = [d for d in candidates if d.slug == data.doctor_slug]
         if not candidates:
@@ -159,14 +175,20 @@ def book(db: Session, data: AppointmentCreate, *, now: datetime | None = None) -
         raise ValidationFailedError(f"No {DEPARTMENT_LABELS[data.department]} doctors are taking bookings right now.")
 
     doctor, end = _pick_doctor(db, candidates, data.appointment_date, data.start_time, now)
+    email = str(data.patient_email) if data.patient_email else None
+    patient = upsert_patient(db, phone=data.patient_phone, full_name=data.patient_name, email=email, source=data.source)
+    # Commit the CRM record first: a lost race for the slot still leaves the enquiry on file.
+    db.commit()
     appointment = Appointment(
         reference=new_reference(),
         doctor_id=doctor.id,
-        department=doctor.department,
+        department=data.department,
+        branch_id=branch.id if branch else None,
+        patient_id=patient.id,
         consultation_fee=doctor.consultation_fee,
         patient_name=data.patient_name,
-        patient_email=str(data.patient_email),
-        patient_phone=data.patient_phone,
+        patient_email=email,
+        patient_phone=patient.phone,
         reason=data.reason,
         appointment_date=data.appointment_date,
         start_time=data.start_time,
@@ -191,7 +213,6 @@ def reschedule(
         raise NotFoundError("Doctor not found.")
     doctor, end = _pick_doctor(db, [doctor], day, start, now or clinic_now(), exclude_id=appointment.id)
     appointment.doctor_id = doctor.id
-    appointment.department = doctor.department
     appointment.consultation_fee = doctor.consultation_fee
     appointment.appointment_date = day
     appointment.start_time = start

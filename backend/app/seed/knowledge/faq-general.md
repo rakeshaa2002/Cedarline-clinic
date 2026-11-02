@@ -1,37 +1,29 @@
-# Frequently asked questions
+# Frequently asked questions about RUA Skin & Hair Center
 
-## Do I need an appointment, or can I walk in?
-Appointments are strongly recommended so a doctor is available for you. Walk-in patients are seen only when a slot is free, and waiting times may be longer.
+## What is RUA Skin & Hair Center?
+RUA Skin & Hair Center is a doctor-led dermatology, cosmetology, laser and hair transplant clinic in Bengaluru, founded by three MD (DVL) dermatologists: Dr. Jatin K Reddy, Dr. Eshritha C and Dr. Jeevith C Reddy. RUA offers personalised, holistic treatment plans rooted in evidence-based, ethical practice, with uncompromised quality, hygiene and safety. Its tagline is "Restore. Unfold. Awaken."
 
-## Is the clinic open on Sundays and public holidays?
-The clinic is closed on Sundays. On public holidays the clinic may close or run reduced hours; any changes are announced on the website and by phone.
+## Where are RUA's centres?
+RUA has two centres in Bengaluru:
+- RUA Ramamurthy Nagar: #14, 2nd Floor, 11th Cross, GPH Tower, above Burger King, 1st Block Akashaya Nagar, TC Palya Main Road, KR Puram, Bengaluru 560016. Phone +91 99597 63678.
+- RUA Indiranagar: 060/1050, 1st Cross, Puttappa Layout, HAL 3rd Stage, backgate of NCFE School, Bengaluru 560075. Phone +91 70199 76689.
 
-## What payment methods do you accept?
-We accept cash, debit and credit cards, and UPI payments at the reception desk.
+## What are the opening hours?
+Both centres are open Sunday to Saturday, 10:00 am to 8:00 pm.
 
-## Do you accept health insurance?
-Cedarline does not currently offer cashless insurance. We provide itemised bills, prescriptions and reports so you can claim reimbursement from your insurer. Please check your policy coverage with your insurer before your visit.
+## What treatments does RUA offer?
+Medical dermatology (acne, pigmentation, psoriasis, eczema, infections, paediatric dermatology and more), dermatosurgery (warts, skin tags, moles, cysts, scar revision, vitiligo surgery), advanced cosmetic dermatology (HydraFacial, chemical peels, MNRF, skin boosters, PDRN, NCTF, Botox and fillers), laser treatments (triple-wavelength laser hair reduction, tattoo and pigment removal, laser toning, CO2 resurfacing), hair treatments (PRP, GFC, exosomes, QR678, LLLT, scalp micropigmentation) and hair transplants (FUE, Sapphire Bio FUE, DHI, beard and eyebrow transplants), plus premium aesthetic packages such as bridal programmes.
 
-## How much does a consultation cost?
-Each service lists an indicative starting price on our Services pages. The final cost depends on the treatment the doctor recommends and is always explained to you before any procedure begins.
+## Who are the doctors?
+- Dr. Jatin K Reddy — MBBS, MD (DVL), Consultant Dermatologist & Hair Transplant Surgeon, Fellowship in Hair Transplantation.
+- Dr. Eshritha C — MBBS, MD (DVL), Consultant Dermatologist, Fellowship in Dermatosurgery, Lasers & Aesthetic Dermatology.
+- Dr. Jeevith C Reddy — MBBS, MD (DVL), Consultant Dermatologist, Fellowship in Functional & Longevity Medicine.
 
-## Is there parking?
-Cedar Court has a basement car park with limited visitor parking, and two-wheeler parking at the front of the building.
+## Do you offer EMI?
+Yes. RUA offers flexible payment options and EMI plans for treatment packages.
 
-## Is the clinic wheelchair accessible?
-Yes. The building has a step-free entrance and a lift to the 2nd floor, and the clinic has an accessible restroom.
+## Are treatments done by doctors?
+Yes. Every treatment is planned and supervised by RUA's dermatologists in a safe, sterile environment.
 
-## Which languages do your doctors speak?
-All of our doctors consult in English. Many also speak Kannada, Hindi, Tamil, Malayalam, Konkani or Punjabi; each doctor's languages are listed on the Our Doctors page.
-
-## Do you treat children?
-Yes. Our paediatrician sees newborns, children and teenagers, and our dental and dermatology teams also see children. Patients under 18 must be accompanied by a parent or guardian.
-
-## Do you provide emergency care?
-No. Cedarline is an outpatient clinic and does not have emergency facilities. In a medical emergency, call 112 or go to the nearest hospital emergency department.
-
-## Can I get my test reports online?
-Reports from our in-house sample collection are emailed to the address you register with, usually within 24 to 48 hours depending on the test. Printed copies are available at the reception desk.
-
-## Can the website chatbot give me medical advice?
-No. The website assistant answers general questions about the clinic, such as services, doctors, timings, location and booking. It cannot diagnose conditions or recommend treatments or medicines. Please book a consultation with a doctor for personal medical advice.
+## Is the website chat a doctor?
+No. The chat is an information assistant. It can explain services, timings and centres and help you book, but it cannot diagnose conditions or recommend medicines — please book a consultation with a dermatologist for that.

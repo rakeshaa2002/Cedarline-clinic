@@ -1,22 +1,19 @@
-# Patient policies and privacy
+# Patient policies at RUA Skin & Hair Center
 
-## Privacy of your information
-Cedarline collects only the personal details needed to arrange and provide your care. When you book, the front desk records your name, contact details and the reason for your visit. The website assistant does not store the questions you ask it. Your information is accessible only to authorised clinic staff and is never sold or shared for marketing.
+## Cancellation and rescheduling
+Please let us know at least a few hours in advance if you cannot make your appointment, so the slot can be offered to another patient. You can cancel from My appointments (/patient), reply to your WhatsApp confirmation, or call the centre. If RUA has to cancel or move your appointment, you are told on WhatsApp with the reason and offered a new time.
 
-## Medical records
-Consultation notes and reports are kept securely by the clinic. You may request a copy of your records at the reception desk; we may ask for photo ID before releasing them.
+## Arriving for your visit
+Please arrive 10 minutes early and bring any previous prescriptions, reports or a list of products you use on your skin or hair.
 
-## Consent for procedures
-Before any procedure, such as a chemical peel, laser session, root canal treatment or PRP therapy, the doctor explains what is involved, the expected costs and possible side effects, and asks for your written consent.
+## Consent and photographs
+Before-and-after photographs are taken only for your medical record, and are shown publicly only with your written consent.
 
-## Patients under 18
-Patients under 18 must be accompanied by a parent or legal guardian, who will be asked to give consent for any treatment.
+## Privacy
+RUA uses your name and mobile number to manage your appointments and to send booking messages and reminders on WhatsApp. The website chat does not store your conversation. Please do not share detailed medical history in chat or messages; your doctor will discuss it with you in person.
 
-## Late arrivals and missed appointments
-If you arrive more than 15 minutes late, we may need to reschedule your appointment so other patients are not delayed. Please give at least 24 hours' notice to reschedule or cancel.
+## Emergencies
+RUA is an outpatient skin and hair clinic and does not provide emergency care. In a medical emergency, call 112 or go to the nearest hospital emergency department.
 
-## Feedback and complaints
-We welcome feedback. You can speak to the clinic manager at the reception desk, call us, or email the clinic. We aim to respond to all written feedback within five working days.
-
-## Conduct
-We are committed to a respectful environment. Abusive or threatening behaviour towards staff or other patients is not tolerated.
+## Payments
+Consultation fees and treatment costs are confirmed by the front desk. RUA offers flexible payment options and EMI plans for treatment packages.

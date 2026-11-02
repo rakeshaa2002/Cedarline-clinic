@@ -6,8 +6,17 @@ from pydantic import BaseModel, EmailStr, Field, field_validator, model_validato
 
 from app.schemas.common import ORMModel, PersonName, PhoneNumber
 
-Department = Literal["general", "dental", "skin", "hair", "pediatrics"]
-Theme = Literal["cedar", "emerald", "sapphire", "slate", "plum"]
+Department = Literal[
+    "medical-dermatology",
+    "dermatosurgery",
+    "aesthetic-dermatology",
+    "laser-treatments",
+    "hair-treatments",
+    "hair-transplant",
+    "premium-packages",
+]
+# RUA brand palettes; "cedar" is the signature cocoa (the stylesheet defaults).
+Theme = Literal["cedar", "walnut", "rosewood", "espresso", "sage"]
 
 
 class OpeningHour(BaseModel):
@@ -39,6 +48,17 @@ class ThemeUpdate(BaseModel):
     theme: Theme
 
 
+class BranchOut(ORMModel):
+    id: int
+    slug: str
+    name: str
+    area: str
+    address: str
+    phone: str
+    whatsapp: str | None
+    map_url: str | None
+
+
 # --- Doctors ----------------------------------------------------------------------
 
 
@@ -47,9 +67,11 @@ class DoctorOut(ORMModel):
     slug: str
     full_name: str
     department: Department
+    departments: list[Department]
     specialization: str
     qualifications: str
-    experience_years: int
+    fellowship: str | None
+    experience_years: int | None
     bio: str
     languages: list[str]
     photo_url: str | None
@@ -64,9 +86,11 @@ class DoctorOut(ORMModel):
 class DoctorBase(BaseModel):
     full_name: str = Field(min_length=3, max_length=120)
     department: Department
+    departments: list[Department] = Field(default_factory=list)
     specialization: str = Field(min_length=2, max_length=150)
     qualifications: str = Field(min_length=2, max_length=255)
-    experience_years: int = Field(ge=0, le=60)
+    fellowship: str | None = Field(default=None, max_length=255)
+    experience_years: int | None = Field(default=None, ge=0, le=60)
     bio: str = Field(min_length=10, max_length=3000)
     languages: list[str] = Field(default_factory=list, max_length=10)
     photo_url: str | None = Field(default=None, max_length=500)
@@ -88,6 +112,8 @@ class DoctorBase(BaseModel):
     def _shift_order(self):
         if self.start_time >= self.end_time:
             raise ValueError("start_time must be before end_time")
+        # The primary category is always one the doctor takes bookings for.
+        self.departments = list(dict.fromkeys([self.department, *self.departments]))
         return self
 
 

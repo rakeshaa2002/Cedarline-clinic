@@ -15,7 +15,10 @@ from app.services.email.templates import Attachment, appointment_email
 logger = logging.getLogger(__name__)
 
 
-def send_appointment_email(db: Session, appointment: Appointment, kind: str) -> AppointmentEmail:
+def send_appointment_email(db: Session, appointment: Appointment, kind: str) -> AppointmentEmail | None:
+    """Email the patient (bookings are phone-first, so patients without an email are skipped silently)."""
+    if not appointment.patient_email:
+        return None
     settings = get_settings()
     clinic = db.scalar(select(ClinicInfo).limit(1))
     email = appointment_email(kind, appointment, clinic, settings.public_site_url)

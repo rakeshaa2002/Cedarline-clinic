@@ -6,11 +6,11 @@ import base64
 PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
 
 ARTICLE = {
-    "slug": "managing-sensitive-teeth",
-    "title": "Managing sensitive teeth at home",
-    "excerpt": "Simple habits that ease tooth sensitivity, and when to see a dentist.",
-    "content": "## Why teeth feel sensitive\n\n" + "Worn enamel exposes the dentine underneath. " * 60,
-    "category": "Dental",
+    "slug": "sunscreen-in-bengaluru",
+    "title": "Choosing a sunscreen for Bengaluru weather",
+    "excerpt": "How to pick and apply sunscreen, and when to see a dermatologist about pigmentation.",
+    "content": "## Why sunscreen matters\n\n" + "UV light deepens pigmentation even on cloudy days. " * 45,
+    "category": "Skin Care",
 }
 
 
@@ -34,7 +34,7 @@ def test_blog_cms_drafts_publish_and_estimate_reading_time(client, seeded, admin
     draft = client.post("/api/v1/admin/blog", json={**ARTICLE, "is_published": False}, headers=admin_headers)
     assert draft.status_code == 201, draft.text
     post = draft.json()
-    assert post["reading_minutes"] == 2  # 364 words at ~200 per minute
+    assert post["reading_minutes"] == 2  # ~364 words at ~200 per minute
     assert client.get(f"/api/v1/blog/{ARTICLE['slug']}").status_code == 404  # drafts stay private
 
     published = client.put(f"/api/v1/admin/blog/{post['id']}", json={**ARTICLE, "is_published": True}, headers=admin_headers)
@@ -51,8 +51,8 @@ def test_only_admins_edit_the_blog(client, seeded, staff_headers):
 
 def test_before_after_cases_need_consent_to_be_published(client, seeded, admin_headers):
     case = {
-        "department": "dental",
-        "title": "Clear aligner treatment",
+        "department": "hair-transplant",
+        "title": "FUE hair transplant, 2,500 grafts",
         "before_image": "/api/v1/media/1",
         "after_image": "/api/v1/media/2",
         "is_published": True,
@@ -65,15 +65,17 @@ def test_before_after_cases_need_consent_to_be_published(client, seeded, admin_h
     hidden = client.post("/api/v1/admin/transformations", json={**case, "title": "Draft case", "is_published": False}, headers=admin_headers)
     assert hidden.status_code == 201
 
-    public = client.get("/api/v1/transformations", params={"department": "dental"}).json()
-    assert [c["title"] for c in public] == ["Clear aligner treatment"]
+    public = client.get("/api/v1/transformations", params={"department": "hair-transplant"}).json()
+    assert [c["title"] for c in public] == ["FUE hair transplant, 2,500 grafts"]
     assert "patient_consent" not in public[0]
-    assert client.get("/api/v1/transformations", params={"department": "skin"}).json() == []
+    assert client.get("/api/v1/transformations", params={"department": "laser-treatments"}).json() == []
 
 
 def test_theme_switch_is_public_and_admin_only(client, seeded, admin_headers, staff_headers):
     assert client.get("/api/v1/clinic-info").json()["theme"] == "cedar"
-    assert client.put("/api/v1/admin/theme", json={"theme": "sapphire"}, headers=staff_headers).status_code == 403
+    assert client.put("/api/v1/admin/theme", json={"theme": "rosewood"}, headers=staff_headers).status_code == 403
     assert client.put("/api/v1/admin/theme", json={"theme": "neon"}, headers=admin_headers).status_code == 422
-    assert client.put("/api/v1/admin/theme", json={"theme": "sapphire"}, headers=admin_headers).status_code == 200
-    assert client.get("/api/v1/clinic-info").json()["theme"] == "sapphire"
+    # The old multispeciality palettes are gone; only RUA's brand palettes are accepted.
+    assert client.put("/api/v1/admin/theme", json={"theme": "sapphire"}, headers=admin_headers).status_code == 422
+    assert client.put("/api/v1/admin/theme", json={"theme": "rosewood"}, headers=admin_headers).status_code == 200
+    assert client.get("/api/v1/clinic-info").json()["theme"] == "rosewood"

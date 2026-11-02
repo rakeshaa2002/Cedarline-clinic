@@ -43,8 +43,8 @@ def test_extract_txt_and_md():
 
 
 def test_extract_pdf():
-    text = extract_text("guide.pdf", make_pdf("Cedarline offers Saturday dental appointments"))
-    assert "Saturday dental appointments" in text
+    text = extract_text("guide.pdf", make_pdf("RUA offers Sunday laser appointments"))
+    assert "Sunday laser appointments" in text
 
 
 @pytest.mark.parametrize(
@@ -123,7 +123,7 @@ def test_hashing_embedder_dimensions_and_similarity():
 
 def test_upload_document_indexes_chunks_and_is_retrievable(client, db, admin_headers):
     content = (
-        "# Monsoon camp\n\nCedarline runs a free monsoon skin-care awareness camp every July on the first "
+        "# Monsoon camp\n\nRUA runs a free monsoon skin-care awareness camp every July on the first "
         "Saturday of the month at the clinic.\n\n" + "Additional details about registration. " * 40
     )
     resp = client.post(
@@ -171,7 +171,7 @@ def test_upload_validation(client, admin_headers, monkeypatch):
 
 def test_delete_document_cascades_to_chunks(client, db, admin_headers):
     resp = client.post("/api/v1/admin/knowledge/documents", headers=admin_headers,
-                       files={"file": ("note.txt", b"The clinic library has leaflets on dental hygiene.", "text/plain")})
+                       files={"file": ("note.txt", b"The clinic library has leaflets on sun protection.", "text/plain")})
     doc_id = resp.json()["id"]
     assert db.scalar(select(func.count()).where(KnowledgeChunk.document_id == doc_id)) == 1
     assert client.delete(f"/api/v1/admin/knowledge/documents/{doc_id}", headers=admin_headers).status_code == 200
@@ -181,15 +181,17 @@ def test_delete_document_cascades_to_chunks(client, db, admin_headers):
 
 def test_system_documents_generated_from_database(db, knowledge):
     keys = set(db.scalars(select(KnowledgeDocument.source_key)))
-    assert {"clinic-opening-hours", "clinic-location-contact", "doctors-directory", "services-dental",
-            "doctor-meera-iyer", "seed-faq-general"} <= keys
+    assert {"clinic-opening-hours", "clinic-location-contact", "doctors-directory", "services-hair-transplant",
+            "doctor-dr-eshritha-c", "seed-faq-general", "seed-appointment-guide"} <= keys
     hours = db.scalar(select(KnowledgeDocument).where(KnowledgeDocument.source_key == "clinic-opening-hours"))
-    assert "Sunday: closed" in hours.content_text
+    assert "Sunday: 10:00 to 20:00" in hours.content_text
+    location = db.scalar(select(KnowledgeDocument).where(KnowledgeDocument.source_key == "clinic-location-contact"))
+    assert "RUA Indiranagar" in location.content_text and "RUA Ramamurthy Nagar" in location.content_text
 
 
 def test_reindex_endpoint(client, admin_headers, knowledge):
     resp = client.post("/api/v1/admin/knowledge/reindex", headers=admin_headers)
     assert resp.status_code == 200
     body = resp.json()
-    assert body["documents"] >= 25 and body["chunks"] >= body["documents"]
+    assert body["documents"] >= 17 and body["chunks"] >= body["documents"]
     assert body["embedding_model"] == "hashing-v2-768"

@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     # --- General -----------------------------------------------------------
     environment: Literal["development", "test", "production"] = "development"
-    app_name: str = "Cedarline Clinic API"
+    app_name: str = "RUA Skin & Hair Center API"
     log_level: str = "INFO"
     clinic_timezone: str = "Asia/Kolkata"
 
@@ -38,11 +38,11 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 120
 
     # Used only by the seed script to create the first admin/staff/doctor accounts.
-    admin_email: str = "admin@cedarline.example"
+    admin_email: str = "admin@ruaskinandhair.example"
     admin_password: str | None = None
-    staff_email: str = "staff@cedarline.example"
+    staff_email: str = "staff@ruaskinandhair.example"
     staff_password: str | None = None
-    doctor_email: str = "doctor@cedarline.example"
+    doctor_email: str = "doctor@ruaskinandhair.example"
     doctor_password: str | None = None
 
     # --- Rate limits (requests per minute, per client IP) ---------------------
@@ -63,15 +63,39 @@ class Settings(BaseSettings):
     smtp_username: str | None = None
     smtp_password: str | None = None
     smtp_from_email: str | None = None  # defaults to SMTP_USERNAME
-    smtp_from_name: str = "Cedarline Multispeciality Clinic"
+    smtp_from_name: str = "RUA Skin & Hair Center"
     smtp_use_ssl: bool = False  # True for implicit TLS (port 465); otherwise STARTTLS
     smtp_timeout_seconds: float = 15.0
+
+    # --- WhatsApp (Meta WhatsApp Business Cloud API) ---------------------------------
+    # Unset token/phone number id = messages are logged as "skipped" (staff can still send them
+    # manually from the admin panel with one click). Business-initiated messages outside a 24-hour
+    # customer window need approved templates: set WHATSAPP_TEMPLATE_<KIND> to use one per message
+    # kind; its body parameters are filled in order (see services/whatsapp/messages.py).
+    whatsapp_access_token: str | None = None
+    whatsapp_phone_number_id: str | None = None
+    whatsapp_api_version: str = "v21.0"
+    whatsapp_template_language: str = "en"
+    whatsapp_template_received: str | None = None
+    whatsapp_template_confirmation: str | None = None
+    whatsapp_template_cancellation: str | None = None
+    whatsapp_template_reschedule: str | None = None
+    whatsapp_template_reminder: str | None = None
+    whatsapp_template_otp: str | None = None
+    whatsapp_timeout_seconds: float = 15.0
+    # Automated reminders for confirmed appointments (24 hours and 2 hours before).
+    reminders_enabled: bool = True
+    reminder_interval_seconds: int = 300
+
+    # --- Patient portal -----------------------------------------------------------------
+    patient_token_expire_minutes: int = 60 * 24 * 7
+    rate_limit_otp_per_minute: int = 5
 
     # --- Media uploads: Cloudinary when configured, else stored in PostgreSQL ----
     cloudinary_cloud_name: str | None = None
     cloudinary_api_key: str | None = None
     cloudinary_api_secret: str | None = None
-    cloudinary_folder: str = "cedarline"
+    cloudinary_folder: str = "rua"
 
     # --- Embeddings ----------------------------------------------------------
     # "gemini" | "openai" (any OpenAI-compatible API) | "hashing" (offline, dev/test only)
@@ -132,6 +156,13 @@ class Settings(BaseSettings):
     @property
     def smtp_configured(self) -> bool:
         return bool(self.smtp_host and (self.smtp_from_email or self.smtp_username))
+
+    @property
+    def whatsapp_configured(self) -> bool:
+        return bool(self.whatsapp_access_token and self.whatsapp_phone_number_id)
+
+    def whatsapp_template(self, kind: str) -> str | None:
+        return getattr(self, f"whatsapp_template_{kind}", None)
 
     @property
     def cloudinary_configured(self) -> bool:
