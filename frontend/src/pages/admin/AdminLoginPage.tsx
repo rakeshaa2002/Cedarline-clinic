@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
             <div className="grid grid-cols-3 gap-1.5">
               <button
                 type="button"
-                onClick={() => fillCredentials('doctor@ruaskinandhair.example', 'Cedarline-Doctor-2026')}
+                onClick={() => fillCredentials('doctor@ruaskinandhair.example', 'RUA-Doctor-2026')}
                 className="flex flex-col items-center justify-center rounded-xl bg-white p-2 text-center text-xs font-semibold text-brand-700 shadow-xs border border-brand-200/80 hover:bg-brand-50 hover:border-brand-300 transition-colors"
               >
                 <span className="text-sm">🩺</span>
@@ -80,7 +80,7 @@ export default function AdminLoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => fillCredentials('staff@ruaskinandhair.example', 'Cedarline-Staff-2026')}
+                onClick={() => fillCredentials('staff@ruaskinandhair.example', 'RUA-Staff-2026')}
                 className="flex flex-col items-center justify-center rounded-xl bg-white p-2 text-center text-xs font-semibold text-ink-700 shadow-xs border border-ink-200 hover:bg-ink-50 transition-colors"
               >
                 <span className="text-sm">🏢</span>
@@ -89,7 +89,7 @@ export default function AdminLoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => fillCredentials('admin@ruaskinandhair.example', 'Cedarline-Admin-2026')}
+                onClick={() => fillCredentials('admin@ruaskinandhair.example', 'RUA-Admin-2026')}
                 className="flex flex-col items-center justify-center rounded-xl bg-white p-2 text-center text-xs font-semibold text-ink-700 shadow-xs border border-ink-200 hover:bg-ink-50 transition-colors"
               >
                 <span className="text-sm">🛡️</span>

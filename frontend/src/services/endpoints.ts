@@ -1,12 +1,9 @@
 import { api } from '@/services/api'
+import { mockAdminApi, mockAuthApi, mockClinicInfo } from '@/services/mockAdmin'
 import type {
-  AppointmentAnalytics,
-  AppointmentDetail,
-  AppointmentList,
   AppointmentStatus,
   Availability,
   BlogPost,
-  BlogPostAdmin,
   BookingConfirmation,
   BookingInput,
   BlogPostSummary,
@@ -15,24 +12,19 @@ import type {
   ChatTurn,
   ClinicHighlights,
   ClinicInfo,
-  ContactMessage,
   Department,
   Doctor,
-  KnowledgeDocument,
-  Overview,
   Page,
   Service,
   Testimonial,
-  Theme,
-  TokenResponse,
   Transformation,
   TransformationAdmin,
-  User,
 } from '@/types'
 
 /* ---------- Public clinic content ---------- */
 export const clinicApi = {
-  info: () => api.get<ClinicInfo>('/clinic-info').then((r) => r.data),
+  // Frontend-only: clinic details come from the RUA content; the theme is the one chosen in the demo admin.
+  info: (): Promise<ClinicInfo> => mockClinicInfo(),
   services: (department?: Department) =>
     api.get<Service[]>('/services', { params: { department } }).then((r) => r.data),
   doctors: (params?: { department?: Department; service_id?: number }) =>
@@ -64,11 +56,8 @@ export const chatApi = {
 }
 
 /* ---------- Auth ---------- */
-export const authApi = {
-  login: (email: string, password: string) =>
-    api.post<TokenResponse>('/auth/login', { email, password }).then((r) => r.data),
-  me: () => api.get<User>('/auth/me').then((r) => r.data),
-}
+// The admin and doctor portals are frontend-only (demo mode): see services/mockAdmin.ts.
+export const authApi = mockAuthApi
 
 /* ---------- Admin ---------- */
 export type DoctorInput = Omit<Doctor, 'id' | 'slug'> & { slug?: string }
@@ -96,74 +85,5 @@ export type AppointmentQuery = {
   page_size?: number
 }
 
-export const adminApi = {
-  overview: () => api.get<Overview>('/admin/overview').then((r) => r.data),
-
-  doctors: () => api.get<Doctor[]>('/admin/doctors').then((r) => r.data),
-  createDoctor: (data: DoctorInput) => api.post<Doctor>('/admin/doctors', data).then((r) => r.data),
-  updateDoctor: (id: number, data: DoctorInput) => api.put<Doctor>(`/admin/doctors/${id}`, data).then((r) => r.data),
-  deleteDoctor: (id: number, opts?: { deleteAppointments?: boolean }) =>
-    api
-      .delete<void>(`/admin/doctors/${id}`, { params: opts?.deleteAppointments ? { delete_appointments: true } : undefined })
-      .then((r) => r.data),
-
-  services: () => api.get<Service[]>('/admin/services').then((r) => r.data),
-  createService: (data: ServiceInput) => api.post<Service>('/admin/services', data).then((r) => r.data),
-  updateService: (id: number, data: ServiceInput) =>
-    api.put<Service>(`/admin/services/${id}`, data).then((r) => r.data),
-  deleteService: (id: number) => api.delete<void>(`/admin/services/${id}`).then((r) => r.data),
-
-  appointments: (params: AppointmentQuery) =>
-    api.get<AppointmentList>('/admin/appointments', { params }).then((r) => r.data),
-  appointment: (id: number) => api.get<AppointmentDetail>(`/admin/appointments/${id}`).then((r) => r.data),
-  appointmentAnalytics: () => api.get<AppointmentAnalytics>('/admin/appointments/analytics').then((r) => r.data),
-  setAppointmentStatus: (
-    id: number,
-    data: { status: 'confirmed' | 'completed' | 'cancelled'; reason?: string; notify?: boolean },
-  ) => api.patch<AppointmentDetail>(`/admin/appointments/${id}/status`, data).then((r) => r.data),
-  updateAppointment: (
-    id: number,
-    data: { admin_notes?: string | null; appointment_date?: string; start_time?: string; doctor_id?: number; notify?: boolean },
-  ) => api.put<AppointmentDetail>(`/admin/appointments/${id}`, data).then((r) => r.data),
-  resendAppointmentEmail: (id: number, kind: 'confirmation' | 'cancellation') =>
-    api.post<AppointmentDetail>(`/admin/appointments/${id}/emails`, { kind }).then((r) => r.data),
-  deleteAppointment: (id: number) => api.delete<void>(`/admin/appointments/${id}`).then((r) => r.data),
-
-  uploadImage: (file: File) => {
-    const form = new FormData()
-    form.append('file', file)
-    return api.post<{ url: string }>('/admin/media', form, { timeout: 60_000 }).then((r) => r.data.url)
-  },
-
-  posts: () => api.get<BlogPostAdmin[]>('/admin/blog').then((r) => r.data),
-  createPost: (data: BlogPostInput) => api.post<BlogPostAdmin>('/admin/blog', data).then((r) => r.data),
-  updatePost: (id: number, data: BlogPostInput) => api.put<BlogPostAdmin>(`/admin/blog/${id}`, data).then((r) => r.data),
-  deletePost: (id: number) => api.delete<void>(`/admin/blog/${id}`).then((r) => r.data),
-
-  transformations: () => api.get<TransformationAdmin[]>('/admin/transformations').then((r) => r.data),
-  createTransformation: (data: TransformationInput) =>
-    api.post<TransformationAdmin>('/admin/transformations', data).then((r) => r.data),
-  updateTransformation: (id: number, data: TransformationInput) =>
-    api.put<TransformationAdmin>(`/admin/transformations/${id}`, data).then((r) => r.data),
-  deleteTransformation: (id: number) => api.delete<void>(`/admin/transformations/${id}`).then((r) => r.data),
-
-  setTheme: (theme: Theme) => api.put<ClinicInfo>('/admin/theme', { theme }).then((r) => r.data),
-
-  messages: () => api.get<ContactMessage[]>('/admin/messages').then((r) => r.data),
-  markMessageRead: (id: number) => api.patch<ContactMessage>(`/admin/messages/${id}/read`).then((r) => r.data),
-
-  documents: () => api.get<KnowledgeDocument[]>('/admin/knowledge/documents').then((r) => r.data),
-  uploadDocument: (file: File, title?: string) => {
-    const form = new FormData()
-    form.append('file', file)
-    if (title) form.append('title', title)
-    return api.post<KnowledgeDocument>('/admin/knowledge/documents', form, { timeout: 120_000 }).then((r) => r.data)
-  },
-  deleteDocument: (id: number) => api.delete<{ message: string }>(`/admin/knowledge/documents/${id}`).then((r) => r.data),
-  reindex: () =>
-    api
-      .post<{ documents: number; chunks: number; embedding_model: string }>('/admin/knowledge/reindex', null, {
-        timeout: 180_000,
-      })
-      .then((r) => r.data),
-}
+/** Admin portal calls, served from the in-browser demo database (services/mockAdmin.ts). */
+export const adminApi = mockAdminApi

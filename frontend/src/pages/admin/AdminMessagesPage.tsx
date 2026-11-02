@@ -7,7 +7,6 @@ import { useToast } from '@/components/ui/Toast'
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
 import { useApi } from '@/hooks/useApi'
 import { useAuth } from '@/hooks/useAuth'
-import { useDoctors } from '@/hooks/useClinic'
 import { AdminPageHeader } from '@/layouts/AdminLayout'
 import type { ApiError } from '@/services/api'
 import { adminApi } from '@/services/endpoints'
@@ -35,7 +34,7 @@ const mentionsDoctor = (text: string, fullName: string) => {
 export default function AdminMessagesPage() {
   const { user } = useAuth()
   const messages = useApi('admin:messages', adminApi.messages, { cache: false })
-  const doctors = useDoctors()
+  const doctors = useApi('admin:messages-doctors', adminApi.doctors)
   const toast = useToast()
 
   const [search, setSearch] = useState('')
